@@ -135,7 +135,6 @@ a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 **1. Aktualizace závislostí:**
 ```bash
-cd sukl_mcp
 pip install -e ".[dev]"  # pandas bude automaticky nainstalován
 ```
 

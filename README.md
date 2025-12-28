@@ -6,7 +6,7 @@
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.14+-green.svg)](https://gofastmcp.com)
 [![Version](https://img.shields.io/badge/version-2.0.0-brightgreen.svg)](https://github.com/your-org/fastmcp-boilerplate/blob/main/CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-23%20passed-success.svg)](sukl_mcp/tests/)
+[![Tests](https://img.shields.io/badge/tests-23%20passed-success.svg)](tests/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > **v2.0.0** - Kompletně přepracovaný Python-only projekt s bezpečnostními vylepšeními, async I/O a 23 testy. [Co je nového?](CHANGELOG.md)
@@ -74,7 +74,6 @@ source venv/bin/activate  # macOS/Linux
 # venv\Scripts\activate   # Windows
 
 # Instalace serveru
-cd sukl_mcp
 pip install -e ".[dev]"
 ```
 
@@ -104,7 +103,7 @@ Přidejte do `claude_desktop_config.json`:
         "sukl_mcp.server"
       ],
       "env": {
-        "PYTHONPATH": "/cesta/k/fastmcp-boilerplate/sukl_mcp/src"
+        "PYTHONPATH": "/cesta/k/fastmcp-boilerplate/src"
       }
     }
   }
@@ -120,7 +119,6 @@ Server je připraven pro nasazení na [FastMCP Cloud](https://gofastmcp.com):
 fastmcp login
 
 # 2. Deploy serveru
-cd sukl_mcp
 fastmcp deploy
 
 # Server bude dostupný na:
@@ -198,7 +196,7 @@ Informace o ATC klasifikační skupině.
 ## Architektura
 
 ```
-sukl_mcp/
+fastmcp-boilerplate/
 ├── src/sukl_mcp/
 │   ├── server.py       # FastMCP server s 7 MCP tools
 │   ├── client_csv.py   # CSV data loader
@@ -208,6 +206,9 @@ sukl_mcp/
 │   ├── test_validation.py
 │   └── test_async_io.py
 ├── pyproject.toml      # Python projekt konfigurace
+├── fastmcp.yaml        # FastMCP Cloud konfigurace
+├── smithery.yaml       # Smithery deployment konfigurace
+├── Dockerfile          # Docker kontejner pro Smithery
 └── README.md
 ```
 
@@ -283,7 +284,6 @@ python3 -m venv venv
 source venv/bin/activate  # macOS/Linux
 
 # Instalace s dev závislostmi
-cd sukl_mcp
 pip install -e ".[dev]"
 ```
 

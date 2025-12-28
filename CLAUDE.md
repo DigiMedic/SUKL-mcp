@@ -10,7 +10,7 @@ Tento soubor poskytuje pokyny pro Claude Code (claude.ai/code) při práci s kó
 
 ### Struktura projektu
 ```
-sukl_mcp/
+fastmcp-boilerplate/
 ├── src/sukl_mcp/
 │   ├── server.py       # FastMCP server s 7 MCP tools
 │   ├── client_csv.py   # CSV data loader a klient
@@ -20,7 +20,10 @@ sukl_mcp/
 ├── tests/
 │   ├── test_validation.py  # Input validation testy
 │   └── test_async_io.py    # Async I/O testy
-└── pyproject.toml      # Konfigurace projektu
+├── pyproject.toml      # Konfigurace projektu
+├── fastmcp.yaml        # FastMCP Cloud deployment
+├── smithery.yaml       # Smithery deployment
+└── Dockerfile          # Docker kontejner
 ```
 
 ### Datový tok
@@ -57,7 +60,6 @@ source venv/bin/activate  # macOS/Linux
 # venv\Scripts\activate   # Windows
 
 # Instalace v režimu vývoje
-cd sukl_mcp
 pip install -e ".[dev]"
 
 # Spuštění serveru
@@ -214,7 +216,7 @@ Přidejte do `claude_desktop_config.json`:
       "command": "python",
       "args": ["-m", "sukl_mcp.server"],
       "env": {
-        "PYTHONPATH": "/cesta/k/fastmcp-boilerplate/sukl_mcp/src"
+        "PYTHONPATH": "/cesta/k/fastmcp-boilerplate/src"
       }
     }
   }

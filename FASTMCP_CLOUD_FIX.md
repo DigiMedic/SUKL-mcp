@@ -101,7 +101,6 @@ OK
 ## 🚀 Deployment
 
 ```bash
-cd sukl_mcp
 fastmcp deploy
 ```
 

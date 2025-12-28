@@ -14,7 +14,7 @@ Tento checklist ti pomůže ověřit, že server je připraven pro nasazení na 
 
 - [ ] **Dependencies nainstalované**
   ```bash
-  cd sukl_mcp
+  # Project is now in repository root
   pip install -e ".[dev]"
   ```
 
@@ -86,7 +86,7 @@ Tento checklist ti pomůže ověřit, že server je připraven pro nasazení na 
 
 - [ ] **Build image**
   ```bash
-  cd sukl_mcp
+  # Project is now in repository root
   docker build -t sukl-mcp:2.1.0 .
   # Očekáváno: Build úspěšný
   ```
@@ -180,7 +180,7 @@ Tento checklist ti pomůže ověřit, že server je připraven pro nasazení na 
 - [ ] **Lokální test (pokud máš FastMCP CLI)**
   ```bash
   # Spuštění v dev módu
-  cd sukl_mcp
+  # Project is now in repository root
   fastmcp dev
   # Zkontroluj, že server startuje bez chyb
   ```
@@ -222,7 +222,7 @@ print('✓ ConfigSchema valid')
 
 - [ ] **Smithery validate**
   ```bash
-  cd sukl_mcp
+  # Project is now in repository root
   smithery validate
   # Očekáváno: Configuration is valid
   ```
@@ -261,7 +261,6 @@ print('✓ ConfigSchema valid')
 fastmcp login
 
 # 2. Deploy
-cd sukl_mcp
 fastmcp deploy
 
 # 3. Verify

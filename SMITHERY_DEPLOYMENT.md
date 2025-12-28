@@ -6,7 +6,6 @@ Tento dokument poskytuje kompletní průvodce nasazením SÚKL MCP serveru na Sm
 
 ```bash
 # 1. Build Docker image lokálně
-cd sukl_mcp
 docker build -t sukl-mcp:2.0.0 .
 
 # 2. Test lokálně
@@ -63,7 +62,6 @@ smithery deploy
 ### Build image
 
 ```bash
-cd sukl_mcp
 
 # Build s taggem
 docker build -t sukl-mcp:2.0.0 .
@@ -166,7 +164,6 @@ metadata:
 
 ```bash
 # Deploy do Smithery
-cd sukl_mcp
 smithery deploy
 
 # S konkrétní environment
@@ -437,7 +434,7 @@ jobs:
 
       - name: Build and test
         run: |
-          cd sukl_mcp
+          # Project is now in repository root
           docker build -t sukl-mcp:test .
           docker run -d -p 8000:8000 -e MCP_TRANSPORT=http sukl-mcp:test
           sleep 10
@@ -448,7 +445,7 @@ jobs:
 
       - name: Deploy to Smithery
         run: |
-          cd sukl_mcp
+          # Project is now in repository root
           smithery deploy --token ${{ secrets.SMITHERY_TOKEN }}
         env:
           SMITHERY_TOKEN: ${{ secrets.SMITHERY_TOKEN }}

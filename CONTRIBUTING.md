@@ -22,7 +22,6 @@ source venv/bin/activate  # macOS/Linux
 # venv\Scripts\activate   # Windows
 
 # Instalace s dev závislostmi
-cd sukl_mcp
 pip install -e ".[dev]"
 ```
 
@@ -134,7 +133,7 @@ async def search_medicines(query: str, limit: int = 20) -> list[dict]:
 
 Pokud přidáváš novou funkci, aktualizuj:
 - `README.md` - hlavní dokumentace
-- `sukl_mcp/README.md` - detailní dokumentace
+- `CLAUDE.md` - pokyny pro AI asistenty
 - `CHANGELOG.md` - záznam změn
 
 ## ✅ Checklist před Pull Request

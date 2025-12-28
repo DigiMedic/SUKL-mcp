@@ -54,7 +54,6 @@ Nyní můžeš znovu zkusit deployment:
 
 ### FastMCP Cloud
 ```bash
-cd sukl_mcp
 git add .dockerignore
 git commit -m "fix: update .dockerignore to include README.md for Docker build"
 git push
@@ -63,7 +62,6 @@ fastmcp deploy
 
 ### Smithery
 ```bash
-cd sukl_mcp
 docker build -t sukl-mcp:2.1.0 .  # Mělo by nyní fungovat!
 smithery deploy
 ```
