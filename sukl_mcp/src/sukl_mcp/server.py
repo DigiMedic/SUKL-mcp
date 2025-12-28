@@ -48,7 +48,7 @@ async def server_lifespan(server):
 
 mcp = FastMCP(
     name="SÚKL MCP Server",
-    version="2.0.0",
+    version="2.1.0",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.
