@@ -1,0 +1,323 @@
+# SÚKL MCP Server 🏥💊
+
+FastMCP server poskytující AI agentům přístup k české databázi léčivých přípravků (SÚKL).
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastMCP](https://img.shields.io/badge/FastMCP-2.0+-green.svg)](https://github.com/jlowin/fastmcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🎯 Co tento server umožňuje
+
+Díky tomuto MCP serveru mohou AI agenti (např. Claude) bezpečně a spolehlivě:
+
+- **Vyhledávat léčiva** podle názvu, účinné látky nebo ATC kódu
+- **Získat detaily přípravku** včetně složení, registrace a dokumentů
+- **Zobrazit příbalový leták** (PIL) s informacemi pro pacienty
+- **Zkontrolovat dostupnost** léčiva na českém trhu
+- **Zjistit úhrady** - kolik platí pojišťovna a jaký je doplatek
+- **Najít lékárny** včetně pohotovostních a e-shopů
+
+## 📦 Instalace
+
+### Pomocí pip
+
+```bash
+pip install sukl-mcp-server
+```
+
+### Ze zdrojového kódu
+
+```bash
+git clone https://github.com/example/sukl-mcp-server.git
+cd sukl-mcp-server
+pip install -e ".[all]"
+```
+
+## 🚀 Rychlý start
+
+### Spuštění serveru
+
+```bash
+# Pomocí příkazu
+sukl-mcp
+
+# Nebo přímo
+python -m sukl_mcp.server
+```
+
+### Použití v Claude Desktop
+
+Přidejte do `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "sukl": {
+      "command": "sukl-mcp",
+      "env": {}
+    }
+  }
+}
+```
+
+### Použití jako Python knihovny
+
+```python
+import asyncio
+from sukl_mcp import SUKLClient
+
+async def main():
+    async with SUKLClient() as client:
+        # Vyhledání léčiva
+        results = await client.search_medicines("ibuprofen", limit=5)
+        for med in results:
+            print(f"{med['nazev']} - {med.get('atc', 'N/A')}")
+        
+        # Detail přípravku
+        detail = await client.get_medicine_detail("0012345")
+        if detail:
+            print(f"Dostupnost: {detail.get('dostupnost')}")
+
+asyncio.run(main())
+```
+
+## 🛠️ Dostupné nástroje (MCP Tools)
+
+### `search_medicine`
+Vyhledává léčivé přípravky v databázi.
+
+```
+Parametry:
+- query: Hledaný text (název, účinná látka, ATC kód)
+- only_available: Pouze dostupné přípravky (default: false)
+- only_reimbursed: Pouze hrazené pojišťovnou (default: false)
+- limit: Max počet výsledků (default: 20)
+```
+
+**Příklad:** "Najdi všechny přípravky s ibuprofem, které jsou hrazené pojišťovnou"
+
+### `get_medicine_details`
+Vrací kompletní informace o léčivém přípravku.
+
+```
+Parametry:
+- sukl_code: 7-místný SÚKL kód (např. "0012345")
+```
+
+**Příklad:** "Jaké jsou detaily přípravku s kódem 0012345?"
+
+### `get_pil_content`
+Získá obsah příbalového letáku pro pacienty.
+
+```
+Parametry:
+- sukl_code: SÚKL kód přípravku
+```
+
+**Příklad:** "Ukaž mi příbalový leták pro Paralen"
+
+### `check_availability`
+Kontroluje dostupnost léčiva na trhu.
+
+```
+Parametry:
+- sukl_code: SÚKL kód přípravku
+```
+
+**Příklad:** "Je Ibuprofen 400 aktuálně dostupný?"
+
+### `get_reimbursement`
+Informace o úhradě zdravotní pojišťovnou.
+
+```
+Parametry:
+- sukl_code: SÚKL kód přípravku
+```
+
+**Příklad:** "Kolik je doplatek na tento lék?"
+
+### `find_pharmacies`
+Vyhledává lékárny podle kritérií.
+
+```
+Parametry:
+- city: Název města (volitelné)
+- postal_code: PSČ (volitelné)
+- has_24h_service: Pouze pohotovostní (default: false)
+- has_internet_sales: Pouze s e-shopem (default: false)
+- limit: Max počet výsledků (default: 20)
+```
+
+**Příklad:** "Najdi pohotovostní lékárny v Praze"
+
+### `get_atc_info`
+Informace o ATC klasifikační skupině.
+
+```
+Parametry:
+- atc_code: ATC kód (1-7 znaků)
+```
+
+**Příklad:** "Co je skupina N02 v ATC klasifikaci?"
+
+## 📊 Zdroje dat
+
+Server využívá oficiální zdroje SÚKL:
+
+| Zdroj | URL | Aktualizace |
+|-------|-----|-------------|
+| REST API | prehledy.sukl.cz | Real-time |
+| Open Data | opendata.sukl.cz | Měsíčně |
+
+### Dostupné datové sady
+
+- **DLP** - Databáze léčivých přípravků
+- **PIL** - Příbalové letáky
+- **SPC** - Souhrny údajů o přípravku
+- **Lékárny** - Seznam schválených lékáren
+- **DIS-13** - Hlášení dodávek
+
+## ⚙️ Konfigurace
+
+### Proměnné prostředí
+
+```bash
+# API timeouts
+SUKL_TIMEOUT_SECONDS=30
+SUKL_CONNECT_TIMEOUT=10
+
+# Cache
+SUKL_CACHE_ENABLED=true
+SUKL_CACHE_TTL_SECONDS=3600
+
+# Rate limiting
+SUKL_MAX_REQUESTS_PER_MINUTE=60
+```
+
+### Programatická konfigurace
+
+```python
+from sukl_mcp import SUKLClient, SUKLConfig
+
+config = SUKLConfig(
+    timeout_seconds=60.0,
+    cache_ttl_seconds=7200,  # 2 hodiny
+    max_retries=5
+)
+
+async with SUKLClient(config) as client:
+    ...
+```
+
+## 🧪 Vývoj
+
+### Nastavení vývojového prostředí
+
+```bash
+# Klonování
+git clone https://github.com/example/sukl-mcp-server.git
+cd sukl-mcp-server
+
+# Virtuální prostředí
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# nebo: venv\Scripts\activate  # Windows
+
+# Instalace s dev závislostmi
+pip install -e ".[dev]"
+```
+
+### Spuštění testů
+
+```bash
+# Všechny testy
+pytest tests/ -v
+
+# S pokrytím kódu
+pytest tests/ -v --cov=sukl_mcp --cov-report=html
+
+# Pouze unit testy (bez sítě)
+pytest tests/ -v -m "not integration"
+```
+
+### Formátování a linting
+
+```bash
+# Formátování
+black src/ tests/
+
+# Linting
+ruff check src/ tests/
+
+# Type checking
+mypy src/
+```
+
+## 🐳 Docker
+
+### Build image
+
+```bash
+docker build -t sukl-mcp-server .
+```
+
+### Spuštění
+
+```bash
+docker run -p 8000:8000 sukl-mcp-server
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  sukl-mcp:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SUKL_CACHE_ENABLED=true
+    restart: unless-stopped
+```
+
+## 📝 Právní upozornění
+
+⚠️ **Důležité:**
+
+- Informace poskytované tímto serverem mají **pouze informativní charakter**
+- Vždy se řiďte pokyny **lékaře a lékárníka**
+- Data pochází z veřejných zdrojů SÚKL a mohou být zpožděná
+- Server **nenahrazuje** odbornou lékařskou konzultaci
+
+### Licence dat
+
+Data SÚKL jsou poskytována pod podmínkami [Open Data SÚKL](https://opendata.sukl.cz/?q=podminky-uziti):
+- ✅ Volné šíření a kopírování
+- ✅ Komerční využití
+- ⚠️ Povinnost uvést SÚKL jako zdroj
+- ❌ Zákaz měnit význam dat
+
+## 🤝 Přispívání
+
+Příspěvky jsou vítány! Prosím:
+
+1. Fork repozitáře
+2. Vytvoř feature branch (`git checkout -b feature/nova-funkce`)
+3. Commit změn (`git commit -am 'Přidána nová funkce'`)
+4. Push do branch (`git push origin feature/nova-funkce`)
+5. Vytvoř Pull Request
+
+## 📜 Licence
+
+MIT License - viz [LICENSE](LICENSE)
+
+## 🙏 Poděkování
+
+- [SÚKL](https://www.sukl.cz) za poskytování otevřených dat
+- [FastMCP](https://github.com/jlowin/fastmcp) za skvělý MCP framework
+- [Anthropic](https://www.anthropic.com) za MCP specifikaci
+
+---
+
+**Vytvořeno s ❤️ pro české zdravotnictví**

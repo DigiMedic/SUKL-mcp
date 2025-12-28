@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # === Production server ===
+  sukl-mcp:
+    build:
+      context: .
+      target: production
+    container_name: sukl-mcp-server
+    ports:
+      - "8000:8000"
+    environment:
+      - SUKL_CACHE_ENABLED=true
+      - SUKL_CACHE_TTL_SECONDS=3600
+      - SUKL_MAX_REQUESTS_PER_MINUTE=60
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sukl-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # === Development server ===
+  sukl-mcp-dev:
+    build:
+      context: .
+      target: development
+    container_name: sukl-mcp-dev
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    environment:
+      - SUKL_CACHE_ENABLED=false
+      - PYTHONDONTWRITEBYTECODE=1
+    profiles:
+      - dev
+    networks:
+      - sukl-network
+
+  # === Redis cache (optional) ===
+  redis:
+    image: redis:7-alpine
+    container_name: sukl-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    profiles:
+      - cache
+    networks:
+      - sukl-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  sukl-network:
+    driver: bridge
+
+volumes:
+  redis-data:
