@@ -10,8 +10,9 @@ from datetime import datetime
 
 from fastmcp import FastMCP
 
-from .client_csv import close_sukl_client, get_sukl_client
-from .models import (
+# Absolutní importy pro FastMCP Cloud compatibility
+from sukl_mcp.client_csv import close_sukl_client, get_sukl_client
+from sukl_mcp.models import (
     AvailabilityInfo,
     MedicineDetail,
     MedicineSearchResult,
@@ -47,7 +48,7 @@ async def server_lifespan(server):
 
 mcp = FastMCP(
     name="SÚKL MCP Server",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.

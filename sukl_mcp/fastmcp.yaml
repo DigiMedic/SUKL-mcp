@@ -1,0 +1,34 @@
+# FastMCP Cloud Deployment Configuration
+# https://gofastmcp.com/getting-started/welcome
+
+# Server specification
+server:
+  # Entry point - musí být absolutní import
+  module: sukl_mcp.server
+  # MCP instance v modulu
+  instance: mcp
+
+# Python runtime
+runtime:
+  python: "3.10"
+
+# Dependencies
+dependencies:
+  - fastmcp>=2.14.0,<3.0.0
+  - httpx>=0.27.0
+  - pydantic>=2.0.0
+  - pandas>=2.0.0
+
+# Environment variables (optional)
+environment:
+  SUKL_CACHE_DIR: /tmp/sukl_dlp_cache
+  SUKL_DATA_DIR: /tmp/sukl_dlp_data
+  SUKL_DOWNLOAD_TIMEOUT: "120.0"
+
+# Metadata
+metadata:
+  name: SÚKL MCP Server
+  version: 2.0.0
+  description: Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL
+  author: FastMCP Community
+  license: MIT

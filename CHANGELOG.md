@@ -43,6 +43,12 @@ a projekt dodržuje [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 **Dependencies:**
 - ✅ `pandas>=2.0.0` přidáno do core dependencies
 
+**FastMCP Cloud Support:**
+- ✅ `fastmcp.yaml` - konfigurace pro cloud deployment
+- ✅ `__main__.py` - entry point pro `python -m sukl_mcp`
+- ✅ Absolutní importy - fix pro "attempted relative import" chybu v cloud
+- ✅ `DEPLOYMENT.md` - kompletní guide pro FastMCP Cloud nasazení
+
 **Dokumentace:**
 - ✅ README.md kompletně přepsána pro Python-only projekt
 - ✅ CLAUDE.md aktualizována - Python best practices, bezpečnostní vzory

@@ -111,6 +111,30 @@ Přidejte do `claude_desktop_config.json`:
 }
 ```
 
+### Nasazení na FastMCP Cloud
+
+Server je připraven pro nasazení na [FastMCP Cloud](https://gofastmcp.com):
+
+```bash
+# 1. Přihlášení do FastMCP Cloud
+fastmcp login
+
+# 2. Deploy serveru
+cd sukl_mcp
+fastmcp deploy
+
+# Server bude dostupný na:
+# https://your-server.fastmcp.cloud
+```
+
+**Konfigurace:** Projekt obsahuje `fastmcp.yaml` s optimalizovaným nastavením pro cloud deployment:
+- ✅ Absolutní importy (fix pro "attempted relative import" chybu)
+- ✅ Environment variables pro cache paths
+- ✅ Python 3.10+ runtime
+- ✅ Všechny dependencies (fastmcp, httpx, pydantic, pandas)
+
+**Poznámka:** Pro FastMCP Cloud je důležité používat **absolutní importy** (`from sukl_mcp.server import mcp`), ne relativní (`from .server import mcp`).
+
 ### Použití jako Python knihovny
 
 ```python

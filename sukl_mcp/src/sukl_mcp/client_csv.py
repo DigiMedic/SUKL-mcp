@@ -16,7 +16,8 @@ import httpx
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from .exceptions import SUKLValidationError, SUKLZipBombError
+# Absolutní import pro FastMCP Cloud compatibility
+from sukl_mcp.exceptions import SUKLValidationError, SUKLZipBombError
 
 logger = logging.getLogger(__name__)
 
