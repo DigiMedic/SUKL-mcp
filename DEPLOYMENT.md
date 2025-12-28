@@ -9,7 +9,6 @@ Tento dokument poskytuje podrobné pokyny pro nasazení SÚKL MCP serveru na Fas
 fastmcp login
 
 # 2. Deploy
-cd sukl_mcp
 fastmcp deploy
 ```
 
@@ -81,8 +80,10 @@ from .client_csv import get_sukl_client
 ## 🏗️ Struktura projektu pro cloud
 
 ```
-sukl_mcp/
+fastmcp-boilerplate/
 ├── fastmcp.yaml           # Cloud config
+├── smithery.yaml          # Smithery config
+├── Dockerfile             # Docker kontejner
 ├── src/sukl_mcp/
 │   ├── __init__.py        # Package init (může mít relativní importy)
 │   ├── __main__.py        # Entry point (absolutní importy!)
@@ -249,7 +250,7 @@ jobs:
 
       - name: Deploy
         run: |
-          cd sukl_mcp
+          # Project is now in repository root
           fastmcp deploy --token ${{ secrets.FASTMCP_TOKEN }}
 ```
 
