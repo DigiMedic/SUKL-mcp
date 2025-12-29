@@ -1,4 +1,4 @@
-# SÚKL MCP Server
+# SUKL MCP Server
 
 **Production-ready FastMCP server** poskytující AI agentům přístup k oficiální české databázi léčivých přípravků SÚKL (Státní ústav pro kontrolu léčiv).
 
