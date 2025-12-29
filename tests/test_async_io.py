@@ -98,9 +98,7 @@ class TestAsyncIOBehavior:
         with patch("zipfile.ZipFile", return_value=mock_zip):
             # Test že _extract_zip je async funkce
             result = loader._extract_zip(Path("/fake/path.zip"))
-            assert asyncio.iscoroutine(
-                result
-            ), "_extract_zip() by měl vrátit coroutine"
+            assert asyncio.iscoroutine(result), "_extract_zip() by měl vrátit coroutine"
 
             # Cleanup coroutine
             try:
@@ -167,9 +165,7 @@ class TestZipBombProtection:
         mock_zip = MagicMock()
         mock_zip.__enter__ = MagicMock(return_value=mock_zip)
         mock_zip.__exit__ = MagicMock(return_value=None)
-        mock_zip.infolist.return_value = [
-            MagicMock(file_size=6 * 1024 * 1024 * 1024)  # 6 GB
-        ]
+        mock_zip.infolist.return_value = [MagicMock(file_size=6 * 1024 * 1024 * 1024)]  # 6 GB
 
         with patch("zipfile.ZipFile", return_value=mock_zip):
             with pytest.raises(SUKLZipBombError, match="ZIP příliš velký"):
@@ -187,9 +183,7 @@ class TestZipBombProtection:
         mock_zip = MagicMock()
         mock_zip.__enter__ = MagicMock(return_value=mock_zip)
         mock_zip.__exit__ = MagicMock(return_value=None)
-        mock_zip.infolist.return_value = [
-            MagicMock(file_size=200 * 1024 * 1024)  # 200 MB
-        ]
+        mock_zip.infolist.return_value = [MagicMock(file_size=200 * 1024 * 1024)]  # 200 MB
         mock_zip.extractall = MagicMock()
 
         # Mock Path.mkdir aby netvořil skutečné adresáře
@@ -199,9 +193,7 @@ class TestZipBombProtection:
                 try:
                     await loader._extract_zip(Path("/fake/ok.zip"))
                 except SUKLZipBombError:
-                    pytest.fail(
-                        "ZIP o velikosti 200 MB by neměl být odmítnut jako ZIP bomb"
-                    )
+                    pytest.fail("ZIP o velikosti 200 MB by neměl být odmítnut jako ZIP bomb")
 
 
 class TestEnvironmentConfiguration:

@@ -99,10 +99,10 @@ class SUKLDataLoader:
         logger.info(f"Stahuji {self.config.opendata_dlp_url}...")
 
         async with httpx.AsyncClient(timeout=self.config.download_timeout) as client:
-            async with client.stream('GET', self.config.opendata_dlp_url) as resp:
+            async with client.stream("GET", self.config.opendata_dlp_url) as resp:
                 resp.raise_for_status()
 
-                with open(zip_path, 'wb') as f:
+                with open(zip_path, "wb") as f:
                     async for chunk in resp.aiter_bytes(chunk_size=8192):
                         f.write(chunk)
 
@@ -114,7 +114,7 @@ class SUKLDataLoader:
 
         def _sync_extract():
             """Synchronní extrakce s bezpečnostní kontrolou."""
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
                 # ZIP bomb protection - kontrola celkové velikosti
                 total_size = sum(info.file_size for info in zip_ref.infolist())
                 max_size = 5 * 1024 * 1024 * 1024  # 5 GB
@@ -138,11 +138,11 @@ class SUKLDataLoader:
 
         # Klíčové tabulky
         tables = [
-            'dlp_lecivepripravky',  # Hlavní tabulka léčiv
-            'dlp_slozeni',          # Složení
-            'dlp_lecivelatky',      # Léčivé látky
-            'dlp_atc',              # ATC kódy
-            'dlp_nazvydokumentu',   # Dokumenty (PIL)
+            "dlp_lecivepripravky",  # Hlavní tabulka léčiv
+            "dlp_slozeni",  # Složení
+            "dlp_lecivelatky",  # Léčivé látky
+            "dlp_atc",  # ATC kódy
+            "dlp_nazvydokumentu",  # Dokumenty (PIL)
         ]
 
         def _load_single_csv(table: str) -> tuple[str, Optional[pd.DataFrame]]:
@@ -151,12 +151,7 @@ class SUKLDataLoader:
             if not csv_path.exists():
                 return (table, None)
 
-            df = pd.read_csv(
-                csv_path,
-                sep=';',
-                encoding='cp1250',
-                low_memory=False
-            )
+            df = pd.read_csv(csv_path, sep=";", encoding="cp1250", low_memory=False)
             return (table, df)
 
         # Paralelní načítání všech CSV souborů
@@ -225,12 +220,12 @@ class SUKLClient:
         if not self._initialized:
             await self.initialize()
 
-        df = self._loader.get_table('dlp_lecivepripravky')
+        df = self._loader.get_table("dlp_lecivepripravky")
         if df is None:
             return []
 
         # Case-insensitive vyhledávání v názvu (regex=False proti injection)
-        mask = df['NAZEV'].str.contains(query, case=False, na=False, regex=False)
+        mask = df["NAZEV"].str.contains(query, case=False, na=False, regex=False)
         results = df[mask]
 
         # Aplikuj filtry
@@ -243,10 +238,10 @@ class SUKLClient:
             pass
 
         # Paging
-        results = results.iloc[offset:offset + limit]
+        results = results.iloc[offset : offset + limit]
 
         # Konverze na dict
-        return results.to_dict('records')
+        return results.to_dict("records")
 
     async def get_medicine_detail(self, sukl_code: str) -> Optional[dict]:
         """Získej detail léčivého přípravku."""
@@ -257,19 +252,21 @@ class SUKLClient:
         if not sukl_code.isdigit():
             raise SUKLValidationError(f"SÚKL kód musí být číselný (zadáno: {sukl_code})")
         if len(sukl_code) > 7:
-            raise SUKLValidationError(f"SÚKL kód příliš dlouhý: {len(sukl_code)} znaků (maximum: 7)")
+            raise SUKLValidationError(
+                f"SÚKL kód příliš dlouhý: {len(sukl_code)} znaků (maximum: 7)"
+            )
 
         if not self._initialized:
             await self.initialize()
 
-        df = self._loader.get_table('dlp_lecivepripravky')
+        df = self._loader.get_table("dlp_lecivepripravky")
         if df is None:
             return None
 
         # Převeď kód na string a odstraň nuly na začátku pro porovnání
         sukl_code_normalized = str(int(sukl_code)) if sukl_code.isdigit() else sukl_code
 
-        result = df[df['KOD_SUKL'].astype(str) == sukl_code_normalized]
+        result = df[df["KOD_SUKL"].astype(str) == sukl_code_normalized]
         if result.empty:
             return None
 
@@ -280,14 +277,14 @@ class SUKLClient:
         if not self._initialized:
             await self.initialize()
 
-        df_composition = self._loader.get_table('dlp_slozeni')
+        df_composition = self._loader.get_table("dlp_slozeni")
         if df_composition is None:
             return []
 
         # Normalizuj kód
         sukl_code_normalized = str(int(sukl_code)) if sukl_code.isdigit() else sukl_code
-        results = df_composition[df_composition['KOD_SUKL'].astype(str) == sukl_code_normalized]
-        return results.to_dict('records')
+        results = df_composition[df_composition["KOD_SUKL"].astype(str) == sukl_code_normalized]
+        return results.to_dict("records")
 
     async def search_pharmacies(
         self,
@@ -311,23 +308,25 @@ class SUKLClient:
         if atc_prefix:
             atc_prefix = atc_prefix.strip()
             if len(atc_prefix) > 7:
-                raise SUKLValidationError(f"ATC prefix příliš dlouhý: {len(atc_prefix)} znaků (maximum: 7)")
+                raise SUKLValidationError(
+                    f"ATC prefix příliš dlouhý: {len(atc_prefix)} znaků (maximum: 7)"
+                )
 
         if not self._initialized:
             await self.initialize()
 
-        df = self._loader.get_table('dlp_atc')
+        df = self._loader.get_table("dlp_atc")
         if df is None:
             return []
 
         # Pokud je zadán prefix, filtruj podle něj
         if atc_prefix:
-            results = df[df['ATC'].str.startswith(atc_prefix, na=False)]
+            results = df[df["ATC"].str.startswith(atc_prefix, na=False)]
         else:
             results = df
 
         # Vrať max 100 výsledků
-        return results.head(100).to_dict('records')
+        return results.head(100).to_dict("records")
 
     async def close(self) -> None:
         """Uzavři klienta."""

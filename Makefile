@@ -13,30 +13,30 @@ help:
 
 install:
 	@echo "📦 Instalace projektu..."
-	cd sukl_mcp && pip install -e ".[dev]"
+	pip install -e ".[dev]"
 	@echo "✅ Instalace dokončena"
 
 test:
 	@echo "🧪 Spouštění testů..."
-	cd sukl_mcp && pytest tests/ -v
+	pytest tests/ -v
 	@echo "✅ Testy dokončeny"
 
 test-cov:
 	@echo "🧪 Spouštění testů s coverage..."
-	cd sukl_mcp && pytest tests/ -v --cov=src/sukl_mcp --cov-report=term-missing
+	pytest tests/ -v --cov=sukl_mcp --cov-report=term-missing
 	@echo "✅ Testy s coverage dokončeny"
 
 lint:
 	@echo "🔍 Kontrola kódu..."
 	@echo "  → ruff check..."
-	cd sukl_mcp && ruff check src/
+	ruff check src/
 	@echo "  → mypy type checking..."
-	cd sukl_mcp && mypy src/sukl_mcp/
+	mypy src/sukl_mcp/
 	@echo "✅ Kontrola dokončena"
 
 format:
 	@echo "✨ Formátování kódu..."
-	cd sukl_mcp && black src/ tests/
+	black src/ tests/
 	@echo "✅ Formátování dokončeno"
 
 clean:
@@ -53,7 +53,7 @@ clean:
 
 run:
 	@echo "🚀 Spouštění SÚKL MCP serveru..."
-	cd sukl_mcp && python -m sukl_mcp.server
+	python -m sukl_mcp
 
 dev:
 	@echo "🛠️  Vývojový režim - formátování + testy + lint..."

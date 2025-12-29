@@ -117,12 +117,10 @@ async def search_medicine(
                     atc_code=item.get("atc", item.get("ATC")),
                     registration_status=item.get("stav_registrace", item.get("STAV_REG")),
                     dispensation_mode=item.get("vydej", item.get("VYDEJ")),
-                    is_available=item.get("dostupnost") == "ano"
-                    if item.get("dostupnost")
-                    else None,
-                    has_reimbursement=item.get("uhrada") == "ano"
-                    if item.get("uhrada")
-                    else None,
+                    is_available=(
+                        item.get("dostupnost") == "ano" if item.get("dostupnost") else None
+                    ),
+                    has_reimbursement=item.get("uhrada") == "ano" if item.get("uhrada") else None,
                 )
             )
         except Exception as e:
@@ -402,9 +400,11 @@ async def get_atc_info(atc_code: str) -> dict:
 
     return {
         "code": atc_code,
-        "name": target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
-        if target
-        else "Neznámá skupina",
+        "name": (
+            target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
+            if target
+            else "Neznámá skupina"
+        ),
         "level": len(atc_code) if len(atc_code) <= 5 else 5,
         "children": children[:20],
         "total_children": len(children),
