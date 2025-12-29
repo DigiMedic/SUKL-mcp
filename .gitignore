@@ -87,3 +87,9 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+
+# Claude local settings
+.claude/
+
+# Python version manager
+.python-version
