@@ -351,39 +351,74 @@ interface PILContent {
 
 ### 4. check_availability
 
-Check current market availability of a medicine.
+**EPIC 4: Intelligent Alternatives** - Check current market availability of a medicine with automatic alternative recommendations when unavailable.
 
-**Location**: `/src/sukl_mcp/server.py` (lines 231-262)
+**Location**: `/src/sukl_mcp/server.py` (lines 341-428)
 
 #### Signature
 
 ```python
-async def check_availability(sukl_code: str) -> AvailabilityInfo | None
+async def check_availability(
+    sukl_code: str,
+    include_alternatives: bool = True,
+    limit: int = 5
+) -> AvailabilityInfo | None
 ```
 
 #### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `sukl_code` | string | Yes | SÚKL code (7 digits) |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `sukl_code` | string | Yes | - | SÚKL code (7 digits) |
+| `include_alternatives` | boolean | No | `True` | Include alternative recommendations when unavailable |
+| `limit` | integer | No | `5` | Maximum number of alternatives (max: 10) |
 
 #### Return Type
 
 ```typescript
 interface AvailabilityInfo {
-  sukl_code: string;                  // SÚKL code
-  medicine_name: string;              // Medicine name
-  is_available: boolean;              // Currently available
-  is_marketed: boolean;               // Currently marketed
-  unavailability_reason: string | null;  // Reason if unavailable
-  alternatives_available: boolean;    // Has alternatives (always false)
-  checked_at: string;                 // ISO 8601 timestamp
+  sukl_code: string;                     // SÚKL code
+  name: string;                          // Medicine name
+  is_available: boolean;                 // Currently available
+  status: "available" | "unavailable" | "unknown";  // Normalized status
+  alternatives_available: boolean;       // Has alternatives found
+  alternatives: AlternativeMedicine[];   // List of alternatives (if unavailable)
+  recommendation: string | null;         // User-friendly recommendation
+  checked_at: string;                    // ISO 8601 timestamp
+}
+
+interface AlternativeMedicine {
+  sukl_code: string;                     // Alternative SÚKL code
+  name: string;                          // Alternative name
+  strength: string | null;               // Strength (e.g., "500mg")
+  form: string | null;                   // Dosage form
+  is_available: boolean;                 // Alternative availability (always true)
+  has_reimbursement: boolean | null;     // Insurance reimbursement
+  relevance_score: number;               // Relevance 0-100
+  match_reason: string;                  // Why recommended
+  max_price: number | null;              // Maximum price
+  patient_copay: number | null;          // Patient copayment
 }
 ```
 
+#### Multi-Criteria Ranking System
+
+Alternatives are ranked using weighted scoring:
+
+| Criterion | Weight | Description |
+|-----------|--------|-------------|
+| **Dosage Form** | 40% | Same form (tablet, syrup, etc.) scores highest |
+| **Strength** | 30% | Similar strength gets higher score |
+| **Price** | 20% | Lower price preferred |
+| **Name Similarity** | 10% | Similar name indicates likely alternative |
+
+**Search Strategy:**
+1. **Primary**: Find alternatives with same active substance (dlp_slozeni)
+2. **Fallback**: Find alternatives in same ATC group (3-character prefix)
+
 #### Examples
 
-**Check availability**:
+**Example 1: Check availability (medicine available)**
 ```json
 {
   "tool": "check_availability",
@@ -393,37 +428,118 @@ interface AvailabilityInfo {
 }
 ```
 
-**Response (available)**:
+**Response**:
 ```json
 {
   "sukl_code": "0254045",
-  "medicine_name": "PARALEN 500",
+  "name": "PARALEN 500",
   "is_available": true,
-  "is_marketed": true,
-  "unavailability_reason": null,
+  "status": "available",
   "alternatives_available": false,
-  "checked_at": "2024-12-29T10:30:00Z"
+  "alternatives": [],
+  "recommendation": null,
+  "checked_at": "2026-01-01T10:30:00Z"
 }
 ```
 
-**Response (unavailable)**:
+**Example 2: Check with alternatives (medicine unavailable)**
+```json
+{
+  "tool": "check_availability",
+  "params": {
+    "sukl_code": "123456",
+    "include_alternatives": true,
+    "limit": 3
+  }
+}
+```
+
+**Response**:
 ```json
 {
   "sukl_code": "0123456",
-  "medicine_name": "SOME MEDICINE",
+  "name": "SOME MEDICINE 500MG",
   "is_available": false,
-  "is_marketed": true,
-  "unavailability_reason": "Přípravek není aktuálně dodáván",
-  "alternatives_available": false,
-  "checked_at": "2024-12-29T10:30:00Z"
+  "status": "unavailable",
+  "alternatives_available": true,
+  "alternatives": [
+    {
+      "sukl_code": "0234567",
+      "name": "ALTERNATIVE A 500MG TABLETA",
+      "strength": "500MG",
+      "form": "TABLETA",
+      "is_available": true,
+      "has_reimbursement": true,
+      "relevance_score": 85.2,
+      "match_reason": "Same active substance, same form",
+      "max_price": 120.50,
+      "patient_copay": 45.50
+    },
+    {
+      "sukl_code": "0345678",
+      "name": "ALTERNATIVE B 500MG TABLETA",
+      "strength": "500MG",
+      "form": "TABLETA",
+      "is_available": true,
+      "has_reimbursement": true,
+      "relevance_score": 78.5,
+      "match_reason": "Same active substance",
+      "max_price": 135.00,
+      "patient_copay": 50.00
+    },
+    {
+      "sukl_code": "0456789",
+      "name": "ALTERNATIVE C 250MG TABLETA",
+      "strength": "250MG",
+      "form": "TABLETA",
+      "is_available": true,
+      "has_reimbursement": false,
+      "relevance_score": 72.1,
+      "match_reason": "Same ATC group",
+      "max_price": 95.00,
+      "patient_copay": 95.00
+    }
+  ],
+  "recommendation": "This medicine is unavailable. Consider ALTERNATIVE A 500MG TABLETA (relevance: 85.2/100)",
+  "checked_at": "2026-01-01T10:30:00Z"
 }
 ```
 
-#### Data Source
+**Example 3: Disable alternatives**
+```json
+{
+  "tool": "check_availability",
+  "params": {
+    "sukl_code": "123456",
+    "include_alternatives": false
+  }
+}
+```
 
-Availability determined by `DODAVKY` column in DLP data:
-- `DODAVKY != "0"`: Available
-- `DODAVKY == "0"`: Unavailable
+#### Data Source & Algorithm
+
+**Availability Status Normalization** (`DODAVKY` column):
+- `"1"`, `"A"`, `"ANO"`, `"YES"` → `available`
+- `"0"`, `"N"`, `"NE"`, `"NO"` → `unavailable`
+- Missing/invalid → `unknown`
+
+**Alternative Finding Algorithm** (when unavailable):
+```python
+1. Get original medicine substance codes (dlp_slozeni)
+2. Search for alternatives with same substance codes
+3. If no results: Search by ATC group (3-char prefix)
+4. Filter: only available medicines, exclude original
+5. Rank by multi-criteria scoring (form 40%, strength 30%, price 20%, name 10%)
+6. Enrich with price data (max_price, patient_copay)
+7. Return top N alternatives (limit parameter)
+```
+
+#### Performance
+
+- **Availability check only**: ~5ms
+- **With alternatives (same substance)**: ~80-120ms
+- **With alternatives (ATC fallback)**: ~150-200ms
+- **Typical response**: <150ms for top 5 alternatives
 
 ---
 

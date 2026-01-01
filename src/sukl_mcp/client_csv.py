@@ -11,7 +11,7 @@ import re
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 import httpx
 import pandas as pd
@@ -20,6 +20,10 @@ from rapidfuzz import fuzz
 
 # Absolutní import pro FastMCP Cloud compatibility
 from sukl_mcp.exceptions import SUKLValidationError, SUKLZipBombError
+
+# Type checking imports (circular dependency prevention)
+if TYPE_CHECKING:
+    from sukl_mcp.models import AvailabilityStatus
 
 logger = logging.getLogger(__name__)
 

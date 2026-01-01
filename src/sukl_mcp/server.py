@@ -7,6 +7,7 @@ Poskytuje AI agentům přístup k české databázi léčivých přípravků.
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import AsyncGenerator, Literal
 
 from fastmcp import FastMCP
 
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def server_lifespan(server):
+async def server_lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
     """Inicializace a cleanup serveru."""
     logger.info("Starting SÚKL MCP Server...")
     client = await get_sukl_client()
@@ -186,7 +187,7 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
         return None
 
     # Helper pro získání hodnoty z CSV dat (velká písmena)
-    def get_val(key_upper: str, default=None):
+    def get_val(key_upper: str, default: str | None = None) -> str | None:
         """Získej hodnotu, podporuje jak velká tal malá písmena."""
         return data.get(key_upper, data.get(key_upper.lower(), default))
 
@@ -601,15 +602,16 @@ async def get_atc_info(atc_code: str) -> dict:
 # === Entry point ===
 
 
-def main():
+def main() -> None:
     """Spusť MCP server s automatickou detekcí transportu."""
     import os
 
     # Detekce transportu z ENV
-    transport = os.getenv("MCP_TRANSPORT", "stdio").lower()
+    transport_str = os.getenv("MCP_TRANSPORT", "stdio").lower()
 
-    if transport in {"http", "sse", "streamable-http"}:
+    if transport_str in {"http", "sse", "streamable-http"}:
         # HTTP transport pro Smithery/Docker deployment
+        transport: Literal["http", "sse", "streamable-http"] = transport_str  # type: ignore[assignment]
         host = os.getenv("MCP_HOST", "0.0.0.0")
         port = int(os.getenv("MCP_PORT", "8000"))
 
