@@ -37,7 +37,7 @@ def sample_cau_df():
             "MC": [150.50, 89.90, 250.00],  # Maximální cena
             "UHR1": [100.00, 89.90, 0.00],  # Úhrada pojišťovny
             "IND_SK": ["A", "B", None],  # Indikační skupina
-            "PLATNOST_DO": ["31.12.2025", "01.01.2026", "31.12.2026"],  # Všechny platné
+            "PLATNOST_DO": ["31.12.2026", "01.01.2027", "31.12.2027"],  # Všechny platné v budoucnosti
         }
     )
 
@@ -51,7 +51,7 @@ def alternative_column_names_df():
             "CENA_MAX": [150.50],
             "UHRADA": [100.00],
             "INDIKACNI_SKUPINA": ["A"],
-            "DATUM_DO": ["31.12.2025"],
+            "DATUM_DO": ["31.12.2026"],
         }
     )
 
@@ -173,7 +173,8 @@ def test_parse_date_invalid_string():
 
 def test_get_price_data_success(sample_cau_df):
     """Test úspěšného získání cenových dat."""
-    result = get_price_data(sample_cau_df, "12345")
+    # Použij explicitní reference_date aby test byl deterministický
+    result = get_price_data(sample_cau_df, "12345", reference_date=date(2025, 12, 1))
 
     assert result is not None
     assert result["sukl_code"] == "12345"
@@ -225,7 +226,7 @@ def test_get_price_data_none_df():
 
 def test_get_price_data_alternative_columns(alternative_column_names_df):
     """Test s alternativními názvy sloupců."""
-    result = get_price_data(alternative_column_names_df, "12345")
+    result = get_price_data(alternative_column_names_df, "12345", reference_date=date(2025, 12, 1))
 
     assert result is not None
     assert result["sukl_code"] == "12345"
@@ -260,9 +261,9 @@ def test_get_price_data_validity_current(sample_cau_df):
 
 def test_get_price_data_with_validity_field(sample_cau_df):
     """Test že výsledek obsahuje valid_until pokud je k dispozici."""
-    result = get_price_data(sample_cau_df, "12345")
+    result = get_price_data(sample_cau_df, "12345", reference_date=date(2025, 12, 1))
     assert "valid_until" in result
-    assert result["valid_until"] == "2025-12-31"
+    assert result["valid_until"] == "2026-12-31"
 
 
 def test_get_price_data_missing_sukl_column():
@@ -357,10 +358,10 @@ def test_get_price_data_multiple_records_uses_latest():
             "KOD_SUKL": ["12345", "12345"],  # Duplikát
             "MC": [100.0, 150.0],  # Různé ceny
             "UHR1": [50.0, 100.0],
-            "PLATNOST_DO": ["31.12.2024", "31.12.2025"],  # Druhý je novější
+            "PLATNOST_DO": ["31.12.2025", "31.12.2026"],  # Druhý je novější
         }
     )
-    result = get_price_data(df, "12345")
+    result = get_price_data(df, "12345", reference_date=date(2025, 12, 1))
     assert result is not None
     # Mělo by použít druhý záznam (novější platnost)
     assert result["max_price"] == 150.0
@@ -399,7 +400,7 @@ def test_price_enrichment_workflow(sample_cau_df):
     # Obohať výsledky o cenové údaje
     for result in search_results:
         sukl_code = str(result["KOD_SUKL"])
-        price_data = get_price_data(sample_cau_df, sukl_code)
+        price_data = get_price_data(sample_cau_df, sukl_code, reference_date=date(2025, 12, 1))
 
         if price_data:
             result["has_reimbursement"] = price_data["is_reimbursed"]

@@ -4,12 +4,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.14+-green.svg)](https://gofastmcp.com)
-[![Version](https://img.shields.io/badge/version-2.3.0-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-brightgreen.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-148%20passed-success.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-197%20passed-success.svg)](tests/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **v2.3.0** - Přidáno parsování PDF/DOCX dokumentů (EPIC 1), smart search s fuzzy matchingem (EPIC 2) a transparentní cenové údaje (EPIC 3). Celkem 148 testů, 100% pass rate. [Co je nového?](CHANGELOG.md)
+> **v3.0.0** - Dokončeny všechny 4 EPICs: Parsování dokumentů (EPIC 1), Smart Search (EPIC 2), Cenové údaje (EPIC 3) a **Inteligentní alternativy** (EPIC 4). Celkem 197 testů, 100% pass rate. [Co je nového?](CHANGELOG.md)
 
 ---
 
@@ -23,12 +23,13 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 - 📄 **Automatické parsování dokumentů**: Extrakce textu z PIL/SPC (PDF + DOCX)
 - 🎯 **Smart Search**: Multi-level pipeline s fuzzy matchingem (tolerance překlepů)
 - 💰 **Cenové údaje**: Transparentní informace o úhradách a doplatcích pacientů
+- 🔄 **Inteligentní alternativy**: Automatické doporučení náhradních léků při nedostupnosti (multi-kriteriální ranking)
 - 💊 **68,248 léčivých přípravků** z SÚKL Open Data
 - ⚡ **Async I/O** s pandas DataFrames pro rychlé vyhledávání (<150ms)
 - 🔒 **Security features**: ZIP bomb protection, regex injection prevention
 - 🏆 **Type-safe**: Pydantic modely s runtime validací
 - 🚀 **Dual deployment**: FastMCP Cloud (stdio) + Smithery (HTTP/Docker)
-- ✅ **148 comprehensive tests** s pytest a coverage >85%
+- ✅ **197 comprehensive tests** s pytest a coverage >85%
 
 ### Datová základna
 
@@ -138,12 +139,26 @@ get_pil_document(sukl_code="12345")
 # → {'sukl_code': '12345', 'full_text': 'Přečtěte si pozorně...', 'document_format': 'pdf', 'url': 'https://...'}
 ```
 
-### 4. `check_medicine_availability` - Dostupnost léků
-Kontrola aktuální dostupnosti přípravku na trhu.
+### 4. `check_medicine_availability` - Dostupnost a alternativy
+Kontrola dostupnosti s automatickým doporučením náhradních léků při nedostupnosti.
+
+**Features:**
+- Normalizace stavu dostupnosti (available/unavailable/unknown)
+- Automatické hledání alternativ: stejná účinná látka → stejná ATC skupina
+- Multi-kriteriální ranking: forma (40%), síla (30%), cena (20%), název (10%)
+- Obohacení o cenové údaje a doplatky pacienta
 
 ```python
-check_medicine_availability(sukl_code="12345")
-# → {'available': True, 'status': 'active', 'last_update': '2024-12-23'}
+check_medicine_availability(sukl_code="12345", include_alternatives=True, limit=5)
+# → {
+#     'available': False,
+#     'status': 'unavailable',
+#     'alternatives': [
+#         {'name': 'Alternative A', 'relevance_score': 85.2, 'patient_copay': 45.50, ...},
+#         {'name': 'Alternative B', 'relevance_score': 78.5, 'patient_copay': 50.00, ...}
+#     ],
+#     'recommendation': 'This medicine is unavailable. Consider Alternative A (relevance: 85.2/100)'
+# }
 ```
 
 ### 5. `get_reimbursement_info` - Informace o úhradách

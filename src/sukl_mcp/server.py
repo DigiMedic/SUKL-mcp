@@ -338,34 +338,86 @@ async def get_spc_content(sukl_code: str) -> PILContent | None:
 
 
 @mcp.tool
-async def check_availability(sukl_code: str) -> AvailabilityInfo | None:
+async def check_availability(
+    sukl_code: str,
+    include_alternatives: bool = True,
+    limit: int = 5,
+) -> AvailabilityInfo | None:
     """
     Zkontroluje aktuální dostupnost léčivého přípravku na českém trhu.
 
+    EPIC 4: Pokud je přípravek nedostupný, automaticky najde a doporučí alternativy
+    se stejnou účinnou látkou nebo ve stejné ATC skupině.
+
     Args:
         sukl_code: SÚKL kód přípravku
+        include_alternatives: Zda zahrnout alternativy (default: True)
+        limit: Max počet alternativ (default: 5, max: 10)
 
     Returns:
-        AvailabilityInfo s informacemi o dostupnosti
+        AvailabilityInfo s informacemi o dostupnosti a alternativách
     """
     client = await get_sukl_client()
     sukl_code = sukl_code.strip().zfill(7)
 
+    # Získej detail přípravku
     detail = await client.get_medicine_detail(sukl_code)
     if not detail:
         return None
 
-    # Dostupnost podle sloupce DODAVKY (0 = nedostupný)
-    is_available = detail.get("DODAVKY") != "0"
-    is_marketed = True  # Pokud je v databázi, je registrován
+    # Zkontroluj dostupnost pomocí normalizace
+    availability = client._normalize_availability(detail.get("DODAVKY"))
+
+    # Import zde pro circular dependency
+    from sukl_mcp.models import AlternativeMedicine, AvailabilityStatus
+
+    is_available = availability == AvailabilityStatus.AVAILABLE
+
+    # Hledání alternativ (pouze pokud není dostupný)
+    alternatives = []
+    recommendation = None
+
+    if include_alternatives and not is_available:
+        # Použij find_generic_alternatives pro nalezení alternativ
+        alt_results = await client.find_generic_alternatives(sukl_code, limit=limit)
+
+        # Konverze na AlternativeMedicine modely
+        for alt in alt_results:
+            alternatives.append(
+                AlternativeMedicine(
+                    sukl_code=str(alt.get("KOD_SUKL", "")),
+                    name=alt.get("NAZEV", ""),
+                    strength=alt.get("SILA"),
+                    form=alt.get("FORMA"),
+                    is_available=True,
+                    has_reimbursement=alt.get("has_reimbursement"),
+                    relevance_score=alt.get("relevance_score", 0.0),
+                    match_reason=alt.get("match_reason", "Similar medicine"),
+                    max_price=alt.get("max_price"),
+                    patient_copay=alt.get("patient_copay"),
+                )
+            )
+
+        # Generuj doporučení
+        if alternatives:
+            top_alt = alternatives[0]
+            recommendation = (
+                f"Tento přípravek není dostupný. "
+                f"Doporučujeme alternativu: {top_alt.name} "
+                f"(relevance: {top_alt.relevance_score:.0f}/100, "
+                f"důvod: {top_alt.match_reason})"
+            )
+        else:
+            recommendation = "Tento přípravek není dostupný a nebyly nalezeny žádné alternativy."
 
     return AvailabilityInfo(
         sukl_code=sukl_code,
-        medicine_name=detail.get("NAZEV", ""),
+        name=detail.get("NAZEV", ""),
         is_available=is_available,
-        is_marketed=is_marketed,
-        unavailability_reason="Přípravek není aktuálně dodáván" if not is_available else None,
-        alternatives_available=False,
+        status=availability,
+        alternatives_available=len(alternatives) > 0,
+        alternatives=alternatives,
+        recommendation=recommendation,
         checked_at=datetime.now(),
     )
 

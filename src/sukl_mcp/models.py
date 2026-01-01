@@ -31,6 +31,14 @@ class DispensationMode(str, Enum):
     RESERVED = "V"  # Vyhrazené
 
 
+class AvailabilityStatus(str, Enum):
+    """Stav dostupnosti léčivého přípravku."""
+
+    AVAILABLE = "available"  # DODAVKY = "1"
+    UNAVAILABLE = "unavailable"  # DODAVKY = "0"
+    UNKNOWN = "unknown"  # Chybějící nebo neplatná data
+
+
 # === Modely pro léčivé přípravky ===
 
 
@@ -116,15 +124,35 @@ class PILContent(BaseModel):
     document_format: Optional[str] = Field(None, description="Formát dokumentu (pdf, docx)")
 
 
+class AlternativeMedicine(BaseModel):
+    """Alternativní léčivý přípravek (EPIC 4: Availability & Alternatives)."""
+
+    sukl_code: str = Field(..., description="Kód SÚKL alternativy")
+    name: str = Field(..., description="Název alternativního přípravku")
+    strength: Optional[str] = Field(None, description="Síla (např. '500mg')")
+    form: Optional[str] = Field(None, description="Léková forma (tableta, sirup, atd.)")
+    is_available: bool = Field(True, description="Je dostupný na trhu")
+    has_reimbursement: Optional[bool] = Field(None, description="Má úhradu pojišťovny")
+    relevance_score: float = Field(..., description="Relevance skóre 0-100")
+    match_reason: str = Field(..., description="Důvod doporučení")
+    max_price: Optional[float] = Field(None, description="Maximální cena")
+    patient_copay: Optional[float] = Field(None, description="Doplatek pacienta")
+
+
 class AvailabilityInfo(BaseModel):
     """Informace o dostupnosti léčivého přípravku."""
 
     sukl_code: str
-    medicine_name: str
+    name: str = Field(..., description="Název přípravku")
     is_available: bool = Field(..., description="Je dostupný")
-    is_marketed: bool = Field(..., description="Je uváděn na trh")
-    unavailability_reason: Optional[str] = Field(None, description="Důvod nedostupnosti")
-    alternatives_available: bool = Field(False)
+    status: AvailabilityStatus = Field(..., description="Stav dostupnosti")
+    alternatives_available: bool = Field(False, description="Existují alternativy")
+    alternatives: list[AlternativeMedicine] = Field(
+        default_factory=list, description="Seznam alternativních léčiv"
+    )
+    recommendation: Optional[str] = Field(
+        None, description="Doporučení pro uživatele"
+    )
     checked_at: datetime = Field(default_factory=datetime.now)
 
 
