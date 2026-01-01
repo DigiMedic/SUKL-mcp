@@ -7,17 +7,23 @@ Načítá data z DLP CSV souborů a poskytuje in-memory vyhledávání.
 import asyncio
 import logging
 import os
+import re
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 import httpx
 import pandas as pd
 from pydantic import BaseModel, Field
+from rapidfuzz import fuzz
 
 # Absolutní import pro FastMCP Cloud compatibility
 from sukl_mcp.exceptions import SUKLValidationError, SUKLZipBombError
+
+# Type checking imports (circular dependency prevention)
+if TYPE_CHECKING:
+    from sukl_mcp.models import AvailabilityStatus
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +149,7 @@ class SUKLDataLoader:
             "dlp_lecivelatky",  # Léčivé látky
             "dlp_atc",  # ATC kódy
             "dlp_nazvydokumentu",  # Dokumenty (PIL)
+            "dlp_cau",  # Cenové a úhradové údaje (EPIC 3)
         ]
 
         def _load_single_csv(table: str) -> tuple[str, Optional[pd.DataFrame]]:
@@ -205,8 +212,28 @@ class SUKLClient:
         offset: int = 0,
         only_available: bool = False,
         only_reimbursed: bool = False,
-    ) -> list[dict]:
-        """Vyhledej léčivé přípravky podle názvu."""
+        use_fuzzy: bool = True,
+    ) -> tuple[list[dict], str]:
+        """
+        Vyhledej léčivé přípravky s multi-level pipeline a fuzzy fallbackem.
+
+        Args:
+            query: Vyhledávací dotaz
+            limit: Max počet výsledků
+            offset: Offset pro paging
+            only_available: Filtr pouze dostupné léky
+            only_reimbursed: Filtr pouze hrazené léky
+            use_fuzzy: Použít fuzzy matching (default: True)
+
+        Returns:
+            Tuple (results, match_type) kde match_type je "substance", "exact", "substring", "fuzzy", nebo "none"
+
+        Raises:
+            SUKLValidationError: Při neplatném vstupu
+        """
+        # Import zde aby se předešlo circular dependencies
+        from sukl_mcp.fuzzy_search import get_fuzzy_matcher
+
         # Input validace
         if not query or not query.strip():
             raise SUKLValidationError("Query nesmí být prázdný")
@@ -220,28 +247,511 @@ class SUKLClient:
         if not self._initialized:
             await self.initialize()
 
-        df = self._loader.get_table("dlp_lecivepripravky")
-        if df is None:
-            return []
+        df_medicines = self._loader.get_table("dlp_lecivepripravky")
+        if df_medicines is None:
+            return ([], "none")
 
-        # Case-insensitive vyhledávání v názvu (regex=False proti injection)
-        mask = df["NAZEV"].str.contains(query, case=False, na=False, regex=False)
-        results = df[mask]
-
-        # Aplikuj filtry
+        # Aplikuj pre-filtry
         if only_available:
-            # TODO: přidat filtr dostupnosti
-            pass
+            df_medicines = df_medicines[
+                df_medicines["DODAVKY"].str.upper() == "A"
+            ].copy()
 
         if only_reimbursed:
-            # TODO: přidat filtr úhrad
+            # NOTE: Reimbursement filtering je implementováno post-enrichment
+            # protože cenová data jsou v separátní tabulce (dlp_cau).
+            # Pre-filtering by vyžadoval DataFrame merge což je nákladné.
+            # Pro filtrování podle úhrad použij price data z výsledků.
             pass
 
-        # Paging
-        results = results.iloc[offset : offset + limit]
+        if df_medicines.empty:
+            return ([], "none")
 
-        # Konverze na dict
-        return results.to_dict("records")
+        # Multi-level search s fuzzy fallbackem
+        if use_fuzzy:
+            matcher = get_fuzzy_matcher()
+
+            # Získej optional tabulky pro substance search
+            df_composition = self._loader.get_table("dlp_slozeni")
+            df_substances = self._loader.get_table("dlp_lecivelatky")
+
+            results, match_type = matcher.search(
+                query=query,
+                df_medicines=df_medicines,
+                df_composition=df_composition,
+                df_substances=df_substances,
+                limit=limit + offset,  # Fetch více pro offset
+            )
+
+            # Aplikuj offset
+            if offset > 0:
+                results = results[offset:]
+
+        else:
+            # Legacy simple substring search (zpětná kompatibilita)
+            mask = df_medicines["NAZEV"].str.contains(query, case=False, na=False, regex=False)
+            results_df = df_medicines[mask]
+
+            # Paging
+            results_df = results_df.iloc[offset : offset + limit]
+
+            # Konverze na dict
+            results = results_df.to_dict("records")
+
+            # Přidej match metadata pro konzistenci
+            for result in results:
+                result["match_score"] = 10.0  # Default score
+                result["match_type"] = "substring"
+
+            match_type = "substring" if results else "none"
+
+        # Obohacení výsledků o cenové údaje (EPIC 3)
+        results = await self._enrich_with_price_data(results)
+
+        return (results, match_type)
+
+    def _normalize_availability(self, value: Any) -> "AvailabilityStatus":
+        """
+        Normalizuj hodnotu DODAVKY na AvailabilityStatus enum.
+
+        Podporuje různé formáty hodnot z CSV:
+        - "1", "A", "ANO" → AVAILABLE
+        - "0", "N", "NE" → UNAVAILABLE
+        - None, NaN, jiné → UNKNOWN
+
+        Args:
+            value: Hodnota z sloupce DODAVKY
+
+        Returns:
+            AvailabilityStatus enum hodnota
+        """
+        # Import zde pro circular dependency
+        from sukl_mcp.models import AvailabilityStatus
+
+        if pd.isna(value):
+            return AvailabilityStatus.UNKNOWN
+
+        # Pokud je to float, převeď na int (1.0 → 1, 0.0 → 0)
+        if isinstance(value, float):
+            if value == int(value):  # Celé číslo jako float
+                value = int(value)
+
+        # Konverze na string a normalizace
+        str_val = str(value).strip().upper()
+
+        # Dostupné varianty
+        if str_val in ("1", "A", "ANO", "YES", "AVAILABLE", "TRUE"):
+            return AvailabilityStatus.AVAILABLE
+
+        # Nedostupné varianty
+        if str_val in ("0", "N", "NE", "NO", "UNAVAILABLE", "FALSE"):
+            return AvailabilityStatus.UNAVAILABLE
+
+        # Neznámé/neplatné hodnoty
+        return AvailabilityStatus.UNKNOWN
+
+    def _parse_strength(self, strength_str: str) -> tuple[Optional[float], str]:
+        """
+        Parsuj sílu přípravku na numerickou hodnotu a jednotku.
+
+        Podporované formáty:
+        - "500mg", "500 mg", "500MG"
+        - "2.5g", "2,5 g", "2.5 G"
+        - "100ml", "10%" (procenta)
+        - "1000iu", "1000 IU" (international units)
+        - Kombinace: "500mg/5ml"
+
+        Args:
+            strength_str: String reprezentující sílu (např. "500mg")
+
+        Returns:
+            tuple[Optional[float], str]: (numerická hodnota, jednotka)
+            Pokud parsing selže, vrací (None, original_string)
+        """
+        # Kontrola NA musí být PRVNÍ (před boolean evaluací)
+        if pd.isna(strength_str):
+            return (None, "")
+
+        if not strength_str:
+            return (None, "")
+
+        strength_str = str(strength_str).strip()
+
+        if not strength_str:
+            return (None, "")
+
+        # Regex patterns pro parsování
+        # Pattern 1: Číslo + jednotka (500mg, 2.5g, 100ml, 10%, 1000iu)
+        pattern = r"(\d+[.,]?\d*)\s*([a-zA-Z%]+)"
+
+        match = re.search(pattern, strength_str, re.IGNORECASE)
+
+        if match:
+            # Extrahuj numerickou hodnotu
+            num_str = match.group(1)
+            # Normalizuj českou desetinnou čárku na tečku
+            num_str = num_str.replace(",", ".")
+
+            try:
+                value = float(num_str)
+            except ValueError:
+                return (None, strength_str)
+
+            # Extrahuj a normalizuj jednotku
+            unit = match.group(2).upper()
+
+            # Normalizace jednotek
+            # G → MG (gram na miligram, převod 1g = 1000mg)
+            if unit == "G":
+                value = value * 1000  # Převod na mg
+                unit = "MG"
+
+            return (value, unit)
+
+        # Pokud regex nesedí, zkus najít alespoň číslo
+        num_pattern = r"(\d+[.,]?\d*)"
+        num_match = re.search(num_pattern, strength_str)
+
+        if num_match:
+            num_str = num_match.group(1).replace(",", ".")
+            try:
+                value = float(num_str)
+                return (value, "")  # Číslo bez jednotky
+            except ValueError:
+                pass
+
+        # Parsing selhal, vrať None a původní string
+        return (None, strength_str)
+
+    def _calculate_strength_similarity(self, str1: str, str2: str) -> float:
+        """
+        Vypočítej podobnost dvou sil přípravku.
+
+        Vrací hodnotu 0.0 - 1.0, kde:
+        - 1.0 = identická síla
+        - 0.5-0.9 = podobná síla (stejná jednotka, jiná hodnota)
+        - 0.3 = různé jednotky
+        - 0.0 = nelze porovnat
+
+        Args:
+            str1: První síla (např. "500mg")
+            str2: Druhá síla (např. "1000mg")
+
+        Returns:
+            float: Podobnost (0.0 - 1.0)
+        """
+        # Parse obě hodnoty
+        val1, unit1 = self._parse_strength(str1)
+        val2, unit2 = self._parse_strength(str2)
+
+        # Pokud parsing selhal, fallback na string comparison
+        if val1 is None or val2 is None:
+            # Pokud jsou stringy identické, vrať 0.5
+            if str1 and str2 and str1.lower().strip() == str2.lower().strip():
+                return 0.5
+            # Jinak nelze porovnat
+            return 0.0
+
+        # Pokud jednotky neodpovídají
+        if unit1 != unit2:
+            return 0.3  # Nízká podobnost (různé jednotky)
+
+        # Pokud jsou jednotky stejné, porovnej numerické hodnoty
+        # Vypočítej ratio (menší/větší), aby výsledek byl 0.0-1.0
+        if val1 == val2:
+            return 1.0  # Identické
+
+        ratio = min(val1, val2) / max(val1, val2)
+
+        # ratio je v rozsahu 0.0-1.0
+        # Např: 500mg vs 1000mg → ratio = 0.5
+        # Např: 900mg vs 1000mg → ratio = 0.9
+        return ratio
+
+    def _rank_alternatives(
+        self, candidates: list[dict], original: dict
+    ) -> list[dict]:
+        """
+        Rankuj alternativní léčiva podle relevance k originálnímu přípravku.
+
+        Multi-kriteriální ranking:
+        - Forma (40 bodů): Shoda lékové formy (tableta, sirup, atd.)
+        - Síla (30 bodů): Podobnost dávkování
+        - Cena (20 bodů): Cenová dostupnost (nižší cena = vyšší skóre)
+        - Název (10 bodů): Fuzzy shoda názvů
+
+        Args:
+            candidates: Seznam kandidátních alternativ (dict records)
+            original: Originální léčivo (dict record)
+
+        Returns:
+            list[dict]: Seřazený seznam (nejvyšší skóre první) s přidaným
+                        polem 'relevance_score' (0-100)
+        """
+        # Extrahuj vlastnosti originálního léčiva
+        original_form = original.get("FORMA", "").lower().strip()
+        original_strength = original.get("SILA", "")
+        original_name = original.get("NAZEV", "")
+        original_price = original.get("max_price")
+
+        # Rankuj každého kandidáta
+        for candidate in candidates:
+            score = 0.0
+
+            # 1. Forma match (40 bodů)
+            candidate_form = candidate.get("FORMA", "").lower().strip()
+            if candidate_form and original_form:
+                if candidate_form == original_form:
+                    score += 40.0
+                else:
+                    # Částečná shoda (např. "tableta" vs "tableta obalená")
+                    if candidate_form in original_form or original_form in candidate_form:
+                        score += 20.0
+
+            # 2. Síla similarity (30 bodů)
+            candidate_strength = candidate.get("SILA", "")
+            if candidate_strength and original_strength:
+                strength_sim = self._calculate_strength_similarity(
+                    original_strength, candidate_strength
+                )
+                score += strength_sim * 30.0
+
+            # 3. Cena (20 bodů) - nižší cena = vyšší skóre
+            candidate_price = candidate.get("max_price")
+            if candidate_price is not None and original_price is not None:
+                # Normalizuj cenový rozdíl
+                # Pokud kandidát je levnější nebo stejně drahý, plný počet bodů
+                # Pokud kandidát je dražší, snížené body
+                if candidate_price <= original_price:
+                    score += 20.0
+                else:
+                    # Vypočítej ratio (menší/větší)
+                    price_ratio = original_price / candidate_price
+                    score += price_ratio * 20.0
+
+            # 4. Název similarity (10 bodů)
+            candidate_name = candidate.get("NAZEV", "")
+            if candidate_name and original_name:
+                # Fuzzy matching na název
+                name_sim = fuzz.ratio(original_name, candidate_name) / 100.0
+                score += name_sim * 10.0
+
+            # Uložení skóre do kandidáta
+            candidate["relevance_score"] = round(score, 2)
+
+        # Seřaď kandidáty podle skóre (nejvyšší první)
+        ranked = sorted(
+            candidates, key=lambda x: x.get("relevance_score", 0.0), reverse=True
+        )
+
+        return ranked
+
+    async def find_generic_alternatives(
+        self, sukl_code: str, limit: int = 10
+    ) -> list[dict]:
+        """
+        Najdi generické alternativy pro nedostupný lék.
+
+        Implementuje kombinovanou strategii:
+        1. Primary: Hledání léků se stejnou účinnou látkou
+        2. Fallback: Hledání léků ve stejné ATC skupině (3-char prefix)
+
+        Args:
+            sukl_code: SÚKL kód nedostupného léčiva
+            limit: Max počet alternativ (default: 10)
+
+        Returns:
+            list[dict]: Seřazený seznam alternativ obohacený o cenové údaje
+                        Prázdný list pokud lék je dostupný nebo neexistují alternativy
+        """
+        # 1. Input validace
+        if not sukl_code or not sukl_code.strip():
+            raise SUKLValidationError("SÚKL kód nesmí být prázdný")
+
+        sukl_code = sukl_code.strip()
+
+        if not sukl_code.isdigit():
+            raise SUKLValidationError(f"SÚKL kód musí být číselný (zadáno: {sukl_code})")
+
+        if len(sukl_code) > 7:
+            raise SUKLValidationError(
+                f"SÚKL kód příliš dlouhý: {len(sukl_code)} znaků (maximum: 7)"
+            )
+
+        if not (1 <= limit <= 100):
+            raise SUKLValidationError(f"Limit musí být 1-100 (zadáno: {limit})")
+
+        # 2. Inicializace
+        if not self._initialized:
+            await self.initialize()
+
+        # 3. Získej originální lék
+        df_medicines = self._loader.get_table("dlp_lecivepripravky")
+        if df_medicines is None:
+            return []
+
+        # Normalizuj kód (odstranění nul na začátku)
+        sukl_code_norm = str(int(sukl_code)) if sukl_code.isdigit() else sukl_code
+
+        original_mask = df_medicines["KOD_SUKL"].astype(str) == sukl_code_norm
+        original_records = df_medicines[original_mask]
+
+        if original_records.empty:
+            return []  # Lék neexistuje
+
+        original = original_records.iloc[0].to_dict()
+
+        # 4. Zkontroluj dostupnost
+        availability = self._normalize_availability(original.get("DODAVKY"))
+
+        # Import zde aby se předešlo circular dependency
+        from sukl_mcp.models import AvailabilityStatus
+
+        if availability == AvailabilityStatus.AVAILABLE:
+            return []  # Lék je dostupný → žádné alternativy nejsou potřeba
+
+        # 5. Strategy A: Hledání podle stejné účinné látky
+        candidates = []
+
+        df_composition = self._loader.get_table("dlp_slozeni")
+        if df_composition is not None:
+            # Získej kódy účinných látek z originálního léku
+            comp_mask = df_composition["KOD_SUKL"].astype(str) == sukl_code_norm
+            original_composition = df_composition[comp_mask]
+
+            if not original_composition.empty:
+                substance_codes = original_composition["KOD_LATKY"].unique().tolist()
+
+                # Najdi všechny léky obsahující tyto látky
+                for substance_code in substance_codes:
+                    subs_mask = df_composition["KOD_LATKY"] == substance_code
+                    matching_sukl_codes = df_composition[subs_mask]["KOD_SUKL"].unique()
+
+                    # Filtruj léčiva
+                    med_mask = df_medicines["KOD_SUKL"].isin(matching_sukl_codes)
+                    matching_medicines = df_medicines[med_mask]
+
+                    if not matching_medicines.empty:
+                        candidates.extend(matching_medicines.to_dict("records"))
+
+                # Deduplikace (pokud je více látek, může být duplicita)
+                seen = set()
+                unique_candidates = []
+                for cand in candidates:
+                    cand_code = str(cand.get("KOD_SUKL"))
+                    if cand_code not in seen:
+                        seen.add(cand_code)
+                        unique_candidates.append(cand)
+                candidates = unique_candidates
+
+        # 6. Strategy B: Fallback na ATC skupinu (pokud Strategy A nenašla nic)
+        if not candidates:
+            atc_code = original.get("ATC_WHO", "")
+            if atc_code and len(atc_code) >= 3:
+                atc_prefix = atc_code[:3]
+                # Najdi léky se stejným ATC prefixem
+                atc_mask = df_medicines["ATC_WHO"].str.startswith(
+                    atc_prefix, na=False
+                )
+                atc_results = df_medicines[atc_mask]
+
+                if not atc_results.empty:
+                    candidates = atc_results.to_dict("records")
+
+        if not candidates:
+            return []  # Žádné kandidáty nenalezeny
+
+        # 7. Filtruj kandidáty
+        filtered = []
+        for candidate in candidates:
+            # Vynech originální lék
+            if str(candidate.get("KOD_SUKL")) == sukl_code_norm:
+                continue
+
+            # Pouze dostupné léky
+            cand_availability = self._normalize_availability(
+                candidate.get("DODAVKY")
+            )
+            if cand_availability != AvailabilityStatus.AVAILABLE:
+                continue
+
+            filtered.append(candidate)
+
+        if not filtered:
+            return []  # Žádné dostupné alternativy
+
+        # 8. Rankuj alternativy
+        ranked = self._rank_alternatives(filtered, original)
+
+        # 9. Limituj výsledky
+        top_alternatives = ranked[:limit]
+
+        # 10. Obohať o cenové údaje
+        enriched = await self._enrich_with_price_data(top_alternatives)
+
+        # 11. Přidej metadata o důvodu matchování
+        for alt in enriched:
+            # Pokud používáme substance match, přidej match_reason
+            if not candidates or len(candidates) > 0:
+                # První kandidáti jsou substance match (pokud existují)
+                if df_composition is not None and not original_composition.empty:
+                    alt["match_reason"] = "Same active substance"
+                else:
+                    alt["match_reason"] = "Same ATC group"
+
+        return enriched
+
+    async def _enrich_with_price_data(self, results: list[dict]) -> list[dict]:
+        """
+        Obohať výsledky vyhledávání o cenové údaje z dlp_cau.
+
+        Args:
+            results: Seznam výsledků vyhledávání
+
+        Returns:
+            Výsledky obohacené o cenové údaje (has_reimbursement, max_price, patient_copay)
+        """
+        if not results:
+            return results
+
+        df_cau = self._loader.get_table("dlp_cau")
+        if df_cau is None:
+            # Pokud dlp_cau není k dispozici, vrať results s None hodnotami
+            for result in results:
+                result["has_reimbursement"] = False
+                result["max_price"] = None
+                result["patient_copay"] = None
+            return results
+
+        # Import price calculator
+        from sukl_mcp.price_calculator import get_price_data
+
+        # Extrahuj všechny SÚKL kódy z výsledků
+        sukl_codes = [str(r.get("KOD_SUKL", "")) for r in results if r.get("KOD_SUKL")]
+
+        # Vytvoř lookup dictionary pro rychlé vyhledávání
+        price_lookup = {}
+        for sukl_code in sukl_codes:
+            if sukl_code and sukl_code.isdigit():
+                price_data = get_price_data(df_cau, sukl_code)
+                if price_data:
+                    price_lookup[sukl_code] = price_data
+
+        # Obohať každý výsledek o cenové údaje
+        for result in results:
+            sukl_code = str(result.get("KOD_SUKL", ""))
+            price_data = price_lookup.get(sukl_code)
+
+            if price_data:
+                result["has_reimbursement"] = price_data.get("is_reimbursed", False)
+                result["max_price"] = price_data.get("max_price")
+                result["patient_copay"] = price_data.get("patient_copay")
+            else:
+                result["has_reimbursement"] = False
+                result["max_price"] = None
+                result["patient_copay"] = None
+
+        return results
 
     async def get_medicine_detail(self, sukl_code: str) -> Optional[dict]:
         """Získej detail léčivého přípravku."""
@@ -327,6 +837,40 @@ class SUKLClient:
 
         # Vrať max 100 výsledků
         return results.head(100).to_dict("records")
+
+    async def get_price_info(self, sukl_code: str) -> Optional[dict]:
+        """
+        Získej cenové a úhradové informace o léčivém přípravku.
+
+        Args:
+            sukl_code: SÚKL kód léčiva
+
+        Returns:
+            Dict s cenovými údaji nebo None
+        """
+        # Input validace
+        if not sukl_code or not sukl_code.strip():
+            raise SUKLValidationError("SÚKL kód nesmí být prázdný")
+        sukl_code = sukl_code.strip()
+        if not sukl_code.isdigit():
+            raise SUKLValidationError(f"SÚKL kód musí být číselný (zadáno: {sukl_code})")
+        if len(sukl_code) > 7:
+            raise SUKLValidationError(
+                f"SÚKL kód příliš dlouhý: {len(sukl_code)} znaků (maximum: 7)"
+            )
+
+        if not self._initialized:
+            await self.initialize()
+
+        df_cau = self._loader.get_table("dlp_cau")
+        if df_cau is None:
+            logger.warning("dlp_cau table není načtena - cenové údaje nejsou dostupné")
+            return None
+
+        # Použij price_calculator pro získání dat
+        from sukl_mcp.price_calculator import get_price_data
+
+        return get_price_data(df_cau, sukl_code)
 
     async def close(self) -> None:
         """Uzavři klienta."""

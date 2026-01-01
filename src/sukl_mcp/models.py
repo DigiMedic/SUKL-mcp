@@ -31,6 +31,14 @@ class DispensationMode(str, Enum):
     RESERVED = "V"  # Vyhrazené
 
 
+class AvailabilityStatus(str, Enum):
+    """Stav dostupnosti léčivého přípravku."""
+
+    AVAILABLE = "available"  # DODAVKY = "1"
+    UNAVAILABLE = "unavailable"  # DODAVKY = "0"
+    UNKNOWN = "unknown"  # Chybějící nebo neplatná data
+
+
 # === Modely pro léčivé přípravky ===
 
 
@@ -47,7 +55,15 @@ class MedicineSearchResult(BaseModel):
     registration_status: Optional[str] = Field(None, description="Stav registrace")
     dispensation_mode: Optional[str] = Field(None, description="Režim výdeje")
     is_available: Optional[bool] = Field(None, description="Dostupnost na trhu")
+
+    # Cenové údaje (EPIC 3: Price & Reimbursement)
     has_reimbursement: Optional[bool] = Field(None, description="Má úhradu")
+    max_price: Optional[float] = Field(None, description="Maximální cena")
+    patient_copay: Optional[float] = Field(None, description="Doplatek pacienta")
+
+    # Match metadata (EPIC 2: Smart Search)
+    match_score: Optional[float] = Field(None, description="Relevance skóre (0-100)")
+    match_type: Optional[str] = Field(None, description="Typ matchování: substance/exact/substring/fuzzy")
 
 
 class MedicineDetail(BaseModel):
@@ -98,24 +114,45 @@ class MedicineDetail(BaseModel):
 
 
 class PILContent(BaseModel):
-    """Obsah příbalového letáku (PIL)."""
+    """Obsah příbalového letáku (PIL) nebo SPC."""
 
     sukl_code: str
     medicine_name: str
-    document_url: Optional[str] = Field(None, description="URL PDF dokumentu")
+    document_url: Optional[str] = Field(None, description="URL dokumentu")
     language: str = Field("cs", description="Jazyk dokumentu")
-    full_text: Optional[str] = None
+    full_text: Optional[str] = Field(None, description="Extrahovaný text dokumentu")
+    document_format: Optional[str] = Field(None, description="Formát dokumentu (pdf, docx)")
+
+
+class AlternativeMedicine(BaseModel):
+    """Alternativní léčivý přípravek (EPIC 4: Availability & Alternatives)."""
+
+    sukl_code: str = Field(..., description="Kód SÚKL alternativy")
+    name: str = Field(..., description="Název alternativního přípravku")
+    strength: Optional[str] = Field(None, description="Síla (např. '500mg')")
+    form: Optional[str] = Field(None, description="Léková forma (tableta, sirup, atd.)")
+    is_available: bool = Field(True, description="Je dostupný na trhu")
+    has_reimbursement: Optional[bool] = Field(None, description="Má úhradu pojišťovny")
+    relevance_score: float = Field(..., description="Relevance skóre 0-100")
+    match_reason: str = Field(..., description="Důvod doporučení")
+    max_price: Optional[float] = Field(None, description="Maximální cena")
+    patient_copay: Optional[float] = Field(None, description="Doplatek pacienta")
 
 
 class AvailabilityInfo(BaseModel):
     """Informace o dostupnosti léčivého přípravku."""
 
     sukl_code: str
-    medicine_name: str
+    name: str = Field(..., description="Název přípravku")
     is_available: bool = Field(..., description="Je dostupný")
-    is_marketed: bool = Field(..., description="Je uváděn na trh")
-    unavailability_reason: Optional[str] = Field(None, description="Důvod nedostupnosti")
-    alternatives_available: bool = Field(False)
+    status: AvailabilityStatus = Field(..., description="Stav dostupnosti")
+    alternatives_available: bool = Field(False, description="Existují alternativy")
+    alternatives: list[AlternativeMedicine] = Field(
+        default_factory=list, description="Seznam alternativních léčiv"
+    )
+    recommendation: Optional[str] = Field(
+        None, description="Doporučení pro uživatele"
+    )
     checked_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -182,3 +219,4 @@ class SearchResponse(BaseModel):
     total_results: int
     results: list[MedicineSearchResult]
     search_time_ms: Optional[float] = None
+    match_type: Optional[str] = Field(None, description="Typ matchování: substance/exact/substring/fuzzy/none")

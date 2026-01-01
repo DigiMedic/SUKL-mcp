@@ -23,3 +23,15 @@ class SUKLDataError(SUKLException):
     """Chyba při načítání nebo zpracování dat."""
 
     pass
+
+
+class SUKLDocumentError(SUKLException):
+    """Chyba při stahování nebo zpracování dokumentu (PIL/SPC)."""
+
+    pass
+
+
+class SUKLParseError(SUKLDocumentError):
+    """Chyba při parsování dokumentu (PDF/DOCX)."""
+
+    pass
