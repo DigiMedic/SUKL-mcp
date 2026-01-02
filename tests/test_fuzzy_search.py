@@ -60,7 +60,7 @@ def sample_substances_df():
     """Sample substances DataFrame."""
     return pd.DataFrame(
         {
-            "KOD": [10, 20, 30],
+            "KOD_LATKY": [10, 20, 30],
             "NAZEV": ["Ibuprofenum", "Paracetamolum", "Acidum acetylsalicylicum"],
         }
     )
