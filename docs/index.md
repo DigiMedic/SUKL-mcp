@@ -75,8 +75,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/fastmcp-boilerplate.git
-cd fastmcp-boilerplate
+git clone https://github.com/petrsovadina/SUKL-mcp.git
+cd SUKL-mcp
 
 # Create virtual environment
 python3 -m venv venv
@@ -106,7 +106,7 @@ docker run -p 8000:8000 sukl-mcp
       "command": "python",
       "args": ["-m", "sukl_mcp.server"],
       "env": {
-        "PYTHONPATH": "/path/to/fastmcp-boilerplate/src"
+        "PYTHONPATH": "/path/to/SUKL-mcp/src"
       }
     }
   }
@@ -156,8 +156,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for development guidelines.
 
 ## Support
 
-- **Issues**: https://github.com/your-org/fastmcp-boilerplate/issues
-- **Discussions**: https://github.com/your-org/fastmcp-boilerplate/discussions
+- **Issues**: https://github.com/petrsovadina/SUKL-mcp/issues
+- **Discussions**: https://github.com/petrsovadina/SUKL-mcp/discussions
 - **SÚKL Open Data**: https://opendata.sukl.cz
 
 ## License

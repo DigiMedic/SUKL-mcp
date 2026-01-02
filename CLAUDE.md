@@ -4,7 +4,7 @@ Tento soubor poskytuje pokyny pro Claude Code (claude.ai/code) při práci s kó
 
 ## Přehled projektu
 
-**SÚKL MCP Server** - Produkční FastMCP server poskytující AI agentům přístup k české databázi léčivých přípravků (68,248 záznamů). Implementuje Model Context Protocol s 7 specializovanými nástroji pro vyhledávání léčiv, získávání detailů, kontrolu dostupnosti a práci s farmaceutickými daty.
+**SÚKL MCP Server v3.1.0** - Produkční FastMCP server poskytující AI agentům přístup k české databázi léčivých přípravků (68,248 záznamů). Implementuje Model Context Protocol s **8 specializovanými nástroji** pro vyhledávání léčiv, získávání detailů, kontrolu dostupnosti a práci s farmaceutickými daty.
 
 ## Klíčové vývojové příkazy
 
@@ -93,15 +93,58 @@ AI Agent → FastMCP Server → SUKLClient → pandas DataFrames → SÚKL Open 
 - Regex injection prevention: `regex=False` v pandas operations
 
 **3. API Layer** (`server.py`)
-- 7 MCP tools registrovaných přes `@mcp.tool` dekorátor
+- 8 MCP tools registrovaných přes `@mcp.tool` dekorátor
+- 5 MCP resources (3 statické + 2 dynamické resource templates)
+- 3 MCP prompts pro běžné dotazy
+- **FastMCP 2.14+ features**: Context logging, Progress reporting, readOnlyHint annotations, tags
 - Lifecycle management přes `@asynccontextmanager`
 - Pydantic modely pro type-safe responses
 - Automatická detekce transportu (stdio vs HTTP)
+- Middleware stack: ErrorHandling, RateLimiting, Timing, Logging
 
 **4. Data Models** (`models.py`)
 - Pydantic 2.0+ modely s runtime validací
 - `MedicineSearchResult`, `MedicineDetail`, `SearchResponse`, atd.
-- Enums: `RegistrationStatus`, `DispensationMode`
+- Enums: `RegistrationStatus`, `DispensationMode`, `AvailabilityStatus`
+
+**5. Document Parser** (`document_parser.py`)
+- Automatická extrakce textu z PDF/DOCX dokumentů
+- LRU cache (50 dokumentů, 24h TTL)
+- Size/page limity pro bezpečnost
+
+**6. Fuzzy Search** (`fuzzy_search.py`)
+- Multi-level search pipeline (účinná látka → exact → substring → fuzzy)
+- Non-blocking s thread executor pro rapidfuzz operace
+- Smart scoring s váhami pro dostupnost a úhradu
+
+**7. Price Calculator** (`price_calculator.py`)
+- Kalkulace doplatků pacienta z dlp_cau.csv
+- Validity filtering podle reference_date
+
+### MCP Tools (8)
+
+| # | Tool | Tags | Popis |
+|---|------|------|-------|
+| 1 | `search_medicine` | `search`, `medicines` | Smart search s fuzzy matchingem |
+| 2 | `get_medicine_details` | `detail`, `medicines` | Kompletní detail přípravku |
+| 3 | `get_pil_content` | `documents`, `pil` | Příbalový leták (PIL) |
+| 4 | `get_spc_content` | `documents`, `spc` | Souhrn údajů o přípravku (SPC) |
+| 5 | `check_availability` | `availability`, `alternatives` | Dostupnost + inteligentní alternativy |
+| 6 | `get_reimbursement` | `pricing`, `reimbursement` | Cenové a úhradové údaje |
+| 7 | `find_pharmacies` | `pharmacies`, `search` | Vyhledávání lékáren |
+| 8 | `get_atc_info` | `classification`, `atc` | ATC klasifikace |
+
+> **FastMCP Annotations**: Všechny tools mají `readOnlyHint: True` pro přeskočení potvrzovacích dialogů v ChatGPT a lepší UX.
+
+### MCP Resources (5)
+
+| URI | Tags | Typ | Popis |
+|-----|------|-----|-------|
+| `sukl://health` | `system`, `monitoring` | Statický | Stav serveru |
+| `sukl://statistics` | `system`, `statistics` | Statický | Statistiky databáze |
+| `sukl://atc-groups/top-level` | `classification`, `atc`, `reference` | Statický | Hlavní ATC skupiny |
+| `sukl://medicine/{sukl_code}` | `medicines`, `detail` | **Template** | Dynamický detail léčiva |
+| `sukl://atc/{atc_code}` | `classification`, `atc` | **Template** | Dynamická ATC skupina |
 
 ### Struktura dat v paměti
 

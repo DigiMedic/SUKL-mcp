@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
 from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
 from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
@@ -76,6 +76,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
 mcp = FastMCP(
     name="SÚKL MCP Server",
     version="3.1.0",
+    website_url="https://github.com/petrsovadina/SUKL-mcp",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.
@@ -160,13 +161,17 @@ Použij search_medicine pro oba léky a get_reimbursement pro cenové údaje."""
 # === MCP Tools ===
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"search", "medicines"},
+    annotations={"readOnlyHint": True, "openWorldHint": True},
+)
 async def search_medicine(
     query: str,
     only_available: bool = False,
     only_reimbursed: bool = False,
     limit: int = 20,
     use_fuzzy: bool = True,
+    ctx: Context = None,
 ) -> SearchResponse:
     """
     Vyhledá léčivé přípravky v databázi SÚKL s multi-level search pipeline.
@@ -195,6 +200,9 @@ async def search_medicine(
         - search_medicine("Paralen", only_reimbursed=True)
         - search_medicine("ibuprofn", use_fuzzy=True)  # Oprava překlepu
     """
+    if ctx:
+        await ctx.info(f"Vyhledávám léčiva: '{query}'")
+
     client = await get_sukl_client()
     start_time = datetime.now()
 
@@ -248,8 +256,11 @@ async def search_medicine(
     )
 
 
-@mcp.tool
-async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
+@mcp.tool(
+    tags={"detail", "medicines"},
+    annotations={"readOnlyHint": True},
+)
+async def get_medicine_details(sukl_code: str, ctx: Context = None) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
 
@@ -264,6 +275,9 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     Examples:
         - get_medicine_details("0012345")
     """
+    if ctx:
+        await ctx.info(f"Načítám detail léčiva: {sukl_code}")
+
     client = await get_sukl_client()
 
     # Normalizace kódu
@@ -312,8 +326,11 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     )
 
 
-@mcp.tool
-async def get_pil_content(sukl_code: str) -> PILContent | None:
+@mcp.tool(
+    tags={"documents", "pil"},
+    annotations={"readOnlyHint": True},
+)
+async def get_pil_content(sukl_code: str, ctx: Context = None) -> PILContent | None:
     """
     Získá obsah příbalového letáku (PIL) pro pacienty.
 
@@ -331,9 +348,16 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
     Examples:
         - get_pil_content("0254045")
     """
+    if ctx:
+        await ctx.info(f"Načítám příbalový leták pro: {sukl_code}")
+        await ctx.report_progress(progress=0, total=100)
+
     client = await get_sukl_client()
     parser = get_document_parser()
     sukl_code = sukl_code.strip().zfill(7)
+
+    if ctx:
+        await ctx.report_progress(progress=20, total=100)
 
     # Získej detail pro název
     detail = await client.get_medicine_detail(sukl_code)
@@ -369,8 +393,11 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
         )
 
 
-@mcp.tool
-async def get_spc_content(sukl_code: str) -> PILContent | None:
+@mcp.tool(
+    tags={"documents", "spc"},
+    annotations={"readOnlyHint": True},
+)
+async def get_spc_content(sukl_code: str, ctx: Context = None) -> PILContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
 
@@ -386,9 +413,16 @@ async def get_spc_content(sukl_code: str) -> PILContent | None:
     Examples:
         - get_spc_content("0254045")
     """
+    if ctx:
+        await ctx.info(f"Načítám SPC pro: {sukl_code}")
+        await ctx.report_progress(progress=0, total=100)
+
     client = await get_sukl_client()
     parser = get_document_parser()
     sukl_code = sukl_code.strip().zfill(7)
+
+    if ctx:
+        await ctx.report_progress(progress=20, total=100)
 
     # Získej detail pro název
     detail = await client.get_medicine_detail(sukl_code)
@@ -424,11 +458,15 @@ async def get_spc_content(sukl_code: str) -> PILContent | None:
         )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"availability", "alternatives"},
+    annotations={"readOnlyHint": True},
+)
 async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
     limit: int = 5,
+    ctx: Context = None,
 ) -> AvailabilityInfo | None:
     """
     Zkontroluje aktuální dostupnost léčivého přípravku na českém trhu.
@@ -444,6 +482,9 @@ async def check_availability(
     Returns:
         AvailabilityInfo s informacemi o dostupnosti a alternativách
     """
+    if ctx:
+        await ctx.info(f"Kontroluji dostupnost: {sukl_code}")
+
     client = await get_sukl_client()
     sukl_code = sukl_code.strip().zfill(7)
 
@@ -509,8 +550,11 @@ async def check_availability(
     )
 
 
-@mcp.tool
-async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
+@mcp.tool(
+    tags={"pricing", "reimbursement"},
+    annotations={"readOnlyHint": True},
+)
+async def get_reimbursement(sukl_code: str, ctx: Context = None) -> ReimbursementInfo | None:
     """
     Získá informace o úhradě léčivého přípravku zdravotní pojišťovnou.
 
@@ -529,6 +573,9 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
     Examples:
         - get_reimbursement("0012345")
     """
+    if ctx:
+        await ctx.info(f"Načítám úhradové informace pro: {sukl_code}")
+
     client = await get_sukl_client()
     sukl_code = sukl_code.strip().zfill(7)
 
@@ -572,13 +619,17 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
         )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"pharmacies", "search"},
+    annotations={"readOnlyHint": True, "openWorldHint": True},
+)
 async def find_pharmacies(
     city: str | None = None,
     postal_code: str | None = None,
     has_24h_service: bool = False,
     has_internet_sales: bool = False,
     limit: int = 20,
+    ctx: Context = None,
 ) -> list[PharmacyInfo]:
     """
     Vyhledá lékárny podle zadaných kritérií.
@@ -598,6 +649,10 @@ async def find_pharmacies(
         - find_pharmacies(has_24h_service=True)
         - find_pharmacies(postal_code="11000")
     """
+    if ctx:
+        location = city or postal_code or "celá ČR"
+        await ctx.info(f"Hledám lékárny: {location}")
+
     client = await get_sukl_client()
 
     raw_results = await client.search_pharmacies(
@@ -638,8 +693,11 @@ async def find_pharmacies(
     return results
 
 
-@mcp.tool
-async def get_atc_info(atc_code: str) -> dict:
+@mcp.tool(
+    tags={"classification", "atc"},
+    annotations={"readOnlyHint": True},
+)
+async def get_atc_info(atc_code: str, ctx: Context = None) -> dict:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.
 
@@ -657,6 +715,9 @@ async def get_atc_info(atc_code: str) -> dict:
         - get_atc_info("N02") - Analgetika
         - get_atc_info("N02BE01") - Paracetamol
     """
+    if ctx:
+        await ctx.info(f"Načítám ATC skupinu: {atc_code}")
+
     client = await get_sukl_client()
 
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
@@ -689,7 +750,11 @@ async def get_atc_info(atc_code: str) -> dict:
 # Statická referenční data exponovaná přímo pro LLM
 
 
-@mcp.resource("sukl://health")
+@mcp.resource(
+    "sukl://health",
+    tags={"system", "monitoring"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_health_resource() -> dict:
     """
     Aktuální stav serveru a statistiky databáze.
@@ -704,7 +769,11 @@ async def get_health_resource() -> dict:
     return health
 
 
-@mcp.resource("sukl://atc-groups/top-level")
+@mcp.resource(
+    "sukl://atc-groups/top-level",
+    tags={"classification", "atc", "reference"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_top_level_atc_groups() -> dict:
     """
     Seznam hlavních ATC skupin (1. úroveň klasifikace).
@@ -729,7 +798,11 @@ async def get_top_level_atc_groups() -> dict:
     }
 
 
-@mcp.resource("sukl://statistics")
+@mcp.resource(
+    "sukl://statistics",
+    tags={"system", "statistics"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_database_statistics() -> dict:
     """
     Statistiky databáze léčiv.
@@ -757,6 +830,92 @@ async def get_database_statistics() -> dict:
         "unavailable_medicines": total_medicines - available_count,
         "data_source": "SÚKL Open Data",
         "server_version": "3.1.0",
+    }
+
+
+# === MCP Resource Templates (Dynamic Resources) ===
+# Dynamické zdroje s parametry v URI
+
+
+@mcp.resource(
+    "sukl://medicine/{sukl_code}",
+    tags={"medicines", "detail"},
+    annotations={"readOnlyHint": True},
+)
+async def get_medicine_resource(sukl_code: str) -> dict:
+    """
+    Detailní informace o léčivu jako resource (bez volání tool).
+
+    Parametry URI:
+        sukl_code: SÚKL kód přípravku (7 číslic)
+
+    Vrací kompletní informace o léčivém přípravku včetně cen.
+    """
+    client = await get_sukl_client()
+    sukl_code = sukl_code.strip().zfill(7)
+
+    data = await client.get_medicine_detail(sukl_code)
+    if not data:
+        return {"error": f"Léčivo {sukl_code} nebylo nalezeno"}
+
+    price_info = await client.get_price_info(sukl_code)
+
+    return {
+        "sukl_code": sukl_code,
+        "name": data.get("NAZEV", ""),
+        "supplement": data.get("DOPLNEK"),
+        "strength": data.get("SILA"),
+        "form": data.get("FORMA"),
+        "atc_code": data.get("ATC_WHO"),
+        "registration_holder": data.get("DRZ"),
+        "is_available": data.get("DODAVKY") != "0",
+        "dispensation_mode": data.get("VYDEJ"),
+        "price_info": price_info if price_info else None,
+    }
+
+
+@mcp.resource(
+    "sukl://atc/{atc_code}",
+    tags={"classification", "atc"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_atc_resource(atc_code: str) -> dict:
+    """
+    ATC skupina jako resource (bez volání tool).
+
+    Parametry URI:
+        atc_code: ATC kód (1-7 znaků, např. 'N', 'N02', 'N02BE01')
+
+    Vrací informace o ATC skupině včetně podskupin.
+    """
+    client = await get_sukl_client()
+    atc_code = atc_code.upper().strip()
+
+    groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
+
+    target = None
+    children = []
+
+    for group in groups:
+        code = group.get("kod", group.get("KOD", ""))
+        if code == atc_code:
+            target = group
+        elif code.startswith(atc_code) and len(code) > len(atc_code):
+            children.append({
+                "code": code,
+                "name": group.get("nazev", group.get("NAZEV", "")),
+            })
+
+    return {
+        "code": atc_code,
+        "name": (
+            target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
+            if target
+            else "Neznámá skupina"
+        ),
+        "level": len(atc_code) if len(atc_code) <= 5 else 5,
+        "children": children[:20],
+        "total_children": len(children),
     }
 
 
