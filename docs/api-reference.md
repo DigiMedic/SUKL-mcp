@@ -370,7 +370,7 @@ interface PILContent {
 
 Get the Summary of Product Characteristics (SPC) for healthcare professionals.
 
-**Location**: `/src/sukl_mcp/server.py` (lines 373-426)
+**Location**: `/src/sukl_mcp/server.py`
 
 #### Signature
 
