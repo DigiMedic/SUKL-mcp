@@ -38,6 +38,11 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
     """Inicializace a cleanup serveru."""
     logger.info("Starting SÚKL MCP Server...")
     client = await get_sukl_client()
+    
+    # Explicitní inicializace při startu (Cold Start fix)
+    # Stáhne a načte data do paměti, aby první request nebyl pomalý
+    await client.initialize()
+    
     health = await client.health_check()
     logger.info(f"Health check: {health}")
 
@@ -52,7 +57,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
 
 mcp = FastMCP(
     name="SÚKL MCP Server",
-    version="2.1.0",
+    version="3.1.0",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.

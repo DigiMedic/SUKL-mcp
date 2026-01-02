@@ -7,6 +7,8 @@ Implementuje multi-level search pipeline:
 3. Fuzzy fallback (shoda > threshold)
 """
 
+import asyncio
+import concurrent.futures
 import logging
 from typing import Any, Optional
 
@@ -99,7 +101,7 @@ class FuzzyMatcher:
         self.min_query_length = min_query_length
         self.candidate_limit = candidate_limit
 
-    def search(
+    async def search(
         self,
         query: str,
         df_medicines: pd.DataFrame,
@@ -153,7 +155,7 @@ class FuzzyMatcher:
 
         # Step 4: Fuzzy fallback
         if len(query) >= self.min_query_length:
-            results = self._search_fuzzy(query_lower, df_medicines, limit)
+            results = await self._search_fuzzy(query_lower, df_medicines, limit)
             if results:
                 logger.info(f"Found {len(results)} results via fuzzy match")
                 return (results, "fuzzy")
@@ -280,7 +282,7 @@ class FuzzyMatcher:
 
         return results
 
-    def _search_fuzzy(
+    async def _search_fuzzy(
         self,
         query: str,
         df_medicines: pd.DataFrame,
@@ -290,20 +292,27 @@ class FuzzyMatcher:
         Fuzzy match s rapidfuzz.
 
         Používá WRatio scorer pro nejlepší výsledky.
+        Běží v thread poolu pro neblokování event loopu.
         """
+        loop = asyncio.get_running_loop()
+
         # Limit kandidátů pro performance
         candidates_df = df_medicines.head(self.candidate_limit)
 
         # Extrahuj názvy pro fuzzy matching
         names = candidates_df["NAZEV"].fillna("").tolist()
 
-        # Fuzzy match s rapidfuzz
-        matches = process.extract(
-            query,
-            names,
-            scorer=fuzz.WRatio,
-            limit=limit * 2,  # Získej více než limit pro filtering
-        )
+        # Wrapper pro rapidfuzz process.extract
+        def run_fuzzy_match():
+            return process.extract(
+                query,
+                names,
+                scorer=fuzz.WRatio,
+                limit=limit * 2,  # Získej více než limit pro filtering
+            )
+
+        # Spusť v executoru
+        matches = await loop.run_in_executor(None, run_fuzzy_match)
 
         # Filtruj podle threshold
         filtered_matches = [(name, score, idx) for name, score, idx in matches if score >= self.threshold]

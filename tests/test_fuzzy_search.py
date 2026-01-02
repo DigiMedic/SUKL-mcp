@@ -153,22 +153,25 @@ class TestFuzzyMatcher:
         assert matcher.min_query_length == 2
         assert matcher.candidate_limit == 500
 
-    def test_search_empty_query(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_empty_query(self, sample_medicines_df):
         """Test že prázdný query vyvolá validační error."""
         matcher = FuzzyMatcher()
         with pytest.raises(SUKLValidationError, match="nesmí být prázdný"):
-            matcher.search("", sample_medicines_df)
+            await matcher.search("", sample_medicines_df)
 
-    def test_search_whitespace_query(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_whitespace_query(self, sample_medicines_df):
         """Test že query pouze s mezerami vyvolá validační error."""
         matcher = FuzzyMatcher()
         with pytest.raises(SUKLValidationError, match="nesmí být prázdný"):
-            matcher.search("   ", sample_medicines_df)
+            await matcher.search("   ", sample_medicines_df)
 
-    def test_search_exact_match(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_exact_match(self, sample_medicines_df):
         """Test exact match v názvu."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search("PARALEN 500MG", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("PARALEN 500MG", sample_medicines_df, limit=5)
 
         assert match_type == "exact"
         assert len(results) == 1
@@ -176,39 +179,43 @@ class TestFuzzyMatcher:
         assert "match_score" in results[0]
         assert results[0]["match_type"] == "exact"
 
-    def test_search_exact_match_case_insensitive(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_exact_match_case_insensitive(self, sample_medicines_df):
         """Test exact match case insensitive."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search("paralen 500mg", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("paralen 500mg", sample_medicines_df, limit=5)
 
         assert match_type == "exact"
         assert len(results) == 1
 
-    def test_search_substring_match(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_substring_match(self, sample_medicines_df):
         """Test substring match v názvu."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search("IBUPROFEN", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("IBUPROFEN", sample_medicines_df, limit=5)
 
         assert match_type == "substring"
         assert len(results) == 2  # IBUPROFEN 400MG + IBUPROFEN FORTE 600MG
         assert all("IBUPROFEN" in r["NAZEV"] for r in results)
         assert all(r["match_type"] == "substring" for r in results)
 
-    def test_search_substring_match_partial(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_substring_match_partial(self, sample_medicines_df):
         """Test substring match s částečným názvem."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search("PARA", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("PARA", sample_medicines_df, limit=5)
 
         assert match_type == "substring"
         assert len(results) == 2  # PARALEN + PARACETAMOL
         assert all("PARA" in r["NAZEV"] for r in results)
 
-    def test_search_substance_match(
+    @pytest.mark.asyncio
+    async def test_search_substance_match(
         self, sample_medicines_df, sample_composition_df, sample_substances_df
     ):
         """Test vyhledávání podle účinné látky."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search(
+        results, match_type = await matcher.search(
             "Ibuprofenum",
             sample_medicines_df,
             sample_composition_df,
@@ -220,12 +227,13 @@ class TestFuzzyMatcher:
         assert len(results) == 2  # IBUPROFEN 400MG + IBUPROFEN FORTE 600MG
         assert all(r["match_type"] == "substance" for r in results)
 
-    def test_search_substance_match_partial(
+    @pytest.mark.asyncio
+    async def test_search_substance_match_partial(
         self, sample_medicines_df, sample_composition_df, sample_substances_df
     ):
         """Test vyhledávání podle částečného názvu látky."""
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search(
+        results, match_type = await matcher.search(
             "Paracetamol",
             sample_medicines_df,
             sample_composition_df,
@@ -236,7 +244,8 @@ class TestFuzzyMatcher:
         assert match_type == "substance"
         assert len(results) == 2  # PARALEN + PARACETAMOL
 
-    def test_search_substance_priority_over_exact(
+    @pytest.mark.asyncio
+    async def test_search_substance_priority_over_exact(
         self, sample_medicines_df, sample_composition_df, sample_substances_df
     ):
         """Test že substance search má přednost před exact match."""
@@ -256,7 +265,7 @@ class TestFuzzyMatcher:
         )
 
         matcher = FuzzyMatcher()
-        results, match_type = matcher.search(
+        results, match_type = await matcher.search(
             "Ibuprofenum",
             medicines_with_dupe,
             sample_composition_df,
@@ -267,13 +276,14 @@ class TestFuzzyMatcher:
         # Substance search má přednost
         assert match_type == "substance"
 
-    def test_search_fuzzy_match_typo(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_fuzzy_match_typo(self, sample_medicines_df):
         """Test fuzzy match s překlepem."""
         matcher = FuzzyMatcher(threshold=60)  # Nižší threshold pro test
 
         # "IBUPROFNE" je bližší k "IBUPROFEN 400MG" než "IBUPROFN"
         # (pouze jeden extra znak vs chybějící znak)
-        results, match_type = matcher.search("IBUPROFNE", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("IBUPROFNE", sample_medicines_df, limit=5)
 
         # Pokud fuzzy nenajde nic, může být match_type "none"
         # (závisí na threshold a podobnosti)
@@ -286,18 +296,20 @@ class TestFuzzyMatcher:
             # Fuzzy matching s tímto query možná nedosáhne threshold
             assert match_type == "none"
 
-    def test_search_fuzzy_match_below_threshold(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_fuzzy_match_below_threshold(self, sample_medicines_df):
         """Test že fuzzy match s nízkým skóre není vrácen."""
         matcher = FuzzyMatcher(threshold=95)  # Vysoký threshold
-        results, match_type = matcher.search("COMPLETELY_DIFFERENT", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("COMPLETELY_DIFFERENT", sample_medicines_df, limit=5)
 
         assert match_type == "none"
         assert len(results) == 0
 
-    def test_search_fuzzy_match_short_query(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_fuzzy_match_short_query(self, sample_medicines_df):
         """Test že krátký query (< min_query_length) nezpůsobí fuzzy search."""
         matcher = FuzzyMatcher(min_query_length=3)
-        results, match_type = matcher.search("IB", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search("IB", sample_medicines_df, limit=5)
 
         # Mělo by najít substring ale NE fuzzy
         if results:
@@ -305,38 +317,43 @@ class TestFuzzyMatcher:
         else:
             assert match_type == "none"
 
-    def test_search_limit_enforcement(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_limit_enforcement(self, sample_medicines_df):
         """Test že limit je respektován."""
         matcher = FuzzyMatcher()
-        results, _ = matcher.search("A", sample_medicines_df, limit=2)
+        results, _ = await matcher.search("A", sample_medicines_df, limit=2)
 
         assert len(results) <= 2
 
-    def test_search_limit_zero(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_limit_zero(self, sample_medicines_df):
         """Test že limit 0 vrací prázdné výsledky."""
         matcher = FuzzyMatcher()
-        results, _ = matcher.search("IBUPROFEN", sample_medicines_df, limit=0)
+        results, _ = await matcher.search("IBUPROFEN", sample_medicines_df, limit=0)
 
         assert len(results) == 0
 
-    def test_search_no_results(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_no_results(self, sample_medicines_df):
         """Test že neexistující query vrací prázdný seznam."""
         matcher = FuzzyMatcher(threshold=99)
-        results, match_type = matcher.search("NONEXISTENT_MEDICINE_XYZ", sample_medicines_df)
+        results, match_type = await matcher.search("NONEXISTENT_MEDICINE_XYZ", sample_medicines_df)
 
         assert match_type == "none"
         assert len(results) == 0
 
-    def test_search_results_sorted_by_score(self, sample_medicines_df):
+    @pytest.mark.asyncio
+    async def test_search_results_sorted_by_score(self, sample_medicines_df):
         """Test že výsledky jsou seřazené podle skóre."""
         matcher = FuzzyMatcher()
-        results, _ = matcher.search("PARA", sample_medicines_df, limit=10)
+        results, _ = await matcher.search("PARA", sample_medicines_df, limit=10)
 
         if len(results) > 1:
             scores = [r["match_score"] for r in results]
             assert scores == sorted(scores, reverse=True)
 
-    def test_search_candidate_limit_enforcement(self):
+    @pytest.mark.asyncio
+    async def test_search_candidate_limit_enforcement(self):
         """Test že fuzzy search limituje počet kandidátů."""
         # Vytvoř velký DataFrame
         large_df = pd.DataFrame(
@@ -348,7 +365,7 @@ class TestFuzzyMatcher:
         )
 
         matcher = FuzzyMatcher(candidate_limit=500, threshold=70)
-        results, match_type = matcher.search("MEDICIN", large_df, limit=10)
+        results, match_type = await matcher.search("MEDICIN", large_df, limit=10)
 
         # Fuzzy by měl limitovat na 500 kandidátů
         # (těžko testovat interně, ale alespoň ověříme že nepadne)
@@ -375,32 +392,34 @@ def test_get_fuzzy_matcher_returns_fuzzy_matcher():
 # === Integration Tests ===
 
 
-def test_multi_level_pipeline_priority(
+@pytest.mark.asyncio
+async def test_multi_level_pipeline_priority(
     sample_medicines_df, sample_composition_df, sample_substances_df
 ):
     """Test že pipeline má správnou prioritu: substance > exact > substring > fuzzy."""
     matcher = FuzzyMatcher()
 
     # Test 1: Substance match má přednost
-    results1, match_type1 = matcher.search(
+    results1, match_type1 = await matcher.search(
         "Paracetamol", sample_medicines_df, sample_composition_df, sample_substances_df
     )
     assert match_type1 == "substance"
 
     # Test 2: Exact match (bez substance tabulek)
-    results2, match_type2 = matcher.search("PARALEN 500MG", sample_medicines_df)
+    results2, match_type2 = await matcher.search("PARALEN 500MG", sample_medicines_df)
     assert match_type2 == "exact"
 
     # Test 3: Substring match (bez substance tabulek, ne exact)
-    results3, match_type3 = matcher.search("PARALEN", sample_medicines_df)
+    results3, match_type3 = await matcher.search("PARALEN", sample_medicines_df)
     assert match_type3 == "substring"
 
     # Test 4: Fuzzy match (typo, bez substance tabulek, ne exact/substring)
-    results4, match_type4 = matcher.search("PARALN", sample_medicines_df)
+    results4, match_type4 = await matcher.search("PARALN", sample_medicines_df)
     assert match_type4 in ["fuzzy", "none"]  # Závisí na threshold
 
 
-def test_availability_bonus_in_scoring(sample_medicines_df):
+@pytest.mark.asyncio
+async def test_availability_bonus_in_scoring(sample_medicines_df):
     """Test že dostupné léky mají vyšší skóre."""
     # Přidej unavailable lék
     medicines_with_unavailable = pd.concat(
@@ -418,7 +437,7 @@ def test_availability_bonus_in_scoring(sample_medicines_df):
     )
 
     matcher = FuzzyMatcher()
-    results, _ = matcher.search("IBUPROFEN", medicines_with_unavailable, limit=10)
+    results, _ = await matcher.search("IBUPROFEN", medicines_with_unavailable, limit=10)
 
     # Najdi dostupné a nedostupné IBUPROFEN
     available = [r for r in results if r["DODAVKY"] == "A"]
@@ -429,12 +448,13 @@ def test_availability_bonus_in_scoring(sample_medicines_df):
         assert available[0]["match_score"] > unavailable[0]["match_score"]
 
 
-def test_empty_dataframe(sample_composition_df, sample_substances_df):
+@pytest.mark.asyncio
+async def test_empty_dataframe(sample_composition_df, sample_substances_df):
     """Test že prázdný DataFrame vrací prázdné výsledky."""
     empty_df = pd.DataFrame(columns=["KOD_SUKL", "NAZEV", "DODAVKY"])
 
     matcher = FuzzyMatcher()
-    results, match_type = matcher.search(
+    results, match_type = await matcher.search(
         "test", empty_df, sample_composition_df, sample_substances_df
     )
 
@@ -442,7 +462,8 @@ def test_empty_dataframe(sample_composition_df, sample_substances_df):
     assert len(results) == 0
 
 
-def test_missing_columns_handled():
+@pytest.mark.asyncio
+async def test_missing_columns_handled():
     """Test že chybějící sloupce jsou korektně zpracovány."""
     # DataFrame bez DODAVKY
     df_no_dodavky = pd.DataFrame(
@@ -453,7 +474,7 @@ def test_missing_columns_handled():
     )
 
     matcher = FuzzyMatcher()
-    results, match_type = matcher.search("TEST", df_no_dodavky, limit=5)
+    results, match_type = await matcher.search("TEST", df_no_dodavky, limit=5)
 
     assert match_type == "substring"
     assert len(results) == 2

@@ -250,12 +250,12 @@ Docker-based deployment s HTTP transportem:
 
 ```bash
 # Build Docker image
-docker build -t sukl-mcp:2.1.0 .
+docker build -t sukl-mcp:3.1.0 .
 
 # Spustit kontejner
-docker run -p 8000:8000 sukl-mcp:2.1.0
+docker run -p 8000:8000 sukl-mcp:3.1.0
 
-# Deploy na Smithery
+# Nasazení na Smithery
 smithery deploy
 ```
 

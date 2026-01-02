@@ -1049,3 +1049,35 @@ Implementace 4 klíčových modulů pro transformaci SÚKL MCP serveru z "vyhled
 
 **Last Updated**: 2025-12-31
 **Version**: 2.0 (All 4 EPICs Completed)
+
+---
+
+## 🚀 Performance Optimization (v3.1.0) ✅ COMPLETED
+
+**Datum**: 2026-01-02
+**Status**: COMPLETED
+**Cíl**: Vyřešit blokování event loopu a optimalizovat paměťovou náročnost.
+
+### Implementované změny:
+1. **Non-blocking Fuzzy Search**:
+   - Refactoring `FuzzyMatcher.search` na `async`.
+   - Použití `loop.run_in_executor` pro CPU-intensive `rapidfuzz` operace.
+   - Eliminace blokování hlavního vlákna při vyhledávání.
+
+2. **PyArrow Backend**:
+   - Přechod na `dtype_backend="pyarrow"` v `pd.read_csv`.
+   - Snížení paměťové náročnosti (zero-copy reads).
+   - Zrychlení načítání dat.
+
+3. **Cold Start Fix**:
+   - Explicitní `await client.initialize()` v `server_lifespan`.
+   - Data se načítají při startu serveru, ne při prvním requestu.
+   - Eliminace latence prvního dotazu.
+
+4. **Test Suite Update**:
+   - Refactoring testů pro podporu async volání.
+   - 100% pass rate (197 testů).
+
+**Metriky:**
+- Pass rate: 100%
+- Version: 3.1.0

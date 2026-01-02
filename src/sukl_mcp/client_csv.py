@@ -158,7 +158,13 @@ class SUKLDataLoader:
             if not csv_path.exists():
                 return (table, None)
 
-            df = pd.read_csv(csv_path, sep=";", encoding="cp1250", low_memory=False)
+            df = pd.read_csv(
+                csv_path,
+                sep=";",
+                encoding="cp1250",
+                low_memory=False,
+                dtype_backend="pyarrow",
+            )
             return (table, df)
 
         # Paralelní načítání všech CSV souborů
@@ -275,7 +281,7 @@ class SUKLClient:
             df_composition = self._loader.get_table("dlp_slozeni")
             df_substances = self._loader.get_table("dlp_lecivelatky")
 
-            results, match_type = matcher.search(
+            results, match_type = await matcher.search(
                 query=query,
                 df_medicines=df_medicines,
                 df_composition=df_composition,

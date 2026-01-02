@@ -5,6 +5,17 @@ All notable changes to SÚKL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-01-02
+
+### Performance Improvements
+- **Non-blocking Fuzzy Search**: Refactored `FuzzyMatcher` to run CPU-intensive `rapidfuzz` operations in a separate thread executor, preventing event loop blocking during heavy searches.
+- **PyArrow Backend**: Switched Pandas `dtype_backend` to `pyarrow` for significantly reduced memory usage and faster data loading.
+- **Cold Start Fix**: Implemented explicit data initialization during server startup (`server_lifespan`) to eliminate latency on the first request.
+
+### Changed
+- Updated `SUKLClient` and `SUKLDataLoader` to support asynchronous initialization and PyArrow types.
+- Refactored unit tests to support async execution of fuzzy search operations.
+
 ## [3.0.0] - 2026-01-01
 
 ### Added (EPIC 4: Availability & Alternatives)

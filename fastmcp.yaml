@@ -28,7 +28,7 @@ environment:
 # Metadata
 metadata:
   name: SÚKL MCP Server
-  version: 2.1.0
+  version: 3.1.0
   description: Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL
   author: FastMCP Community
   license: MIT

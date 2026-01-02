@@ -1,6 +1,6 @@
 #!/bin/bash
 # Validační script pro SÚKL MCP Server deployment
-# Verze: 2.1.0
+# Verze: 3.1.0
 
 set -e
 
@@ -28,12 +28,12 @@ print_test() {
 
 print_pass() {
     echo -e "${GREEN}✓ PASS${NC}"
-    ((PASSED++))
+    PASSED=$((PASSED+1))
 }
 
 print_fail() {
     echo -e "${RED}✗ FAIL${NC}: $1"
-    ((FAILED++))
+    FAILED=$((FAILED+1))
 }
 
 print_skip() {
@@ -43,44 +43,44 @@ print_skip() {
 # Change to script directory
 cd "$(dirname "$0")"
 
-print_header "SÚKL MCP Server v2.1.0 - Deployment Validation"
+print_header "SÚKL MCP Server v3.1.0 - Deployment Validation"
 
 # 1. Version consistency
 print_header "1. Version Consistency"
 
 print_test "pyproject.toml version"
-if grep -q 'version = "2.1.0"' pyproject.toml; then
+if grep -q 'version = "3.1.0"' pyproject.toml; then
     print_pass
 else
-    print_fail "Version not 2.1.0 in pyproject.toml"
+    print_fail "Version not 3.1.0 in pyproject.toml"
 fi
 
 print_test "__init__.py version"
-if grep -q '__version__ = "2.1.0"' src/sukl_mcp/__init__.py; then
+if grep -q '__version__ = "3.1.0"' src/sukl_mcp/__init__.py; then
     print_pass
 else
-    print_fail "Version not 2.1.0 in __init__.py"
+    print_fail "Version not 3.1.0 in __init__.py"
 fi
 
 print_test "fastmcp.yaml version"
-if grep -q 'version: 2.1.0' fastmcp.yaml; then
+if grep -q 'version: 3.1.0' fastmcp.yaml; then
     print_pass
 else
-    print_fail "Version not 2.1.0 in fastmcp.yaml"
+    print_fail "Version not 3.1.0 in fastmcp.yaml"
 fi
 
 print_test "smithery.yaml version"
-if grep -q 'version: "2.1.0"' smithery.yaml; then
+if grep -q 'version: "3.1.0"' smithery.yaml; then
     print_pass
 else
-    print_fail "Version not 2.1.0 in smithery.yaml"
+    print_fail "Version not 3.1.0 in smithery.yaml"
 fi
 
 print_test "Dockerfile version"
-if grep -q 'LABEL version="2.1.0"' Dockerfile; then
+if grep -q 'LABEL version="3.1.0"' Dockerfile; then
     print_pass
 else
-    print_fail "Version not 2.1.0 in Dockerfile"
+    print_fail "Version not 3.1.0 in Dockerfile"
 fi
 
 # 2. File existence
@@ -89,9 +89,7 @@ print_header "2. Required Files"
 FILES=(
     "pyproject.toml"
     "README.md"
-    "DEPLOYMENT.md"
-    "SMITHERY_DEPLOYMENT.md"
-    "DEPLOYMENT_CHECKLIST.md"
+    "docs/deployment.md"
     "fastmcp.yaml"
     "smithery.yaml"
     "Dockerfile"
@@ -141,7 +139,7 @@ else
 fi
 
 print_test "sukl_mcp.__version__ import"
-if python3 -c "from sukl_mcp import __version__; assert __version__ == '2.1.0'" 2>/dev/null; then
+if python3 -c "from sukl_mcp import __version__; assert __version__ == '3.1.0'" 2>/dev/null; then
     print_pass
 else
     print_fail "Version mismatch in __version__"
@@ -230,18 +228,18 @@ else
     print_fail "Smithery deployment section missing in README"
 fi
 
-print_test "DEPLOYMENT.md contains Smithery reference"
-if grep -q "Smithery Platform" DEPLOYMENT.md; then
+print_test "docs/deployment.md contains Smithery reference"
+if grep -q "Smithery" docs/deployment.md; then
     print_pass
 else
-    print_fail "Smithery reference missing in DEPLOYMENT.md"
+    print_fail "Smithery reference missing in docs/deployment.md"
 fi
 
-print_test "CHANGELOG.md contains v2.1.0"
-if grep -q "\[2.1.0\]" ../CHANGELOG.md 2>/dev/null || grep -q "\[2.1.0\]" CHANGELOG.md 2>/dev/null; then
+print_test "CHANGELOG.md contains v3.1.0"
+if grep -q "\[3.1.0\]" ../CHANGELOG.md 2>/dev/null || grep -q "\[3.1.0\]" CHANGELOG.md 2>/dev/null; then
     print_pass
 else
-    print_fail "Version 2.1.0 not documented in CHANGELOG"
+    print_fail "Version 3.1.0 not documented in CHANGELOG"
 fi
 
 # Summary

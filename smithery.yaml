@@ -47,7 +47,7 @@ startCommand:
 metadata:
   name: "SÚKL MCP Server"
   displayName: "SÚKL MCP Server"
-  version: "2.1.0"
+  version: "3.1.0"
   description: "Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL (68,248 přípravků)"
   author: "FastMCP Community"
   license: "MIT"

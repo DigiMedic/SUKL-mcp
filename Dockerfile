@@ -14,7 +14,7 @@ FROM python:3.10-slim
 
 # Metadata
 LABEL maintainer="SUKL MCP Server Team"
-LABEL version="2.1.0"
+LABEL version="3.1.0"
 LABEL description="Production-ready MCP server pro české farmaceutické databáze"
 
 # Create non-root user

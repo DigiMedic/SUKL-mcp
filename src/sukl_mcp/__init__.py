@@ -22,7 +22,7 @@ from .models import (
 )
 from .server import mcp
 
-__version__ = "2.1.0"
+__version__ = "3.1.0"
 
 __all__ = [
     # Server

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sukl-mcp-server"
-version = "3.0.0"
+version = "3.1.0"
 description = "Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL (68,248 záznamů)"
 readme = "README.md"
 license = "MIT"
@@ -52,6 +52,7 @@ dependencies = [
     "async-lru>=2.0.0,<3.0.0",    # Async LRU caching with TTL
     # EPIC 2: Smart Search
     "rapidfuzz>=3.0.0,<4.0.0",    # Fuzzy string matching
+    "pyarrow>=14.0.0",            # Pandas PyArrow backend
 ]
 
 [project.optional-dependencies]
