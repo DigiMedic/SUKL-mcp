@@ -10,7 +10,7 @@
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/YOURUSER/Desktop"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/YOURUSER/Desktop/Projects/specific-project"],
       "env": {}
     },
     "brave-search": {
@@ -29,7 +29,7 @@
     },
     "postgres": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"],
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:password@localhost:5432/mydb"],
       "env": {}
     },
     "slack": {

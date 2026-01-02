@@ -13,7 +13,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/petrsovadina/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 
 # Create virtual environment

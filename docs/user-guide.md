@@ -19,7 +19,7 @@ The SÚKL MCP Server provides AI agents like Claude with access to the Czech pha
 ```bash
 # macOS/Linux
 cd ~/Documents
-git clone https://github.com/petrsovadina/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 python3 -m venv venv
 source venv/bin/activate
@@ -506,7 +506,7 @@ Example:
 
 ### Report Issues
 
-GitHub Issues: https://github.com/petrsovadina/SUKL-mcp/issues
+GitHub Issues: https://github.com/DigiMedic/SUKL-mcp/issues
 
 ### Documentation
 

@@ -75,7 +75,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/petrsovadina/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 
 # Create virtual environment
@@ -156,8 +156,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for development guidelines.
 
 ## Support
 
-- **Issues**: https://github.com/petrsovadina/SUKL-mcp/issues
-- **Discussions**: https://github.com/petrsovadina/SUKL-mcp/discussions
+- **Issues**: https://github.com/DigiMedic/SUKL-mcp/issues
+- **Discussions**: https://github.com/DigiMedic/SUKL-mcp/discussions
 - **SÚKL Open Data**: https://opendata.sukl.cz
 
 ## License

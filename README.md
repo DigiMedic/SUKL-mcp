@@ -50,7 +50,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 
 ```bash
 # 1. Klonovat repozitář
-git clone https://github.com/petrsovadina/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 
 # 2. Vytvořit virtuální prostředí
@@ -490,7 +490,7 @@ Data poskytnutá SÚKL pod podmínkami Open Data: https://opendata.sukl.cz/?q=po
 - **FastMCP Framework**: https://gofastmcp.com
 - **SÚKL Open Data**: https://opendata.sukl.cz
 - **Model Context Protocol**: https://modelcontextprotocol.io
-- **Issues & Support**: https://github.com/petrsovadina/SUKL-mcp/issues
+- **Issues & Support**: https://github.com/DigiMedic/SUKL-mcp/issues
 
 ---
 

@@ -401,8 +401,8 @@ mkdocs-pdf-export-plugin
 
 Found an error or have suggestions?
 
-- **GitHub Issues**: https://github.com/petrsovadina/SUKL-mcp/issues
-- **Pull Requests**: https://github.com/petrsovadina/SUKL-mcp/pulls
+- **GitHub Issues**: https://github.com/DigiMedic/SUKL-mcp/issues
+- **Pull Requests**: https://github.com/DigiMedic/SUKL-mcp/pulls
 
 ---
 

@@ -76,12 +76,12 @@ all = [
 sukl-mcp = "sukl_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/petrsovadina/SUKL-mcp"
-Documentation = "https://github.com/petrsovadina/SUKL-mcp/tree/main/docs"
-Repository = "https://github.com/petrsovadina/SUKL-mcp"
-"Bug Tracker" = "https://github.com/petrsovadina/SUKL-mcp/issues"
+Homepage = "https://github.com/DigiMedic/SUKL-mcp"
+Documentation = "https://github.com/DigiMedic/SUKL-mcp/tree/main/docs"
+Repository = "https://github.com/DigiMedic/SUKL-mcp"
+"Bug Tracker" = "https://github.com/DigiMedic/SUKL-mcp/issues"
 "SÚKL Open Data" = "https://opendata.sukl.cz"
-Changelog = "https://github.com/petrsovadina/SUKL-mcp/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/DigiMedic/SUKL-mcp/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sukl_mcp"]

@@ -210,7 +210,7 @@ git commit -m "docs(readme): update installation instructions"
 
 Pokud najdeš bug:
 
-1. Zkontroluj, jestli už není [reported](https://github.com/petrsovadina/SUKL-mcp/issues)
+1. Zkontroluj, jestli už není [reported](https://github.com/DigiMedic/SUKL-mcp/issues)
 2. Vytvoř nový issue s:
    - Popisem problému
    - Kroky k reprodukci
@@ -242,4 +242,4 @@ Děkujeme všem přispěvatelům za pomoc s vylepšováním SÚKL MCP Server!
 
 ---
 
-**Máš otázky?** Otevři [discussion](https://github.com/petrsovadina/SUKL-mcp/discussions) nebo se zeptej v issues.
+**Máš otázky?** Otevři [discussion](https://github.com/DigiMedic/SUKL-mcp/discussions) nebo se zeptej v issues.

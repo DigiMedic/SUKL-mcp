@@ -209,7 +209,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Links
 
-- [GitHub Repository](https://github.com/petrsovadina/SUKL-mcp)
+- [GitHub Repository](https://github.com/DigiMedic/SUKL-mcp)
 - [SÚKL Open Data](https://opendata.sukl.cz)
 - [FastMCP Framework](https://gofastmcp.com)
 - [Model Context Protocol](https://modelcontextprotocol.io)

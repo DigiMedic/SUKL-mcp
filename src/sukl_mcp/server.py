@@ -76,7 +76,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
 mcp = FastMCP(
     name="SÚKL MCP Server",
     version="3.1.0",
-    website_url="https://github.com/petrsovadina/SUKL-mcp",
+    website_url="https://github.com/DigiMedic/SUKL-mcp",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.

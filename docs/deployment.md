@@ -20,7 +20,7 @@ The SÚKL MCP Server supports three deployment modes:
 
 ```bash
 # Clone and install
-git clone https://github.com/petrsovadina/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 python3 -m venv venv
 source venv/bin/activate
