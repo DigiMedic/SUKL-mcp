@@ -299,7 +299,9 @@ class TestFuzzyMatcher:
     async def test_search_fuzzy_match_below_threshold(self, sample_medicines_df):
         """Test že fuzzy match s nízkým skóre není vrácen."""
         matcher = FuzzyMatcher(threshold=95)  # Vysoký threshold
-        results, match_type = await matcher.search("COMPLETELY_DIFFERENT", sample_medicines_df, limit=5)
+        results, match_type = await matcher.search(
+            "COMPLETELY_DIFFERENT", sample_medicines_df, limit=5
+        )
 
         assert match_type == "none"
         assert len(results) == 0

@@ -259,9 +259,7 @@ class SUKLClient:
 
         # Aplikuj pre-filtry
         if only_available:
-            df_medicines = df_medicines[
-                df_medicines["DODAVKY"].str.upper() == "A"
-            ].copy()
+            df_medicines = df_medicines[df_medicines["DODAVKY"].str.upper() == "A"].copy()
 
         if only_reimbursed:
             # NOTE: Reimbursement filtering je implementováno post-enrichment
@@ -474,9 +472,7 @@ class SUKLClient:
         # Např: 900mg vs 1000mg → ratio = 0.9
         return ratio
 
-    def _rank_alternatives(
-        self, candidates: list[dict], original: dict
-    ) -> list[dict]:
+    def _rank_alternatives(self, candidates: list[dict], original: dict) -> list[dict]:
         """
         Rankuj alternativní léčiva podle relevance k originálnímu přípravku.
 
@@ -546,15 +542,11 @@ class SUKLClient:
             candidate["relevance_score"] = round(score, 2)
 
         # Seřaď kandidáty podle skóre (nejvyšší první)
-        ranked = sorted(
-            candidates, key=lambda x: x.get("relevance_score", 0.0), reverse=True
-        )
+        ranked = sorted(candidates, key=lambda x: x.get("relevance_score", 0.0), reverse=True)
 
         return ranked
 
-    async def find_generic_alternatives(
-        self, sukl_code: str, limit: int = 10
-    ) -> list[dict]:
+    async def find_generic_alternatives(self, sukl_code: str, limit: int = 10) -> list[dict]:
         """
         Najdi generické alternativy pro nedostupný lék.
 
@@ -656,9 +648,7 @@ class SUKLClient:
             if atc_code and len(atc_code) >= 3:
                 atc_prefix = atc_code[:3]
                 # Najdi léky se stejným ATC prefixem
-                atc_mask = df_medicines["ATC_WHO"].str.startswith(
-                    atc_prefix, na=False
-                )
+                atc_mask = df_medicines["ATC_WHO"].str.startswith(atc_prefix, na=False)
                 atc_results = df_medicines[atc_mask]
 
                 if not atc_results.empty:
@@ -675,9 +665,7 @@ class SUKLClient:
                 continue
 
             # Pouze dostupné léky
-            cand_availability = self._normalize_availability(
-                candidate.get("DODAVKY")
-            )
+            cand_availability = self._normalize_availability(candidate.get("DODAVKY"))
             if cand_availability != AvailabilityStatus.AVAILABLE:
                 continue
 

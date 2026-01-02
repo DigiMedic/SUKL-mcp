@@ -313,7 +313,9 @@ class FuzzyMatcher:
         matches = await loop.run_in_executor(None, run_fuzzy_match)
 
         # Filtruj podle threshold
-        filtered_matches = [(name, score, idx) for name, score, idx in matches if score >= self.threshold]
+        filtered_matches = [
+            (name, score, idx) for name, score, idx in matches if score >= self.threshold
+        ]
 
         if not filtered_matches:
             return []

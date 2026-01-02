@@ -217,7 +217,9 @@ class TestDocumentDownloader:
         httpx_mock.add_response(
             url=url,
             content=content,
-            headers={"content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+            headers={
+                "content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            },
         )
 
         downloader = DocumentDownloader()
@@ -642,7 +644,9 @@ class TestDocumentParser:
         httpx_mock.add_response(
             url=url,
             content=sample_docx_bytes,
-            headers={"content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+            headers={
+                "content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            },
         )
 
         parser = DocumentParser()
@@ -701,6 +705,7 @@ class TestDocumentParser:
         # Mock parse aby trval příliš dlouho (synchronní funkce s time.sleep)
         def slow_parse(*args):
             import time
+
             time.sleep(35)  # Více než PARSE_TIMEOUT (30s)
             return "Never returned"
 
@@ -855,6 +860,7 @@ class TestAsyncIOBehavior:
 
         def delayed_extract(*args, **kwargs):
             import time
+
             call_times.append(time.time())
             time.sleep(0.1)  # Simulace CPU-bound operace
             return "Page text"
@@ -898,10 +904,7 @@ class TestAsyncIOBehavior:
             mock_extract.return_value = "Concurrent document text"
 
             # Spusť 5 downloads concurrently
-            tasks = [
-                parser.get_document_content(code, "pil")
-                for code in sukl_codes
-            ]
+            tasks = [parser.get_document_content(code, "pil") for code in sukl_codes]
 
             results = await asyncio.gather(*tasks)
 
@@ -998,6 +1001,7 @@ class TestSecurityFeatures:
         # Mock parse s timeoutem
         def slow_parse(*args, **kwargs):
             import time
+
             time.sleep(35)  # > PARSE_TIMEOUT
             return "Never returned"
 

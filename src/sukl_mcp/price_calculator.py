@@ -184,9 +184,7 @@ def get_price_data(
 
     # Extrahuj cenové údaje
     max_price = _get_numeric_value(record[col_max_price]) if col_max_price else None
-    reimbursement = (
-        _get_numeric_value(record[col_reimbursement]) if col_reimbursement else None
-    )
+    reimbursement = _get_numeric_value(record[col_reimbursement]) if col_reimbursement else None
     copay = _get_numeric_value(record[col_copay]) if col_copay else None
 
     # Vypočítej doplatek, pokud není přímo v CSV

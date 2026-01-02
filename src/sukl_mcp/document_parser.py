@@ -90,9 +90,7 @@ class DocumentDownloader:
                         format_type = "docx"
                     else:
                         # Nepodporovaný Content-Type
-                        raise SUKLDocumentError(
-                            f"Nepodporovaný formát dokumentu: {content_type}"
-                        )
+                        raise SUKLDocumentError(f"Nepodporovaný formát dokumentu: {content_type}")
                 # Fallback na URL extension pokud Content-Type chybí nebo je generický
                 elif url.lower().endswith(".pdf"):
                     format_type = "pdf"
@@ -140,9 +138,7 @@ class PDFParser:
             SUKLParseError: Když parsing selže
         """
         if len(content) > self.max_size:
-            raise SUKLParseError(
-                f"PDF příliš velký: {len(content)} B (max {self.max_size} B)"
-            )
+            raise SUKLParseError(f"PDF příliš velký: {len(content)} B (max {self.max_size} B)")
 
         try:
             reader = pypdf.PdfReader(BytesIO(content))
@@ -150,9 +146,7 @@ class PDFParser:
             # Kontrola počtu stran
             num_pages = len(reader.pages)
             if num_pages > self.max_pages:
-                logger.warning(
-                    f"PDF má {num_pages} stran, parsuju pouze prvních {self.max_pages}"
-                )
+                logger.warning(f"PDF má {num_pages} stran, parsuju pouze prvních {self.max_pages}")
 
             # Extrakce textu
             text_parts = []
@@ -202,9 +196,7 @@ class DOCXParser:
             SUKLParseError: Když parsing selže
         """
         if len(content) > self.max_size:
-            raise SUKLParseError(
-                f"DOCX příliš velký: {len(content)} B (max {self.max_size} B)"
-            )
+            raise SUKLParseError(f"DOCX příliš velký: {len(content)} B (max {self.max_size} B)")
 
         try:
             doc = docx.Document(BytesIO(content))
@@ -310,9 +302,7 @@ class DocumentParser:
             else:
                 raise SUKLDocumentError(f"Nepodporovaný formát: {format_type}")
 
-            logger.info(
-                f"Dokument úspěšně zpracován: {len(text)} znaků ({format_type})"
-            )
+            logger.info(f"Dokument úspěšně zpracován: {len(text)} znaků ({format_type})")
 
             return {
                 "content": text,
@@ -323,15 +313,11 @@ class DocumentParser:
             }
 
         except asyncio.TimeoutError:
-            raise SUKLParseError(
-                f"Timeout při parsování dokumentu ({PARSE_TIMEOUT}s)"
-            ) from None
+            raise SUKLParseError(f"Timeout při parsování dokumentu ({PARSE_TIMEOUT}s)") from None
         except (SUKLDocumentError, SUKLParseError):
             raise
         except Exception as e:
-            raise SUKLDocumentError(
-                f"Neočekávaná chyba při zpracování dokumentu: {e}"
-            ) from e
+            raise SUKLDocumentError(f"Neočekávaná chyba při zpracování dokumentu: {e}") from e
 
     def clear_cache(self) -> None:
         """Vyčisti cache."""

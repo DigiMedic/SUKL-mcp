@@ -62,7 +62,9 @@ class MedicineSearchResult(BaseModel):
 
     # Match metadata (EPIC 2: Smart Search)
     match_score: float | None = Field(None, description="Relevance skóre (0-100)")
-    match_type: str | None = Field(None, description="Typ matchování: substance/exact/substring/fuzzy")
+    match_type: str | None = Field(
+        None, description="Typ matchování: substance/exact/substring/fuzzy"
+    )
 
 
 class MedicineDetail(BaseModel):
@@ -149,9 +151,7 @@ class AvailabilityInfo(BaseModel):
     alternatives: list[AlternativeMedicine] = Field(
         default_factory=list, description="Seznam alternativních léčiv"
     )
-    recommendation: str | None = Field(
-        None, description="Doporučení pro uživatele"
-    )
+    recommendation: str | None = Field(None, description="Doporučení pro uživatele")
     checked_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -218,4 +218,6 @@ class SearchResponse(BaseModel):
     total_results: int
     results: list[MedicineSearchResult]
     search_time_ms: float | None = None
-    match_type: str | None = Field(None, description="Typ matchování: substance/exact/substring/fuzzy/none")
+    match_type: str | None = Field(
+        None, description="Typ matchování: substance/exact/substring/fuzzy/none"
+    )

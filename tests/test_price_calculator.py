@@ -36,7 +36,11 @@ def sample_cau_df():
             "MC": [150.50, 89.90, 250.00],  # Maximální cena
             "UHR1": [100.00, 89.90, 0.00],  # Úhrada pojišťovny
             "IND_SK": ["A", "B", None],  # Indikační skupina
-            "PLATNOST_DO": ["31.12.2026", "01.01.2027", "31.12.2027"],  # Všechny platné v budoucnosti
+            "PLATNOST_DO": [
+                "31.12.2026",
+                "01.01.2027",
+                "31.12.2027",
+            ],  # Všechny platné v budoucnosti
         }
     )
 
