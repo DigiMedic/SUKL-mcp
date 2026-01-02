@@ -7,13 +7,18 @@ Poskytuje AI agentům přístup k české databázi léčivých přípravků.
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
 from fastmcp import FastMCP
+from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
+from fastmcp.server.middleware.logging import LoggingMiddleware
+from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
+from fastmcp.server.middleware.timing import TimingMiddleware
 
 # Absolutní importy pro FastMCP Cloud compatibility
-from sukl_mcp.client_csv import close_sukl_client, get_sukl_client
+from sukl_mcp.client_csv import SUKLClient, close_sukl_client, get_sukl_client
 from sukl_mcp.document_parser import close_document_parser, get_document_parser
 from sukl_mcp.exceptions import SUKLDocumentError, SUKLParseError
 from sukl_mcp.models import (
@@ -31,12 +36,23 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# === Application Context (Best Practice) ===
+
+
+@dataclass
+class AppContext:
+    """Typovaný aplikační kontext pro lifespan."""
+
+    client: "SUKLClient"  # Forward reference
+    initialized_at: datetime
+
+
 # === Lifecycle management ===
 
 
 @asynccontextmanager
-async def server_lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
-    """Inicializace a cleanup serveru."""
+async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
+    """Inicializace a cleanup serveru s typovaným kontextem."""
     logger.info("Starting SÚKL MCP Server...")
     client = await get_sukl_client()
 
@@ -47,7 +63,8 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
     health = await client.health_check()
     logger.info(f"Health check: {health}")
 
-    yield
+    # Vrať typovaný kontext
+    yield AppContext(client=client, initialized_at=datetime.now())
 
     logger.info("Shutting down SÚKL MCP Server...")
     await close_sukl_client()
@@ -74,6 +91,70 @@ mcp = FastMCP(
     Data pochází z oficiálních zdrojů SÚKL (Státní ústav pro kontrolu léčiv).
     """,
 )
+
+# === Middleware Stack (Best Practice) ===
+# Pořadí je důležité: ErrorHandling -> RateLimiting -> Timing -> Logging
+mcp.add_middleware(ErrorHandlingMiddleware())  # Zachytí a zpracuje chyby
+mcp.add_middleware(RateLimitingMiddleware(max_requests_per_second=50))  # Rate limiting
+mcp.add_middleware(TimingMiddleware())  # Měření doby zpracování
+mcp.add_middleware(LoggingMiddleware())  # Logování requestů
+
+
+# === MCP Prompts (Best Practice) ===
+# Předdefinované šablony pro běžné dotazy
+
+
+@mcp.prompt
+def find_alternative_prompt(medicine_name: str) -> str:
+    """
+    Vytvoří dotaz pro nalezení alternativy k léčivu.
+
+    Použijte, když pacient hledá levnější nebo dostupnou alternativu.
+    """
+    return f"""Najdi dostupnou alternativu pro léčivo "{medicine_name}".
+
+Požadavky:
+1. Stejná nebo podobná účinná látka
+2. Dostupné na trhu (DODAVKY = A)
+3. Pokud možno s nižším doplatkem
+
+Použij nástroj search_medicine pro vyhledání a check_availability pro ověření dostupnosti."""
+
+
+@mcp.prompt
+def check_medicine_info_prompt(medicine_name: str) -> str:
+    """
+    Vytvoří dotaz pro získání kompletních informací o léčivu.
+
+    Použijte pro komplexní přehled včetně ceny a dostupnosti.
+    """
+    return f"""Získej kompletní informace o léčivu "{medicine_name}".
+
+Zjisti:
+1. Základní informace (síla, forma, balení)
+2. Dostupnost na trhu
+3. Cenu a úhradu pojišťovny
+4. Režim výdeje (na předpis / volně prodejné)
+
+Použij nástroje search_medicine, get_medicine_details a get_reimbursement."""
+
+
+@mcp.prompt
+def compare_medicines_prompt(medicine1: str, medicine2: str) -> str:
+    """
+    Vytvoří dotaz pro porovnání dvou léčiv.
+
+    Použijte pro srovnání ceny, účinnosti nebo dostupnosti.
+    """
+    return f"""Porovnej léčiva "{medicine1}" a "{medicine2}".
+
+Srovnej:
+1. Účinné látky
+2. Ceny a doplatky
+3. Dostupnost na trhu
+4. Lékové formy a síly
+
+Použij search_medicine pro oba léky a get_reimbursement pro cenové údaje."""
 
 
 # === MCP Tools ===
@@ -601,6 +682,81 @@ async def get_atc_info(atc_code: str) -> dict:
         "level": len(atc_code) if len(atc_code) <= 5 else 5,
         "children": children[:20],
         "total_children": len(children),
+    }
+
+
+# === MCP Resources (Best Practice) ===
+# Statická referenční data exponovaná přímo pro LLM
+
+
+@mcp.resource("sukl://health")
+async def get_health_resource() -> dict:
+    """
+    Aktuální stav serveru a statistiky databáze.
+
+    Poskytuje informace o:
+    - Stavu serveru (online/offline)
+    - Počtu načtených záznamů
+    - Čase posledního načtení dat
+    """
+    client = await get_sukl_client()
+    health = await client.health_check()
+    return health
+
+
+@mcp.resource("sukl://atc-groups/top-level")
+async def get_top_level_atc_groups() -> dict:
+    """
+    Seznam hlavních ATC skupin (1. úroveň klasifikace).
+
+    ATC = Anatomicko-terapeuticko-chemická klasifikace léčiv.
+    Vrací 14 hlavních skupin (A-V) s jejich názvy.
+    """
+    client = await get_sukl_client()
+    groups = await client.get_atc_groups(None)
+
+    # Filtruj pouze top-level skupiny (1 znak)
+    top_level = [
+        {"code": g.get("kod", g.get("KOD", "")), "name": g.get("nazev", g.get("NAZEV", ""))}
+        for g in groups
+        if len(g.get("kod", g.get("KOD", ""))) == 1
+    ]
+
+    return {
+        "description": "Hlavní ATC skupiny (1. úroveň)",
+        "total": len(top_level),
+        "groups": top_level,
+    }
+
+
+@mcp.resource("sukl://statistics")
+async def get_database_statistics() -> dict:
+    """
+    Statistiky databáze léčiv.
+
+    Poskytuje souhrnné informace o počtech:
+    - Celkový počet léčivých přípravků
+    - Počet dostupných přípravků
+    - Počet hrazených přípravků
+    """
+    client = await get_sukl_client()
+
+    # Získej základní statistiky
+    total_medicines = 0
+    available_count = 0
+
+    dlp = client._loader.get_table("dlp")
+    if dlp is not None:
+        total_medicines = len(dlp)
+        if "DODAVKY" in dlp.columns:
+            available_count = int((dlp["DODAVKY"] == "A").sum())
+
+    return {
+        "total_medicines": total_medicines,
+        "available_medicines": available_count,
+        "unavailable_medicines": total_medicines - available_count,
+        "data_source": "SÚKL Open Data",
+        "server_version": "3.1.0",
     }
 
 
