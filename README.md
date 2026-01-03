@@ -20,16 +20,20 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 ### Klíčové vlastnosti
 
 - 🔍 **7 MCP tools** pro komplexní práci s farmaceutickými daty
+- 🌐 **Hybrid Architecture (v4.0)**: REST API + CSV fallback pro 100% uptime
+  - **3/10 tools migrované** na dual-mode (search, details, availability)
+  - REST API primary (~100-160ms) → CSV fallback (~50ms)
+  - Graceful degradation při API nedostupnosti
 - 📄 **Automatické parsování dokumentů**: Extrakce textu z PIL/SPC (PDF + DOCX)
 - 🎯 **Smart Search**: Multi-level pipeline s fuzzy matchingem (tolerance překlepů)
 - 💰 **Cenové údaje**: Transparentní informace o úhradách a doplatcích pacientů
 - 🔄 **Inteligentní alternativy**: Automatické doporučení náhradních léků při nedostupnosti (multi-kriteriální ranking)
 - 💊 **68,248 léčivých přípravků** z SÚKL Open Data
-- ⚡ **Async I/O** s pandas DataFrames pro rychlé vyhledávání (<150ms)
+- ⚡ **Async I/O** s pandas DataFrames pro rychlé vyhledávání
 - 🔒 **Security features**: ZIP bomb protection, regex injection prevention
-- 🏆 **Type-safe**: Pydantic modely s runtime validací
+- 🏆 **Type-safe**: Pydantic v2 modely s runtime validací
 - 🚀 **Dual deployment**: FastMCP Cloud (stdio) + Smithery (HTTP/Docker)
-- ✅ **197 comprehensive tests** s pytest a coverage >85%
+- ✅ **230+ comprehensive tests** s pytest a coverage >85%
 
 ### Datová základna
 

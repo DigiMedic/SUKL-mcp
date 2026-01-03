@@ -18,9 +18,10 @@ from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
 from fastmcp.server.middleware.timing import TimingMiddleware
 
 # Absolutní importy pro FastMCP Cloud compatibility
+from sukl_mcp.api import SUKLAPIClient, close_api_client, get_api_client
 from sukl_mcp.client_csv import SUKLClient, close_sukl_client, get_sukl_client
 from sukl_mcp.document_parser import close_document_parser, get_document_parser
-from sukl_mcp.exceptions import SUKLDocumentError, SUKLParseError
+from sukl_mcp.exceptions import SUKLAPIError, SUKLDocumentError, SUKLParseError
 from sukl_mcp.models import (
     AvailabilityInfo,
     MedicineDetail,
@@ -43,7 +44,8 @@ logger = logging.getLogger(__name__)
 class AppContext:
     """Typovaný aplikační kontext pro lifespan."""
 
-    client: "SUKLClient"  # Forward reference
+    client: "SUKLClient"  # CSV client (legacy, fallback)
+    api_client: "SUKLAPIClient"  # REST API client (v4.0+, preferred)
     initialized_at: datetime
 
 
@@ -53,20 +55,28 @@ class AppContext:
 @asynccontextmanager
 async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
     """Inicializace a cleanup serveru s typovaným kontextem."""
-    logger.info("Starting SÚKL MCP Server...")
-    client = await get_sukl_client()
+    logger.info("Starting SÚKL MCP Server v4.0 (REST API + CSV fallback)...")
 
-    # Explicitní inicializace při startu (Cold Start fix)
-    # Stáhne a načte data do paměti, aby první request nebyl pomalý
-    await client.initialize()
+    # Inicializace REST API klienta (primary)
+    api_client = await get_api_client()
+    api_health = await api_client.health_check()
+    logger.info(f"REST API health: {api_health['status']}, latency: {api_health.get('latency_ms', 'N/A')}ms")
 
-    health = await client.health_check()
-    logger.info(f"Health check: {health}")
+    # Inicializace CSV klienta (fallback)
+    csv_client = await get_sukl_client()
+    await csv_client.initialize()  # Cold Start fix
+    csv_health = await csv_client.health_check()
+    logger.info(f"CSV client health: {csv_health}")
 
     # Vrať typovaný kontext
-    yield AppContext(client=client, initialized_at=datetime.now())
+    yield AppContext(
+        client=csv_client,
+        api_client=api_client,
+        initialized_at=datetime.now(),
+    )
 
     logger.info("Shutting down SÚKL MCP Server...")
+    await close_api_client()
     await close_sukl_client()
     close_document_parser()
 
@@ -160,6 +170,68 @@ Použij search_medicine pro oba léky a get_reimbursement pro cenové údaje."""
 # === MCP Tools ===
 
 
+async def _try_rest_search(
+    query: str, limit: int, typ_seznamu: str = "dlpo"
+) -> tuple[list[dict], str] | None:
+    """
+    Pokusí se vyhledat přes REST API.
+
+    Hybrid helper: Try REST API first, return None on failure for CSV fallback.
+
+    Args:
+        query: Hledaný text
+        limit: Maximální počet výsledků
+        typ_seznamu: Typ seznamu (default: "dlpo" - dostupné léčivé přípravky)
+
+    Returns:
+        tuple[list[dict], str]: (results, "rest_api") nebo None při chybě
+    """
+    try:
+        api_client = await get_api_client()
+
+        # Search pro získání kódů
+        search_result = await api_client.search_medicines(
+            query=query, typ_seznamu=typ_seznamu, limit=limit
+        )
+
+        if not search_result.codes:
+            logger.info(f"REST API: žádné výsledky pro '{query}'")
+            return [], "rest_api"
+
+        # Batch fetch details
+        medicines = await api_client.get_medicines_batch(
+            search_result.codes[:limit], max_concurrent=5
+        )
+
+        # Convert APILecivyPripravek -> dict pro kompatibilitu
+        results = []
+        for med in medicines:
+            results.append(
+                {
+                    "kod_sukl": med.kodSUKL,
+                    "nazev": med.nazev,
+                    "doplnek": med.doplnek,
+                    "sila": med.sila,
+                    "forma": med.lekovaFormaKod,
+                    "baleni": med.baleni,
+                    "atc": med.ATCkod,
+                    "stav_registrace": med.stavRegistraceKod,
+                    "vydej": med.zpusobVydejeKod,
+                    "dostupnost": "ano" if med.jeDodavka else "ne",
+                    # Match metadata (REST API vrací exact match)
+                    "match_score": 20.0,
+                    "match_type": "exact",
+                }
+            )
+
+        logger.info(f"✅ REST API: {len(results)}/{len(search_result.codes)} results")
+        return results, "rest_api"
+
+    except (SUKLAPIError, Exception) as e:
+        logger.warning(f"⚠️  REST API search failed: {e}")
+        return None
+
+
 @mcp.tool
 async def search_medicine(
     query: str,
@@ -169,11 +241,15 @@ async def search_medicine(
     use_fuzzy: bool = True,
 ) -> SearchResponse:
     """
-    Vyhledá léčivé přípravky v databázi SÚKL s multi-level search pipeline.
+    Vyhledá léčivé přípravky v databázi SÚKL (v4.0: REST API + CSV fallback).
 
     Vyhledává podle názvu přípravku, účinné látky nebo ATC kódu s fuzzy matchingem.
 
-    Multi-level pipeline:
+    v4.0 Hybrid Mode:
+    1. PRIMARY: REST API (prehledy.sukl.cz) - real-time data
+    2. FALLBACK: CSV client - local cache
+
+    Multi-level pipeline (CSV fallback):
     1. Vyhledávání v účinné látce (dlp_slozeni)
     2. Exact match v názvu
     3. Substring match v názvu
@@ -195,17 +271,26 @@ async def search_medicine(
         - search_medicine("Paralen", only_reimbursed=True)
         - search_medicine("ibuprofn", use_fuzzy=True)  # Oprava překlepu
     """
-    client = await get_sukl_client()
     start_time = datetime.now()
 
-    # Získej výsledky s match metadaty (tuple: results, match_type)
-    raw_results, match_type = await client.search_medicines(
-        query=query,
-        limit=limit,
-        only_available=only_available,
-        only_reimbursed=only_reimbursed,
-        use_fuzzy=use_fuzzy,
-    )
+    # TRY: REST API (primary)
+    rest_result = await _try_rest_search(query, limit)
+
+    if rest_result is not None:
+        # REST API success
+        raw_results, match_type = rest_result
+    else:
+        # FALLBACK: CSV client
+        logger.info(f"🔄 Falling back to CSV for query: '{query}'")
+        client = await get_sukl_client()
+        raw_results, match_type = await client.search_medicines(
+            query=query,
+            limit=limit,
+            only_available=only_available,
+            only_reimbursed=only_reimbursed,
+            use_fuzzy=use_fuzzy,
+        )
+        match_type = f"csv_{match_type}"
 
     # Transformace na Pydantic modely
     results = []
@@ -248,12 +333,66 @@ async def search_medicine(
     )
 
 
+async def _try_rest_get_detail(sukl_code: str) -> dict | None:
+    """
+    Pokusí se získat detail přes REST API.
+
+    Hybrid helper: Try REST API first, return None on failure for CSV fallback.
+
+    Args:
+        sukl_code: SÚKL kód (7 číslic)
+
+    Returns:
+        dict s daty léčiva nebo None při chybě
+    """
+    try:
+        api_client = await get_api_client()
+
+        # Get medicine detail from REST API
+        medicine = await api_client.get_medicine(sukl_code)
+
+        if not medicine:
+            logger.info(f"REST API: medicine {sukl_code} not found")
+            return None
+
+        # Convert APILecivyPripravek → dict pro kompatibilitu
+        data = {
+            "NAZEV": medicine.nazev,
+            "DOPLNEK": medicine.doplnek,
+            "SILA": medicine.sila,
+            "FORMA": medicine.lekovaFormaKod,
+            "CESTA": medicine.cestaKod,
+            "BALENI": medicine.baleni,
+            "OBAL": medicine.obalKod,
+            "RC": medicine.registracniCislo,
+            "REG": medicine.stavRegistraceKod,
+            "DRZ": medicine.drzitelKod,
+            "ATC_WHO": medicine.ATCkod,
+            "VYDEJ": medicine.zpusobVydejeKod,
+            "DODAVKY": "1" if medicine.jeDodavka else "0",
+            "ZAV": medicine.zavislostKod,
+            "DOPING": medicine.dopingKod,
+        }
+
+        logger.info(f"✅ REST API: medicine detail for {sukl_code}")
+        return data
+
+    except (SUKLAPIError, Exception) as e:
+        logger.warning(f"⚠️  REST API get_detail failed: {e}")
+        return None
+
+
 @mcp.tool
 async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
 
     Vrací kompletní informace včetně složení, registrace, cen, úhrad a dokumentů.
+
+    v4.0: REST API + CSV fallback
+    - PRIMARY: REST API (real-time data)
+    - FALLBACK: CSV (local cache)
+    - ALWAYS: Price data from CSV (dlp_cau.csv - REST API nemá ceny)
 
     Args:
         sukl_code: SÚKL kód léčivého přípravku (7 číslic, např. "0012345")
@@ -264,22 +403,29 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     Examples:
         - get_medicine_details("0012345")
     """
-    client = await get_sukl_client()
-
     # Normalizace kódu
     sukl_code = sukl_code.strip().zfill(7)
 
-    data = await client.get_medicine_detail(sukl_code)
-    if not data:
-        return None
+    # TRY: REST API pro základní data
+    data = await _try_rest_get_detail(sukl_code)
 
-    # Helper pro získání hodnoty z CSV dat (velká písmena)
+    if data is None:
+        # FALLBACK: CSV
+        logger.info(f"🔄 Falling back to CSV for medicine: {sukl_code}")
+        csv_client = await get_sukl_client()
+        data = await csv_client.get_medicine_detail(sukl_code)
+
+        if not data:
+            return None
+
+    # Helper pro získání hodnoty z dict (velká písmena)
     def get_val(key_upper: str, default: str | None = None) -> str | None:
-        """Získej hodnotu, podporuje jak velká tal malá písmena."""
+        """Získej hodnotu, podporuje jak velká tak malá písmena."""
         return data.get(key_upper, data.get(key_upper.lower(), default))
 
-    # Získej cenové údaje z dlp_cau (EPIC 3)
-    price_info = await client.get_price_info(sukl_code)
+    # ALWAYS: Získej cenové údaje z CSV (REST API je nemá)
+    csv_client = await get_sukl_client()
+    price_info = await csv_client.get_price_info(sukl_code)
 
     return MedicineDetail(
         sukl_code=sukl_code,
@@ -436,6 +582,11 @@ async def check_availability(
     EPIC 4: Pokud je přípravek nedostupný, automaticky najde a doporučí alternativy
     se stejnou účinnou látkou nebo ve stejné ATC skupině.
 
+    v4.0: REST API + CSV fallback
+    - PRIMARY: REST API (availability check)
+    - FALLBACK: CSV (local cache)
+    - ALWAYS: CSV pro find_generic_alternatives() (REST API nemá substance search)
+
     Args:
         sukl_code: SÚKL kód přípravku
         include_alternatives: Zda zahrnout alternativy (default: True)
@@ -444,16 +595,23 @@ async def check_availability(
     Returns:
         AvailabilityInfo s informacemi o dostupnosti a alternativách
     """
-    client = await get_sukl_client()
     sukl_code = sukl_code.strip().zfill(7)
 
-    # Získej detail přípravku
-    detail = await client.get_medicine_detail(sukl_code)
-    if not detail:
-        return None
+    # TRY: REST API pro dostupnost
+    detail = await _try_rest_get_detail(sukl_code)
 
-    # Zkontroluj dostupnost pomocí normalizace
-    availability = client._normalize_availability(detail.get("DODAVKY"))
+    if detail is None:
+        # FALLBACK: CSV
+        logger.info(f"🔄 Falling back to CSV for availability check: {sukl_code}")
+        csv_client = await get_sukl_client()
+        detail = await csv_client.get_medicine_detail(sukl_code)
+
+        if not detail:
+            return None
+
+    # Zkontroluj dostupnost
+    csv_client = await get_sukl_client()
+    availability = csv_client._normalize_availability(detail.get("DODAVKY"))
 
     # Import zde pro circular dependency
     from sukl_mcp.models import AlternativeMedicine, AvailabilityStatus
@@ -520,6 +678,18 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
     POZNÁMKA: Skutečný doplatek se může lišit podle konkrétní pojišťovny
     a bonusových programů lékáren.
 
+    v4.0: PURE CSV (REST API nemá cenová data)
+    - REST API **DOES NOT** provide price/reimbursement data
+    - dlp_cau.csv is the **ONLY source** for pricing information
+    - Optional REST API usage for medicine name only (faster)
+
+    CRITICAL LIMITATION:
+    SÚKL REST API endpoint '/dlp/v1/lecive-pripravky/{kod}' does NOT include
+    fields for max_price, reimbursement_amount, or patient_copay. These data
+    are only available in CSV file 'dlp_cau.csv' (cenové a úhradové údaje).
+
+    Future (v4.1+): Consider background CSV sync → cache for hybrid mode.
+
     Args:
         sukl_code: SÚKL kód přípravku (7 číslic, např. "0012345")
 
@@ -529,22 +699,37 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
     Examples:
         - get_reimbursement("0012345")
     """
-    client = await get_sukl_client()
     sukl_code = sukl_code.strip().zfill(7)
 
-    # Získej základní informace o léčivu
-    detail = await client.get_medicine_detail(sukl_code)
-    if not detail:
-        return None
+    # OPTIONAL: REST API pro název léčiva (rychlejší než CSV)
+    medicine_name = ""
+    try:
+        api_client = await get_api_client()
+        medicine = await api_client.get_medicine(sukl_code)
+        if medicine:
+            medicine_name = medicine.nazev
+            logger.info(f"✅ REST API: medicine name for {sukl_code}")
+    except (SUKLAPIError, Exception) as e:
+        logger.debug(f"REST API name fetch failed: {e}, using CSV")
+        pass  # Fallback na CSV název
 
-    # Získej cenové a úhradové informace z dlp_cau
-    price_info = await client.get_price_info(sukl_code)
+    # ALWAYS: Získej základní informace a cenové údaje z CSV
+    csv_client = await get_sukl_client()
+
+    if not medicine_name:
+        detail = await csv_client.get_medicine_detail(sukl_code)
+        if not detail:
+            return None
+        medicine_name = detail.get("NAZEV", "")
+
+    # ALWAYS: Cenové a úhradové informace z dlp_cau (REST API je nemá)
+    price_info = await csv_client.get_price_info(sukl_code)
 
     # Sestavení response
     if price_info:
         return ReimbursementInfo(
             sukl_code=sukl_code,
-            medicine_name=detail.get("NAZEV", ""),
+            medicine_name=medicine_name,
             is_reimbursed=price_info.get("is_reimbursed", False),
             reimbursement_group=price_info.get("indication_group"),
             max_producer_price=price_info.get("max_price"),
@@ -559,7 +744,7 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
         # Fallback pokud nejsou cenová data
         return ReimbursementInfo(
             sukl_code=sukl_code,
-            medicine_name=detail.get("NAZEV", ""),
+            medicine_name=medicine_name,
             is_reimbursed=False,
             reimbursement_group=None,
             max_producer_price=None,

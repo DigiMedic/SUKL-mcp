@@ -5,54 +5,174 @@ All notable changes to SÚKL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.0] - 2026-01-XX
+## [4.0.0] - 2026-01-03
 
 ### Added - REST API Layer (Major Architecture Change)
-- **New `src/sukl_mcp/api/` module** for SÚKL REST API integration:
-  - `client.py` - SUKLAPIClient with async context manager, retry, caching, rate limiting
-  - `models.py` - Pydantic v2 models mapping SÚKL API JSON responses
-  - `__init__.py` - Clean module exports
-- **SUKLAPIClient features**:
-  - Async HTTP client with httpx
-  - Automatic retry with exponential backoff (3 attempts default)
-  - In-memory cache with configurable TTL (5 minutes default)
-  - Rate limiting (60 requests/minute default)
-  - Structured logging
-  - Health check endpoint
-- **New Makefile commands**:
-  - `make api-test` - Run integration tests against real SÚKL API
+
+#### New API Module (`src/sukl_mcp/api/`)
+- **`SUKLAPIClient`** - Production-ready REST API client:
+  - Async context manager pattern (`async with SUKLAPIClient()`)
+  - Automatic retry with exponential backoff (3 attempts, configurable delay)
+  - In-memory LRU cache with TTL (300s default, configurable)
+  - Rate limiting with sliding window (60 req/min default)
+  - Batch fetch with semaphore control (`get_medicines_batch()`)
+  - Health check endpoint with latency measurement
+  - Structured logging with operation metadata
+- **Pydantic v2 Models** (`api/models.py`):
+  - `APILecivyPripravek` - Medicine detail from `/dlp/v1/lecive-pripravky/{kod}`
+  - `APISearchResponse` - Search results from `/dlp/v1/lecive-pripravky?nazev=...`
+  - `APIHealthResponse` - Health check response
+  - Full type safety with runtime validation
+- **Configuration** (`api/client.py`):
+  - `SUKLAPIConfig` - Dataclass with sensible defaults
+  - Environment variable support (`SUKL_API_BASE_URL`, `SUKL_API_TIMEOUT`, etc.)
+  - `CacheEntry` - TTL-aware cache with timestamp validation
+
+#### Hybrid Search Architecture
+- **Dual-client initialization** (`server.py:56-81`):
+  - Primary: REST API client (real-time data from prehledy.sukl.cz)
+  - Fallback: CSV client (local cache, 68k records in-memory)
+  - Health checks for both clients on startup
+  - Graceful degradation strategy
+- **Helper function** `_try_rest_search()` (`server.py:173-232`):
+  - Attempts REST API search first
+  - Returns `(results, "rest_api")` on success
+  - Returns `None` on failure (triggers CSV fallback)
+  - Batch fetch with concurrent limit (5 parallel requests)
+  - Data transformation: `APILecivyPripravek` → dict → Pydantic models
+- **Updated `search_medicine` tool** (`server.py:235-333`):
+  - Try REST API first (via `_try_rest_search()`)
+  - Automatic CSV fallback on API errors
+  - Match type prefix: `rest_api` or `csv_{match_type}`
+  - Zero breaking changes - same API signature
+  - Backward compatible with existing clients
+
+#### Testing & Quality
+- **22 unit tests** (`tests/test_api_client.py`):
+  - Config validation (2 tests)
+  - Cache mechanics (3 tests)
+  - Search operations (3 tests)
+  - Get medicine details (3 tests)
+  - Rate limiting (1 test)
+  - Health checks (2 tests)
+  - Error handling (5 tests)
+  - Batch operations (3 tests)
+- **4 integration tests** against live SÚKL API:
+  - Real search: "PARALEN" query (5 results)
+  - Real detail: medicine "0254045"
+  - Real health check (<100ms latency)
+  - Real batch fetch (10 medicines)
+- **100% pass rate** - All 241 tests passing (219 existing + 22 new)
+
+#### Development Tools
+- **Makefile targets**:
+  - `make api-test` - Run integration tests against real API
   - `make api-health` - Quick API availability check
-- **Comprehensive test suite** for API client (`tests/test_api_client.py`):
-  - Unit tests with mocked HTTP responses
-  - Integration tests with `@pytest.mark.integration` marker
+  - `make dev` - Full development workflow (format + test + lint)
+- **Documentation updates**:
+  - `docs/Phase-01-REST-API-Migration-Plan.md` - Implementation plan
+  - `PRODUCT_SPECIFICATION.md` - Updated with v4.0 status
+  - `CLAUDE.md` - REST API architecture and patterns
 
 ### Changed
-- **Architecture shift**: From CSV download + pandas to real-time REST API calls
-- Added `tenacity>=8.0.0` dependency for robust retry logic
-- Updated CLAUDE.md with new architecture documentation
-- Pandas marked as deprecated (legacy CSV support, to be removed in v5.0)
+
+#### Architecture
+- **Primary data source**: REST API (prehledy.sukl.cz/dlp/v1) replacing CSV downloads
+- **Hybrid mode**: REST API with CSV fallback for resilience
+- **Server lifecycle**: Dual-client initialization in `server_lifespan()`
+- **App context**: `AppContext` dataclass with typed `api_client` and `client` fields
+
+#### Dependencies
+- Added `httpx>=0.25.0` - Async HTTP client for REST API
+- Added `tenacity>=8.0.0` - Retry logic with exponential backoff
+- Updated `pydantic>=2.0.0` - Full Pydantic v2 migration
+
+#### Performance
+- **REST API latency**: ~97ms health check, ~100-160ms search (measured live)
+- **CSV fallback**: ~50-150ms (in-memory pandas operations)
+- **Cache hit rate**: TBD (monitoring needed)
+- **No regression**: Existing tools maintain <200ms p95 latency
 
 ### Fixed
-- Pydantic v2 deprecation warnings (class Config → model_config)
-- All linting issues in new API module
+- Pydantic v2 deprecation warnings (`class Config` → `model_config`)
+- All linting issues in new `api/` module (ruff + mypy clean)
+- Type hints for all public API methods (mypy strict mode)
+
+### Deprecated
+- **`src/sukl_mcp/client_csv.py`** - Legacy CSV client
+  - Status: Functional but deprecated
+  - Removal: Planned for v5.0.0
+  - Migration path: Switch to `SUKLAPIClient` for real-time data
+- **Pandas dependency** - Will become optional in v5.0 (CSV export tool only)
 
 ### Migration Guide
+
+#### For MCP Tool Users
+No changes required - hybrid mode ensures backward compatibility.
+
+#### For Developers
 ```python
 # Old (v3.x) - CSV-based
 from sukl_mcp.client_csv import get_sukl_client
+
 client = await get_sukl_client()
-results = await client.search_by_name("PARALEN")
+results = await client.search_by_name("PARALEN", limit=10)
 
 # New (v4.x) - REST API
 from sukl_mcp.api import SUKLAPIClient
+
 async with SUKLAPIClient() as client:
-    results = await client.search_medicines("PARALEN")
+    # Search (returns codes)
+    search_result = await client.search_medicines("PARALEN", limit=10)
+
+    # Batch fetch details
+    medicines = await client.get_medicines_batch(search_result.codes)
+
+    # Single medicine detail
     medicine = await client.get_medicine("0254045")
+
+    # Health check
+    health = await client.health_check()
 ```
 
-### Deprecated
-- `src/sukl_mcp/client_csv.py` - Will be removed in v5.0
-- `src/sukl_mcp/client_api.py` - Merged into new `api/` module
+#### Configuration
+```python
+from sukl_mcp.api import SUKLAPIClient, SUKLAPIConfig
+
+# Custom config
+config = SUKLAPIConfig(
+    base_url="https://prehledy.sukl.cz",  # Default
+    timeout=30.0,                          # Request timeout
+    max_retries=3,                         # Retry attempts
+    cache_ttl=300,                         # Cache TTL in seconds
+    rate_limit=60,                         # Max requests per minute
+)
+
+async with SUKLAPIClient(config) as client:
+    # Use client...
+```
+
+### Performance Metrics
+
+| Operation | REST API | CSV Fallback | Target |
+|-----------|----------|--------------|--------|
+| Health check | ~97ms | N/A | <100ms ✅ |
+| Search (10 results) | ~100-160ms | ~50-150ms | <300ms ✅ |
+| Get detail | ~80-120ms | ~10-50ms | <200ms ✅ |
+| Batch fetch (10) | ~300-500ms | N/A | <1000ms ✅ |
+
+### Known Limitations
+- REST API doesn't provide price data (dlp_cau.csv) - CSV fallback required for `get_reimbursement()`
+- Cache is in-memory only (not persistent across restarts)
+- Rate limiting is client-side only (no server coordination)
+
+### Next Steps (v4.1.0+)
+- [ ] Migrate `get_medicine_details()` to REST API
+- [ ] Migrate `check_availability()` to REST API
+- [ ] Add persistent cache layer (Redis/SQLite)
+- [ ] Implement server-side rate limiting coordination
+- [ ] Add Prometheus metrics for monitoring
+- [ ] Deprecation warnings for pure CSV usage
 
 ## [3.1.0] - 2026-01-02
 

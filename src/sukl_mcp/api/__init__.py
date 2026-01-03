@@ -14,7 +14,12 @@ Použití:
         detail = await client.get_medicine("0254045")
 """
 
-from sukl_mcp.api.client import SUKLAPIClient, SUKLAPIConfig
+from sukl_mcp.api.client import (
+    SUKLAPIClient,
+    SUKLAPIConfig,
+    close_api_client,
+    get_api_client,
+)
 from sukl_mcp.api.models import (
     APICena,
     APILecivyPripravek,
@@ -25,6 +30,8 @@ from sukl_mcp.api.models import (
 __all__ = [
     "SUKLAPIClient",
     "SUKLAPIConfig",
+    "get_api_client",
+    "close_api_client",
     "APILecivyPripravek",
     "APISearchResponse",
     "APICena",

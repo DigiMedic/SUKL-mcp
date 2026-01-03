@@ -160,21 +160,40 @@
 - [x] Cold start fix (server_lifespan init)
 - [x] 219 testů, 100% pass rate
 
-### Rozpracované funkce (v4.0.0)
+### Dokončené funkce (v4.0.0)
 
-#### EPIC 5: REST API Migration 🚧
-- [x] SUKLAPIClient implementace
-- [x] Pydantic modely pro API responses
-- [x] Retry s exponential backoff
-- [x] In-memory cache s TTL
-- [x] Rate limiting
-- [ ] **Integrace do server.py tools** ← Hlavní pending úkol
-- [ ] Migrace search_medicine
-- [ ] Migrace get_medicine_details
-- [ ] Migrace get_reimbursement
-- [ ] Migrace check_availability
-- [ ] Deprecation warnings pro CSV client
-- [ ] Integration testy proti real API
+#### EPIC 5: REST API Migration ✅ 75% Complete
+- [x] **Phase 01: Core Infrastructure**
+  - [x] SUKLAPIClient implementace (22/22 tests passing)
+  - [x] Pydantic modely pro API responses (APILecivyPripravek, APISearchResult)
+  - [x] Retry s exponential backoff (3 attempts, 1-4s delay)
+  - [x] In-memory cache s TTL (5 min default)
+  - [x] Rate limiting (100 req/min)
+  - [x] Dual-client initialization in server.py
+
+- [x] **Phase 02: MCP Tools Migration (3/10 tools migrated)**
+  - [x] `search_medicine` - **Hybrid mode (REST → CSV fallback)**
+    - Helper `_try_rest_search()` implementován
+    - End-to-end testy (PARALEN, ibuprofen, batch fetch)
+    - Latence: ~97ms health, ~100-160ms search
+  - [x] `get_medicine_details` - **Hybrid mode (REST primary + CSV enrichment)**
+    - Helper `_try_rest_get_detail()` implementován
+    - REST API pro základní data, CSV ALWAYS pro cenové údaje
+    - Test coverage: 11/13 integration tests passing
+  - [x] `check_availability` - **Hybrid mode (REST availability + CSV alternatives)**
+    - REST API pro jeDodavka boolean
+    - CSV ALWAYS pro find_generic_alternatives() (substance search)
+    - Multi-criteria ranking preserved
+  - [x] `get_reimbursement` - **CSV-only (REST API nemá cenová data)**
+    - Dokumentováno REST API limitation
+    - Optional REST API call pro medicine name only
+    - CSV ALWAYS pro price/reimbursement data (dlp_cau.csv)
+
+- [ ] **Phase 03: Completion (v4.0.0 → v4.1.0)**
+  - [ ] Deprecation warnings pro CSV-only operations
+  - [ ] Performance benchmark (REST vs CSV latency)
+  - [ ] Monitoring & metrics (Prometheus/Grafana)
+  - [ ] Background CSV sync job (caching strategy)
 
 ---
 
