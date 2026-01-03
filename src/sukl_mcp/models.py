@@ -221,3 +221,27 @@ class SearchResponse(BaseModel):
     match_type: str | None = Field(
         None, description="Typ matchování: substance/exact/substring/fuzzy/none"
     )
+
+
+class ATCChild(BaseModel):
+    """Potomek ATC skupiny."""
+
+    code: str = Field(..., description="ATC kód podskupiny")
+    name: str = Field(..., description="Název podskupiny")
+
+
+class ATCInfo(BaseModel):
+    """Informace o ATC (anatomicko-terapeuticko-chemické) skupině."""
+
+    code: str = Field(..., description="ATC kód skupiny (1-7 znaků)")
+    name: str = Field(..., description="Název ATC skupiny")
+    level: int = Field(
+        ...,
+        ge=1,
+        le=5,
+        description="Úroveň v ATC hierarchii (1=anatomická, 5=chemická látka)",
+    )
+    children: list[ATCChild] = Field(
+        default_factory=list, description="Seznam podskupin (max 20)"
+    )
+    total_children: int = Field(0, description="Celkový počet podskupin")
