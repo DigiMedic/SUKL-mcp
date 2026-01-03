@@ -735,28 +735,26 @@ async def get_atc_info(atc_code: str, ctx: Context = None) -> ATCInfo:
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
 
     # Najdi konkrétní skupinu
+    # DŮLEŽITÉ: ATC tabulka má sloupce 'ATC' a 'NAZEV' (ne 'kod')
     target = None
     children: list[ATCChild] = []
 
     for group in groups:
-        code = group.get("kod", group.get("KOD", ""))
+        code = group.get("ATC", "")  # Sloupec v dlp_atc.csv
+        name = group.get("NAZEV", "")  # Sloupec v dlp_atc.csv
         if code == atc_code:
             target = group
         elif code.startswith(atc_code) and len(code) > len(atc_code):
             children.append(
                 ATCChild(
                     code=code,
-                    name=group.get("nazev", group.get("NAZEV", "")),
+                    name=name,
                 )
             )
 
     return ATCInfo(
         code=atc_code,
-        name=(
-            target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
-            if target
-            else "Neznámá skupina"
-        ),
+        name=target.get("NAZEV", "Neznámá skupina") if target else "Neznámá skupina",
         level=min(len(atc_code), 5),
         children=children[:20],
         total_children=len(children),
@@ -802,10 +800,11 @@ async def get_top_level_atc_groups() -> dict:
     groups = await client.get_atc_groups(None)
 
     # Filtruj pouze top-level skupiny (1 znak)
+    # DŮLEŽITÉ: ATC tabulka má sloupce 'ATC' a 'NAZEV'
     top_level = [
-        {"code": g.get("kod", g.get("KOD", "")), "name": g.get("nazev", g.get("NAZEV", ""))}
+        {"code": g.get("ATC", ""), "name": g.get("NAZEV", "")}
         for g in groups
-        if len(g.get("kod", g.get("KOD", ""))) == 1
+        if len(g.get("ATC", "")) == 1
     ]
 
     return {
@@ -910,28 +909,26 @@ async def get_atc_resource(atc_code: str) -> ATCInfo:
 
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
 
+    # DŮLEŽITÉ: ATC tabulka má sloupce 'ATC' a 'NAZEV' (ne 'kod')
     target = None
     children: list[ATCChild] = []
 
     for group in groups:
-        code = group.get("kod", group.get("KOD", ""))
+        code = group.get("ATC", "")  # Sloupec v dlp_atc.csv
+        name = group.get("NAZEV", "")  # Sloupec v dlp_atc.csv
         if code == atc_code:
             target = group
         elif code.startswith(atc_code) and len(code) > len(atc_code):
             children.append(
                 ATCChild(
                     code=code,
-                    name=group.get("nazev", group.get("NAZEV", "")),
+                    name=name,
                 )
             )
 
     return ATCInfo(
         code=atc_code,
-        name=(
-            target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
-            if target
-            else "Neznámá skupina"
-        ),
+        name=target.get("NAZEV", "Neznámá skupina") if target else "Neznámá skupina",
         level=min(len(atc_code), 5),
         children=children[:20],
         total_children=len(children),
