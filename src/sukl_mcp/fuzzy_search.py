@@ -178,7 +178,7 @@ class FuzzyMatcher:
             return []
 
         # Získej KOD_LATKY pro matching látky
-        substance_codes = matching_substances["KOD"].unique()
+        substance_codes = matching_substances["KOD_LATKY"].unique()
 
         # Najdi složení obsahující tyto látky
         composition_mask = df_composition["KOD_LATKY"].isin(substance_codes)

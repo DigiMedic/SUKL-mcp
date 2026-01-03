@@ -22,6 +22,8 @@ from sukl_mcp.client_csv import SUKLClient, close_sukl_client, get_sukl_client
 from sukl_mcp.document_parser import close_document_parser, get_document_parser
 from sukl_mcp.exceptions import SUKLDocumentError, SUKLParseError
 from sukl_mcp.models import (
+    ATCChild,
+    ATCInfo,
     AvailabilityInfo,
     MedicineDetail,
     MedicineSearchResult,
@@ -105,7 +107,10 @@ mcp.add_middleware(LoggingMiddleware())  # Logování requestů
 # Předdefinované šablony pro běžné dotazy
 
 
-@mcp.prompt
+@mcp.prompt(
+    tags={"alternatives", "search", "patient"},
+    title="Hledání alternativy k léčivu",
+)
 def find_alternative_prompt(medicine_name: str) -> str:
     """
     Vytvoří dotaz pro nalezení alternativy k léčivu.
@@ -122,7 +127,10 @@ Požadavky:
 Použij nástroj search_medicine pro vyhledání a check_availability pro ověření dostupnosti."""
 
 
-@mcp.prompt
+@mcp.prompt(
+    tags={"info", "detail", "overview"},
+    title="Kompletní informace o léčivu",
+)
 def check_medicine_info_prompt(medicine_name: str) -> str:
     """
     Vytvoří dotaz pro získání kompletních informací o léčivu.
@@ -140,7 +148,10 @@ Zjisti:
 Použij nástroje search_medicine, get_medicine_details a get_reimbursement."""
 
 
-@mcp.prompt
+@mcp.prompt(
+    tags={"comparison", "analysis", "pricing"},
+    title="Porovnání dvou léčiv",
+)
 def compare_medicines_prompt(medicine1: str, medicine2: str) -> str:
     """
     Vytvoří dotaz pro porovnání dvou léčiv.
@@ -697,7 +708,7 @@ async def find_pharmacies(
     tags={"classification", "atc"},
     annotations={"readOnlyHint": True},
 )
-async def get_atc_info(atc_code: str, ctx: Context = None) -> dict:
+async def get_atc_info(atc_code: str, ctx: Context = None) -> ATCInfo:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.
 
@@ -708,7 +719,7 @@ async def get_atc_info(atc_code: str, ctx: Context = None) -> dict:
         atc_code: ATC kód (1-7 znaků, např. 'N', 'N02', 'N02BE01')
 
     Returns:
-        Informace o ATC skupině včetně podskupin
+        ATCInfo s informacemi o ATC skupině včetně podskupin
 
     Examples:
         - get_atc_info("N") - Léčiva nervového systému
@@ -719,31 +730,37 @@ async def get_atc_info(atc_code: str, ctx: Context = None) -> dict:
         await ctx.info(f"Načítám ATC skupinu: {atc_code}")
 
     client = await get_sukl_client()
+    atc_code = atc_code.upper().strip()
 
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
 
     # Najdi konkrétní skupinu
     target = None
-    children = []
+    children: list[ATCChild] = []
 
     for group in groups:
         code = group.get("kod", group.get("KOD", ""))
         if code == atc_code:
             target = group
         elif code.startswith(atc_code) and len(code) > len(atc_code):
-            children.append({"code": code, "name": group.get("nazev", group.get("NAZEV", ""))})
+            children.append(
+                ATCChild(
+                    code=code,
+                    name=group.get("nazev", group.get("NAZEV", "")),
+                )
+            )
 
-    return {
-        "code": atc_code,
-        "name": (
+    return ATCInfo(
+        code=atc_code,
+        name=(
             target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
             if target
             else "Neznámá skupina"
         ),
-        "level": len(atc_code) if len(atc_code) <= 5 else 5,
-        "children": children[:20],
-        "total_children": len(children),
-    }
+        level=min(len(atc_code), 5),
+        children=children[:20],
+        total_children=len(children),
+    )
 
 
 # === MCP Resources (Best Practice) ===
@@ -879,7 +896,7 @@ async def get_medicine_resource(sukl_code: str) -> dict:
     tags={"classification", "atc"},
     annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_atc_resource(atc_code: str) -> dict:
+async def get_atc_resource(atc_code: str) -> ATCInfo:
     """
     ATC skupina jako resource (bez volání tool).
 
@@ -894,29 +911,31 @@ async def get_atc_resource(atc_code: str) -> dict:
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
 
     target = None
-    children = []
+    children: list[ATCChild] = []
 
     for group in groups:
         code = group.get("kod", group.get("KOD", ""))
         if code == atc_code:
             target = group
         elif code.startswith(atc_code) and len(code) > len(atc_code):
-            children.append({
-                "code": code,
-                "name": group.get("nazev", group.get("NAZEV", "")),
-            })
+            children.append(
+                ATCChild(
+                    code=code,
+                    name=group.get("nazev", group.get("NAZEV", "")),
+                )
+            )
 
-    return {
-        "code": atc_code,
-        "name": (
+    return ATCInfo(
+        code=atc_code,
+        name=(
             target.get("nazev", target.get("NAZEV", "Neznámá skupina"))
             if target
             else "Neznámá skupina"
         ),
-        "level": len(atc_code) if len(atc_code) <= 5 else 5,
-        "children": children[:20],
-        "total_children": len(children),
-    }
+        level=min(len(atc_code), 5),
+        children=children[:20],
+        total_children=len(children),
+    )
 
 
 # === Entry point ===

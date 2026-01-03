@@ -1,0 +1,44 @@
+{
+  "mcpServers": {
+    "sukl": {
+      "command": "python",
+      "args": ["-m", "sukl_mcp"],
+      "env": {
+        "PYTHONPATH": "/Users/YOURUSER/Desktop/Develope/personal/SUKL-mcp/src",
+        "SUKL_LOG_LEVEL": "INFO"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/YOURUSER/Desktop"],
+      "env": {}
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"],
+      "env": {}
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "xoxb-YOUR-TOKEN-HERE",
+        "SLACK_TEAM_ID": "YOUR-TEAM-ID"
+      }
+    }
+  }
+}
