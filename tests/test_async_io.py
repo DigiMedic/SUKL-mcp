@@ -80,10 +80,10 @@ class TestAsyncIOBehavior:
     @pytest.mark.asyncio
     async def test_zip_extraction_is_async(self):
         """_extract_zip() by měl být async a neblokovat event loop."""
-        from sukl_mcp.client_csv import SUKLConfig, SUKLDataLoader
+        from sukl_mcp.client_csv import SUKLConfig, SUKLDataFetcher
 
         config = SUKLConfig()
-        loader = SUKLDataLoader(config)
+        loader = SUKLDataFetcher(config)
 
         # Mock zipfile.ZipFile aby nemusel existovat skutečný ZIP
         mock_zip = MagicMock()
@@ -109,10 +109,10 @@ class TestAsyncIOBehavior:
     @pytest.mark.asyncio
     async def test_csv_loading_is_parallel(self):
         """_load_csvs() by měl načítat CSV soubory paralelně."""
-        from sukl_mcp.client_csv import SUKLConfig, SUKLDataLoader
+        from sukl_mcp.client_csv import SUKLConfig, SUKLDataFetcher
 
         config = SUKLConfig()
-        loader = SUKLDataLoader(config)
+        loader = SUKLDataFetcher(config)
 
         # Mock csv files existence
         with patch.object(Path, "exists", return_value=True):
@@ -156,10 +156,10 @@ class TestZipBombProtection:
     @pytest.mark.asyncio
     async def test_zip_bomb_detection(self):
         """Příliš velký ZIP by měl být odmítnut."""
-        from sukl_mcp.client_csv import SUKLConfig, SUKLDataLoader
+        from sukl_mcp.client_csv import SUKLConfig, SUKLDataFetcher
 
         config = SUKLConfig()
-        loader = SUKLDataLoader(config)
+        loader = SUKLDataFetcher(config)
 
         # Mock velmi velký ZIP (6 GB)
         mock_zip = MagicMock()
@@ -174,10 +174,10 @@ class TestZipBombProtection:
     @pytest.mark.asyncio
     async def test_acceptable_zip_size(self):
         """ZIP do 5 GB by měl projít."""
-        from sukl_mcp.client_csv import SUKLConfig, SUKLDataLoader
+        from sukl_mcp.client_csv import SUKLConfig, SUKLDataFetcher
 
         config = SUKLConfig()
-        loader = SUKLDataLoader(config)
+        loader = SUKLDataFetcher(config)
 
         # Mock přijatelně velký ZIP (200 MB)
         mock_zip = MagicMock()
