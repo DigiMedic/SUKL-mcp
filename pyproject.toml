@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sukl-mcp-server"
-version = "3.1.0"
-description = "Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL (68,248 záznamů)"
+version = "4.0.0"
+description = "Production-ready FastMCP server s REST API pro přístup k české databázi léčivých přípravků SÚKL v reálném čase"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
@@ -45,6 +45,9 @@ dependencies = [
     "fastmcp>=2.14.0,<3.0.0",
     "httpx>=0.27.0",
     "pydantic>=2.0.0",
+    # REST API layer
+    "tenacity>=8.0.0,<10.0.0",    # Retry with exponential backoff
+    # Legacy CSV support (deprecated, will be removed in v5.0)
     "pandas>=2.0.0",
     # EPIC 1: Content Extractor
     "pypdf>=4.0.0,<6.0.0",        # PDF text extraction

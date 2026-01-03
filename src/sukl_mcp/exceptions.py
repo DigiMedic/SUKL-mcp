@@ -13,6 +13,12 @@ class SUKLValidationError(SUKLException):
     pass
 
 
+class SUKLAPIError(SUKLException):
+    """Chyba při komunikaci s SÚKL REST API."""
+
+    pass
+
+
 class SUKLZipBombError(SUKLException):
     """ZIP bomb detekována - příliš velký soubor."""
 

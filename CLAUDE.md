@@ -4,7 +4,30 @@ Tento soubor poskytuje pokyny pro Claude Code (claude.ai/code) při práci s kó
 
 ## Přehled projektu
 
-**SÚKL MCP Server** - Produkční FastMCP server poskytující AI agentům přístup k české databázi léčivých přípravků (68,248 záznamů). Implementuje Model Context Protocol s 7 specializovanými nástroji pro vyhledávání léčiv, získávání detailů, kontrolu dostupnosti a práci s farmaceutickými daty.
+**SÚKL MCP Server** - Produkční FastMCP server poskytující AI agentům přístup k české databázi léčivých přípravků v reálném čase prostřednictvím SÚKL REST API. Implementuje Model Context Protocol s 7+ specializovanými nástroji pro vyhledávání léčiv, získávání detailů, kontrolu dostupnosti a práci s farmaceutickými daty.
+
+### Verze 4.0 - Architektura s REST API
+
+**Nová architektura** (v4.0+):
+```
+AI Agent → FastMCP Server → SUKLAPIClient → SÚKL REST API (prehledy.sukl.cz)
+```
+
+**Legacy architektura** (deprecated, bude odstraněna v v5.0):
+```
+AI Agent → FastMCP Server → SUKLClient (CSV) → pandas DataFrames → SÚKL Open Data (ZIP/CSV)
+```
+
+### SÚKL REST API Endpointy
+
+| Endpoint | Popis |
+|----------|-------|
+| `GET /dlp/v1/lecive-pripravky?nazev={query}&typSeznamu=dlpo` | Vyhledávání léčiv (vrací SÚKL kódy) |
+| `GET /dlp/v1/lecive-pripravky/{kodSUKL}` | Detail léčiva |
+| `GET /dlp/v1/lekarny` | Seznam lékáren |
+| `GET /dlp/v1/distributori` | Seznam distributorů |
+
+**Důležité**: Parametr `typSeznamu` je povinný! Hodnoty: `dlpo`, `scau`, `scup`, `sneh`, `splp`, `vpois`
 
 ## Klíčové vývojové příkazy
 
@@ -72,7 +95,52 @@ make clean  # Vyčistí __pycache__, .pytest_cache, .mypy_cache, atd.
 
 ## Architektura projektu
 
-### Vícevrstvý design
+### REST API vrstva (v4.0+ - doporučeno)
+
+**`src/sukl_mcp/api/`** - Nový REST API modul
+
+```
+api/
+├── __init__.py      # Exporty: SUKLAPIClient, SUKLAPIConfig, models
+├── client.py        # Async HTTP klient s retry, cache, rate limiting
+└── models.py        # Pydantic modely pro API responses
+```
+
+**`SUKLAPIClient`** (`api/client.py`) - Hlavní klient pro komunikaci s REST API:
+- Retry s exponential backoff (max 3 pokusy)
+- In-memory cache s TTL (výchozí 5 minut)
+- Rate limiting (60 req/min)
+- Structured logging
+- Async context manager pattern
+
+**Použití:**
+```python
+from sukl_mcp.api import SUKLAPIClient, SUKLAPIConfig
+
+async with SUKLAPIClient() as client:
+    # Vyhledávání
+    result = await client.search_medicines("PARALEN", limit=10)
+    
+    # Detail
+    medicine = await client.get_medicine("0254045")
+    
+    # Health check
+    status = await client.health_check()
+```
+
+**Konfigurace:**
+```python
+config = SUKLAPIConfig(
+    base_url="https://prehledy.sukl.cz",  # Výchozí
+    timeout=30.0,                          # Timeout pro request
+    max_retries=3,                         # Počet retry pokusů
+    cache_ttl=300,                         # Cache TTL v sekundách
+    rate_limit=60,                         # Max requestů za minutu
+)
+client = SUKLAPIClient(config)
+```
+
+### Legacy CSV vrstva (deprecated)
 
 ```
 AI Agent → FastMCP Server → SUKLClient → pandas DataFrames → SÚKL Open Data (CSV)

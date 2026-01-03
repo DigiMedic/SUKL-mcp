@@ -5,6 +5,55 @@ All notable changes to SÚKL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-01-XX
+
+### Added - REST API Layer (Major Architecture Change)
+- **New `src/sukl_mcp/api/` module** for SÚKL REST API integration:
+  - `client.py` - SUKLAPIClient with async context manager, retry, caching, rate limiting
+  - `models.py` - Pydantic v2 models mapping SÚKL API JSON responses
+  - `__init__.py` - Clean module exports
+- **SUKLAPIClient features**:
+  - Async HTTP client with httpx
+  - Automatic retry with exponential backoff (3 attempts default)
+  - In-memory cache with configurable TTL (5 minutes default)
+  - Rate limiting (60 requests/minute default)
+  - Structured logging
+  - Health check endpoint
+- **New Makefile commands**:
+  - `make api-test` - Run integration tests against real SÚKL API
+  - `make api-health` - Quick API availability check
+- **Comprehensive test suite** for API client (`tests/test_api_client.py`):
+  - Unit tests with mocked HTTP responses
+  - Integration tests with `@pytest.mark.integration` marker
+
+### Changed
+- **Architecture shift**: From CSV download + pandas to real-time REST API calls
+- Added `tenacity>=8.0.0` dependency for robust retry logic
+- Updated CLAUDE.md with new architecture documentation
+- Pandas marked as deprecated (legacy CSV support, to be removed in v5.0)
+
+### Fixed
+- Pydantic v2 deprecation warnings (class Config → model_config)
+- All linting issues in new API module
+
+### Migration Guide
+```python
+# Old (v3.x) - CSV-based
+from sukl_mcp.client_csv import get_sukl_client
+client = await get_sukl_client()
+results = await client.search_by_name("PARALEN")
+
+# New (v4.x) - REST API
+from sukl_mcp.api import SUKLAPIClient
+async with SUKLAPIClient() as client:
+    results = await client.search_medicines("PARALEN")
+    medicine = await client.get_medicine("0254045")
+```
+
+### Deprecated
+- `src/sukl_mcp/client_csv.py` - Will be removed in v5.0
+- `src/sukl_mcp/client_api.py` - Merged into new `api/` module
+
 ## [3.1.0] - 2026-01-02
 
 ### Performance Improvements
