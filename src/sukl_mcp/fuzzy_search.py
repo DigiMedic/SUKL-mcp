@@ -9,6 +9,7 @@ Implementuje multi-level search pipeline:
 
 import asyncio
 import logging
+from typing import Any, cast
 
 import pandas as pd
 from rapidfuzz import fuzz, process
@@ -168,7 +169,7 @@ class FuzzyMatcher:
         df_composition: pd.DataFrame,
         df_substances: pd.DataFrame,
         limit: int,
-    ) -> list[dict]:
+    ) -> list[dict[Any, Any]]:
         """Vyhledej podle účinné látky."""
         # Najdi účinné látky obsahující query
         mask = df_substances["NAZEV"].str.contains(query, case=False, na=False, regex=False)
@@ -205,7 +206,8 @@ class FuzzyMatcher:
         results_df = results_df.sort_values("_score", ascending=False)
 
         # Limit a konverze
-        results = results_df.head(limit).to_dict("records")
+        records = results_df.head(limit).to_dict("records")
+        results: list[dict[Any, Any]] = cast(list[dict[Any, Any]], records)
 
         # Přidej match metadata
         for result in results:
@@ -219,7 +221,7 @@ class FuzzyMatcher:
         query: str,
         df_medicines: pd.DataFrame,
         limit: int,
-    ) -> list[dict]:
+    ) -> list[dict[Any, Any]]:
         """Exact match v názvu."""
         mask = df_medicines["NAZEV"].str.lower() == query
         results_df = df_medicines[mask]
@@ -238,7 +240,8 @@ class FuzzyMatcher:
         results_df = results_df.sort_values("_score", ascending=False)
 
         # Limit a konverze
-        results = results_df.head(limit).to_dict("records")
+        records = results_df.head(limit).to_dict("records")
+        results: list[dict[Any, Any]] = cast(list[dict[Any, Any]], records)
 
         # Přidej match metadata
         for result in results:
@@ -252,7 +255,7 @@ class FuzzyMatcher:
         query: str,
         df_medicines: pd.DataFrame,
         limit: int,
-    ) -> list[dict]:
+    ) -> list[dict[Any, Any]]:
         """Substring match v názvu."""
         mask = df_medicines["NAZEV"].str.contains(query, case=False, na=False, regex=False)
         results_df = df_medicines[mask]
@@ -271,7 +274,8 @@ class FuzzyMatcher:
         results_df = results_df.sort_values("_score", ascending=False)
 
         # Limit a konverze
-        results = results_df.head(limit).to_dict("records")
+        records = results_df.head(limit).to_dict("records")
+        results: list[dict[Any, Any]] = cast(list[dict[Any, Any]], records)
 
         # Přidej match metadata
         for result in results:
@@ -285,7 +289,7 @@ class FuzzyMatcher:
         query: str,
         df_medicines: pd.DataFrame,
         limit: int,
-    ) -> list[dict]:
+    ) -> list[dict[Any, Any]]:
         """
         Fuzzy match s rapidfuzz.
 
@@ -340,7 +344,8 @@ class FuzzyMatcher:
         results_df = results_df.sort_values("_score", ascending=False)
 
         # Limit a konverze
-        results = results_df.head(limit).to_dict("records")
+        records = results_df.head(limit).to_dict("records")
+        results: list[dict[Any, Any]] = cast(list[dict[Any, Any]], records)
 
         # Přidej match metadata
         for result in results:

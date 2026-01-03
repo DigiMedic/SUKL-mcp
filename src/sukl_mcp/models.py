@@ -241,7 +241,124 @@ class ATCInfo(BaseModel):
         le=5,
         description="Úroveň v ATC hierarchii (1=anatomická, 5=chemická látka)",
     )
-    children: list[ATCChild] = Field(
-        default_factory=list, description="Seznam podskupin (max 20)"
-    )
+    children: list[ATCChild] = Field(default_factory=list, description="Seznam podskupin (max 20)")
     total_children: int = Field(0, description="Celkový počet podskupin")
+
+
+# === Modely pro nedostupné léčivé přípravky (HSZ) ===
+
+
+class UnavailabilityType(str, Enum):
+    """Typ nedostupnosti léčivého přípravku."""
+
+    ONE_TIME = "JR"  # Jednorázový požadavek
+    LIMITED = "OOP"  # Omezená dostupnost
+
+
+class UnavailableMedicineInfo(BaseModel):
+    """Informace o nedostupném léčivém přípravku."""
+
+    sukl_code: str = Field(..., description="Kód SÚKL (7 číslic)")
+    name: str = Field(..., description="Název přípravku")
+    supplement: str | None = Field(None, description="Doplněk názvu")
+    unavailability_type: UnavailabilityType = Field(..., description="Typ nedostupnosti (JR/OOP)")
+    valid_from: datetime | None = Field(None, description="Platnost od")
+    valid_to: datetime | None = Field(None, description="Platnost do")
+    reporting_frequency: str | None = Field(
+        None, description="Periodicita hlášení (denně/týdně/měsíčně)"
+    )
+    required_reporters: list[str] = Field(
+        default_factory=list,
+        description="Skupiny povinných hlásitelů (lékárny/distributoři/MAH)",
+    )
+
+
+class UnavailabilityReport(BaseModel):
+    """Souhrnná zpráva o nedostupných léčivých přípravcích."""
+
+    total_count: int = Field(..., description="Celkový počet nedostupných LP")
+    one_time_requests: int = Field(0, description="Počet jednorázových požadavků (JR)")
+    limited_availability: int = Field(0, description="Počet s omezenou dostupností (OOP)")
+    medicines: list[UnavailableMedicineInfo] = Field(
+        default_factory=list, description="Seznam nedostupných LP"
+    )
+    checked_at: datetime = Field(default_factory=datetime.now)
+
+
+# === Modely pro market report ===
+
+
+class MarketNotificationType(str, Enum):
+    """Typ oznámení o uvádění LP na trh."""
+
+    STARTED = "zahajeni"  # Zahájení uvádění na trh
+    SUSPENDED = "preruseni"  # Přerušení uvádění
+    RESUMED = "obnoveni"  # Obnovení uvádění
+    TERMINATED = "ukonceni"  # Ukončení uvádění
+
+
+class MarketReportInfo(BaseModel):
+    """Informace o uvádění léčivého přípravku na trh."""
+
+    sukl_code: str = Field(..., description="Kód SÚKL (7 číslic)")
+    notification_type: MarketNotificationType = Field(..., description="Typ oznámení")
+    valid_from: datetime | None = Field(None, description="Platnost od")
+    reported_at: datetime | None = Field(None, description="Datum hlášení")
+    replacement_medicines: list[str] = Field(
+        default_factory=list, description="Náhradní přípravky (SÚKL kódy)"
+    )
+    suspension_reason: str | None = Field(None, description="Důvod přerušení")
+    expected_resume_date: datetime | None = Field(None, description="Očekávané obnovení")
+    note: str | None = Field(None, description="Poznámka")
+
+
+# === Modely pro distributory ===
+
+
+class DistributorInfo(BaseModel):
+    """Informace o distributorovi léčiv."""
+
+    workplace_code: str = Field(..., description="Kód pracoviště (11 číslic)")
+    name: str = Field(..., description="Název distributora")
+    ico: str = Field(..., description="IČO")
+    type: str = Field(..., description="Typ pracoviště (Sklad, apod.)")
+
+    # Adresa pracoviště
+    street: str | None = Field(None, description="Ulice a číslo")
+    city: str | None = Field(None, description="Město")
+    postal_code: str | None = Field(None, description="PSČ")
+    country: str = Field("CZ", description="Země")
+
+    # Povolení
+    has_sukl_permit: bool = Field(False, description="Povolení SÚKL")
+    has_eu_permit: bool = Field(False, description="Povolení EU")
+    has_dispensing_permit: bool = Field(False, description="Povolení výdeje")
+
+    # Kontakty
+    phone: list[str] = Field(default_factory=list, description="Telefonní čísla")
+    email: list[str] = Field(default_factory=list, description="E-mailové adresy")
+    web: list[str] = Field(default_factory=list, description="Webové stránky")
+
+    # Aktivní stav
+    is_active: bool = Field(True, description="Aktivní provoz")
+
+
+# === Modely pro šarže vakcín ===
+
+
+class VaccineBatchInfo(BaseModel):
+    """Informace o propuštěné šarži vakcíny."""
+
+    sukl_code: str = Field(..., description="Kód SÚKL vakcíny")
+    vaccine_name: str | None = Field(None, description="Název vakcíny")
+    batch_number: str = Field(..., description="Číslo šarže")
+    released_date: datetime | None = Field(None, description="Datum propuštění")
+    expiration_date: datetime | None = Field(None, description="Datum expirace")
+
+
+class VaccineBatchReport(BaseModel):
+    """Souhrnná zpráva o šaržích vakcín."""
+
+    total_batches: int = Field(..., description="Celkový počet šarží")
+    last_update: datetime | None = Field(None, description="Datum poslední aktualizace")
+    batches: list[VaccineBatchInfo] = Field(default_factory=list, description="Seznam šarží")

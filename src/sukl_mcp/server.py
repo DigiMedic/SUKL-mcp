@@ -17,20 +17,32 @@ from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
 from fastmcp.server.middleware.timing import TimingMiddleware
 
+from sukl_mcp.client_api import SUKLAPIClient, pharmacy_api_to_info
+
 # Absolutní importy pro FastMCP Cloud compatibility
 from sukl_mcp.client_csv import SUKLClient, close_sukl_client, get_sukl_client
 from sukl_mcp.document_parser import close_document_parser, get_document_parser
 from sukl_mcp.exceptions import SUKLDocumentError, SUKLParseError
 from sukl_mcp.models import (
+    AlternativeMedicine,
     ATCChild,
     ATCInfo,
     AvailabilityInfo,
+    AvailabilityStatus,
+    DistributorInfo,
+    MarketNotificationType,
+    MarketReportInfo,
     MedicineDetail,
     MedicineSearchResult,
     PharmacyInfo,
     PILContent,
     ReimbursementInfo,
     SearchResponse,
+    UnavailabilityReport,
+    UnavailabilityType,
+    UnavailableMedicineInfo,
+    VaccineBatchInfo,
+    VaccineBatchReport,
 )
 
 # Logging
@@ -174,7 +186,7 @@ Použij search_medicine pro oba léky a get_reimbursement pro cenové údaje."""
 
 @mcp.tool(
     tags={"search", "medicines"},
-    annotations={"readOnlyHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": True, "idempotentHint": True},
 )
 async def search_medicine(
     query: str,
@@ -182,7 +194,7 @@ async def search_medicine(
     only_reimbursed: bool = False,
     limit: int = 20,
     use_fuzzy: bool = True,
-    ctx: Context = None,
+    ctx: Context | None = None,
 ) -> SearchResponse:
     """
     Vyhledá léčivé přípravky v databázi SÚKL s multi-level search pipeline.
@@ -269,9 +281,9 @@ async def search_medicine(
 
 @mcp.tool(
     tags={"detail", "medicines"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_medicine_details(sukl_code: str, ctx: Context = None) -> MedicineDetail | None:
+async def get_medicine_details(sukl_code: str, ctx: Context | None = None) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
 
@@ -339,9 +351,9 @@ async def get_medicine_details(sukl_code: str, ctx: Context = None) -> MedicineD
 
 @mcp.tool(
     tags={"documents", "pil"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_pil_content(sukl_code: str, ctx: Context = None) -> PILContent | None:
+async def get_pil_content(sukl_code: str, ctx: Context | None = None) -> PILContent | None:
     """
     Získá obsah příbalového letáku (PIL) pro pacienty.
 
@@ -406,9 +418,9 @@ async def get_pil_content(sukl_code: str, ctx: Context = None) -> PILContent | N
 
 @mcp.tool(
     tags={"documents", "spc"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_spc_content(sukl_code: str, ctx: Context = None) -> PILContent | None:
+async def get_spc_content(sukl_code: str, ctx: Context | None = None) -> PILContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
 
@@ -471,13 +483,13 @@ async def get_spc_content(sukl_code: str, ctx: Context = None) -> PILContent | N
 
 @mcp.tool(
     tags={"availability", "alternatives"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
 async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
     limit: int = 5,
-    ctx: Context = None,
+    ctx: Context | None = None,
 ) -> AvailabilityInfo | None:
     """
     Zkontroluje aktuální dostupnost léčivého přípravku na českém trhu.
@@ -506,9 +518,6 @@ async def check_availability(
 
     # Zkontroluj dostupnost pomocí normalizace
     availability = client._normalize_availability(detail.get("DODAVKY"))
-
-    # Import zde pro circular dependency
-    from sukl_mcp.models import AlternativeMedicine, AvailabilityStatus
 
     is_available = availability == AvailabilityStatus.AVAILABLE
 
@@ -563,9 +572,9 @@ async def check_availability(
 
 @mcp.tool(
     tags={"pricing", "reimbursement"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_reimbursement(sukl_code: str, ctx: Context = None) -> ReimbursementInfo | None:
+async def get_reimbursement(sukl_code: str, ctx: Context | None = None) -> ReimbursementInfo | None:
     """
     Získá informace o úhradě léčivého přípravku zdravotní pojišťovnou.
 
@@ -632,7 +641,7 @@ async def get_reimbursement(sukl_code: str, ctx: Context = None) -> Reimbursemen
 
 @mcp.tool(
     tags={"pharmacies", "search"},
-    annotations={"readOnlyHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": True, "idempotentHint": True},
 )
 async def find_pharmacies(
     city: str | None = None,
@@ -640,7 +649,7 @@ async def find_pharmacies(
     has_24h_service: bool = False,
     has_internet_sales: bool = False,
     limit: int = 20,
-    ctx: Context = None,
+    ctx: Context | None = None,
 ) -> list[PharmacyInfo]:
     """
     Vyhledá lékárny podle zadaných kritérií.
@@ -706,9 +715,9 @@ async def find_pharmacies(
 
 @mcp.tool(
     tags={"classification", "atc"},
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_atc_info(atc_code: str, ctx: Context = None) -> ATCInfo:
+async def get_atc_info(atc_code: str, ctx: Context | None = None) -> ATCInfo:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.
 
@@ -759,6 +768,389 @@ async def get_atc_info(atc_code: str, ctx: Context = None) -> ATCInfo:
         children=children[:20],
         total_children=len(children),
     )
+
+
+# === Nové nástroje využívající REST API ===
+
+
+@mcp.tool(
+    tags={"availability", "hsz", "unavailable"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_unavailable_medicines(
+    unavailability_type: str | None = None,
+    limit: int = 50,
+    ctx: Context | None = None,
+) -> UnavailabilityReport:
+    """
+    Získá seznam nedostupných léčivých přípravků z databáze HSZ (Hlášení skladových zásob).
+
+    Používá real-time REST API pro aktuální data o nedostupnosti léčiv.
+
+    Args:
+        unavailability_type: Typ nedostupnosti - 'JR' (jednorázový požadavek) nebo 'OOP' (omezená dostupnost)
+        limit: Maximální počet vrácených záznamů (výchozí 50)
+
+    Returns:
+        UnavailabilityReport se seznamem nedostupných LP a statistikami
+
+    Examples:
+        - get_unavailable_medicines() - Všechny nedostupné LP
+        - get_unavailable_medicines(unavailability_type="OOP") - Pouze s omezenou dostupností
+    """
+    if ctx:
+        await ctx.info("Načítám seznam nedostupných léčiv z HSZ API...")
+
+    api_client = await SUKLAPIClient.get_instance()
+
+    # Mapování typu
+    type_filter = None
+    if unavailability_type:
+        if unavailability_type.upper() == "JR":
+            type_filter = 1
+        elif unavailability_type.upper() == "OOP":
+            type_filter = 2
+
+    unavailable = await api_client.get_unavailable_medicines(type_filter)
+
+    # Konverze na modely
+    medicines = []
+    jr_count = 0
+    oop_count = 0
+
+    for med in unavailable[:limit]:
+        med_type = UnavailabilityType.ONE_TIME if med.typ == 1 else UnavailabilityType.LIMITED
+        if med.typ == 1:
+            jr_count += 1
+        else:
+            oop_count += 1
+
+        # Mapování periodicity
+        periodicity_map = {1: "jednorázově", 2: "denně", 3: "týdně", 4: "měsíčně"}
+        frequency = periodicity_map.get(med.periodicita) if med.periodicita else None
+
+        # Mapování skupin hlásitelů
+        reporter_map = {"lek": "lékárny", "dis": "distributoři", "mah": "držitelé registrace"}
+        reporters = [reporter_map.get(r, r) for r in (med.skupina_hlasitelu or [])]
+
+        medicines.append(
+            UnavailableMedicineInfo(
+                sukl_code=med.kod_sukl,
+                name=med.nazev,
+                supplement=med.doplnek,
+                unavailability_type=med_type,
+                valid_from=datetime.strptime(med.plat_od, "%Y-%m-%d") if med.plat_od else None,
+                valid_to=datetime.strptime(med.plat_do, "%Y-%m-%d") if med.plat_do else None,
+                reporting_frequency=frequency,
+                required_reporters=reporters,
+            )
+        )
+
+    return UnavailabilityReport(
+        total_count=len(unavailable),
+        one_time_requests=jr_count,
+        limited_availability=oop_count,
+        medicines=medicines,
+    )
+
+
+@mcp.tool(
+    tags={"market", "status", "availability"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_market_status(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> MarketReportInfo | None:
+    """
+    Získá aktuální stav uvádění léčivého přípravku na trh z market reportu.
+
+    Informace o tom, zda je přípravek aktivně uváděn na trh, přerušen nebo ukončen.
+
+    Args:
+        sukl_code: 7místný kód SÚKL
+
+    Returns:
+        MarketReportInfo s informacemi o stavu uvádění na trh, nebo None pokud není nalezen
+
+    Examples:
+        - get_market_status("0254045") - Stav PARALEN 500MG na trhu
+    """
+    if ctx:
+        await ctx.info(f"Kontroluji stav uvádění na trh pro: {sukl_code}")
+
+    api_client = await SUKLAPIClient.get_instance()
+    report = await api_client.get_market_report_for_medicine(sukl_code)
+
+    if not report:
+        return None
+
+    return MarketReportInfo(
+        sukl_code=report.kod_sukl,
+        notification_type=MarketNotificationType(report.typ_oznameni),
+        valid_from=datetime.strptime(report.plat_od, "%Y-%m-%d") if report.plat_od else None,
+        reported_at=(
+            datetime.strptime(report.datum_hlaseni, "%Y-%m-%d") if report.datum_hlaseni else None
+        ),
+        replacement_medicines=report.nahrazujici_lp or [],
+        suspension_reason=report.duvod_preruseni,
+        expected_resume_date=(
+            datetime.strptime(report.termin_obnovy, "%Y-%m-%d") if report.termin_obnovy else None
+        ),
+        note=report.poznamka,
+    )
+
+
+@mcp.tool(
+    tags={"pharmacy", "search", "realtime"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def search_pharmacies_live(
+    city: str,
+    limit: int = 20,
+    ctx: Context | None = None,
+) -> list[PharmacyInfo]:
+    """
+    Vyhledá lékárny v daném městě pomocí real-time REST API.
+
+    Na rozdíl od find_pharmacies používá živá data z API (ne CSV cache).
+    Obsahuje detailnější informace včetně otevírací doby a GPS souřadnic.
+
+    Args:
+        city: Název města (např. 'Praha', 'Brno')
+        limit: Maximální počet výsledků (výchozí 20, max 100)
+
+    Returns:
+        Seznam PharmacyInfo s detaily lékáren
+
+    Examples:
+        - search_pharmacies_live("Praha") - Lékárny v Praze
+        - search_pharmacies_live("Brno", limit=10) - 10 lékáren v Brně
+    """
+    if ctx:
+        await ctx.info(f"Vyhledávám lékárny v městě: {city}")
+
+    api_client = await SUKLAPIClient.get_instance()
+    pharmacies = await api_client.search_pharmacies_by_city(city, min(limit, 100))
+
+    results = []
+    for p in pharmacies:
+        info = pharmacy_api_to_info(p)
+        results.append(PharmacyInfo(**info))
+
+    return results
+
+
+@mcp.tool(
+    tags={"price", "reimbursement", "realtime"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_live_price(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> ReimbursementInfo | None:
+    """
+    Získá aktuální cenové a úhradové informace z REST API.
+
+    Používá real-time API pro nejaktuálnější data o cenách a úhradách.
+    Vhodné pro léčiva se stanovenou úhradou (CAU/SCAU).
+
+    Args:
+        sukl_code: 7místný kód SÚKL
+
+    Returns:
+        ReimbursementInfo s aktuálními cenovými údaji, nebo None pokud LP nemá úhradu
+
+    Examples:
+        - get_live_price("0000113") - Cena DILURAN (má úhradu)
+    """
+    if ctx:
+        await ctx.info(f"Načítám aktuální ceny pro: {sukl_code}")
+
+    api_client = await SUKLAPIClient.get_instance()
+    price_info = await api_client.get_price_reimbursement(sukl_code)
+
+    if not price_info:
+        return None
+
+    # Zpracování úhrad
+    is_reimbursed = bool(price_info.uhrady)
+    reimbursement_amount = None
+    patient_copay = None
+
+    if price_info.uhrady and len(price_info.uhrady) > 0:
+        first_uhrada = price_info.uhrady[0]
+        reimbursement_amount = first_uhrada.get("uhradaZaBaleni")
+        patient_copay = first_uhrada.get("doplatek")
+
+    return ReimbursementInfo(
+        sukl_code=sukl_code,
+        medicine_name=price_info.nazev or "",
+        is_reimbursed=is_reimbursed,
+        reimbursement_group=None,  # API neposkytuje
+        max_producer_price=price_info.cena_puvodce,
+        max_retail_price=price_info.cena_lekarna,
+        reimbursement_amount=reimbursement_amount,
+        patient_copay=patient_copay,
+        has_indication_limit=False,  # Vyžaduje detailní analýzu
+        indication_limit_text=None,
+        specialist_only=False,
+    )
+
+
+@mcp.tool(
+    tags={"vaccine", "batch", "safety"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_vaccine_batches(
+    sukl_code: str | None = None,
+    limit: int = 50,
+    ctx: Context | None = None,
+) -> VaccineBatchReport:
+    """
+    Získá seznam propuštěných šarží vakcín.
+
+    Důležité pro sledování bezpečnosti vakcín a ověření šarže.
+
+    Args:
+        sukl_code: Volitelný filtr - SÚKL kód vakcíny (7 číslic)
+        limit: Maximální počet šarží (výchozí 50)
+
+    Returns:
+        VaccineBatchReport se seznamem šarží a datem poslední aktualizace
+
+    Examples:
+        - get_vaccine_batches() - Všechny propuštěné šarže vakcín
+        - get_vaccine_batches("0250303") - Šarže konkrétní vakcíny
+    """
+    if ctx:
+        await ctx.info("Načítám seznam propuštěných šarží vakcín...")
+
+    api_client = await SUKLAPIClient.get_instance()
+    batches, last_change = await api_client.get_vaccine_batches(sukl_code)
+
+    # Konverze na modely
+    batch_infos = []
+    for b in batches[:limit]:
+        released = None
+        expiration = None
+
+        # Parse date formats (DD.MM.YYYY)
+        if b.propusteno_dne:
+            try:
+                released = datetime.strptime(b.propusteno_dne, "%d.%m.%Y")
+            except ValueError:
+                pass
+
+        if b.expirace:
+            try:
+                expiration = datetime.strptime(b.expirace, "%d.%m.%Y")
+            except ValueError:
+                pass
+
+        batch_infos.append(
+            VaccineBatchInfo(
+                sukl_code=b.kod_sukl,
+                vaccine_name=b.nazev,
+                batch_number=b.sarze,
+                released_date=released,
+                expiration_date=expiration,
+            )
+        )
+
+    # Parse last update
+    last_update = None
+    if last_change:
+        try:
+            last_update = datetime.strptime(last_change, "%d.%m.%Y")
+        except ValueError:
+            pass
+
+    return VaccineBatchReport(
+        total_batches=len(batches),
+        last_update=last_update,
+        batches=batch_infos,
+    )
+
+
+@mcp.tool(
+    tags={"distributor", "supply"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
+async def get_distributors(
+    limit: int = 50,
+    ctx: Context | None = None,
+) -> list[DistributorInfo]:
+    """
+    Získá seznam distributorů léčiv v ČR.
+
+    Distributoři jsou subjekty oprávněné k velkoobchodní distribuci léčiv.
+
+    Args:
+        limit: Maximální počet distributorů (výchozí 50)
+
+    Returns:
+        Seznam DistributorInfo s informacemi o distributorech
+
+    Examples:
+        - get_distributors() - Seznam distributorů léčiv
+    """
+    if ctx:
+        await ctx.info("Načítám seznam distributorů léčiv...")
+
+    api_client = await SUKLAPIClient.get_instance()
+    distributors = await api_client.get_all_distributors()
+
+    results = []
+    for d in distributors[:limit]:
+        # Sestavení adresy
+        addr = d.adresa
+        street = None
+        city = None
+        psc = None
+
+        if addr:
+            parts = []
+            if addr.ulice:
+                parts.append(addr.ulice)
+            if addr.cislo_popisne:
+                parts.append(addr.cislo_popisne)
+            street = " ".join(parts) if parts else None
+            psc = addr.psc
+
+        # Sídlo
+        sidlo = d.sidlo
+        has_sukl = sidlo.povoleni_sukl if sidlo else False
+        has_eu = sidlo.povoleni_eu if sidlo else False
+        has_dispensing = sidlo.povoleni_vydeje if sidlo else False
+
+        # Kontakty (null-safe)
+        contacts = d.kontakty
+        phones = contacts.get("tel", []) if contacts else []
+        emails = contacts.get("email", []) if contacts else []
+        webs = contacts.get("web", []) if contacts else []
+
+        results.append(
+            DistributorInfo(
+                workplace_code=d.kod_pracoviste,
+                name=d.nazev,
+                ico=d.ico,
+                type=d.typ,
+                street=street,
+                city=city,
+                postal_code=psc,
+                country="CZ",
+                has_sukl_permit=has_sukl,
+                has_eu_permit=has_eu,
+                has_dispensing_permit=has_dispensing,
+                phone=phones,
+                email=emails,
+                web=webs,
+                is_active=True,
+            )
+        )
+
+    return results
 
 
 # === MCP Resources (Best Practice) ===

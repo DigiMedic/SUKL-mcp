@@ -11,7 +11,7 @@ import re
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import httpx
 import pandas as pd
@@ -794,9 +794,10 @@ class SUKLClient:
         if result.empty:
             return None
 
-        return result.iloc[0].to_dict()
+        row_dict = result.iloc[0].to_dict()
+        return cast(dict[Any, Any], row_dict)
 
-    async def get_composition(self, sukl_code: str | int) -> list[dict]:
+    async def get_composition(self, sukl_code: str | int) -> list[dict[Any, Any]]:
         """Získej složení léčivého přípravku."""
         if not self._initialized:
             await self.initialize()
@@ -809,7 +810,8 @@ class SUKLClient:
         sukl_code_str = str(sukl_code).strip()
         sukl_code_normalized = str(int(sukl_code_str)) if sukl_code_str.isdigit() else sukl_code_str
         results = df_composition[df_composition["KOD_SUKL"].astype(str) == sukl_code_normalized]
-        return results.to_dict("records")
+        records = results.to_dict("records")
+        return cast(list[dict[Any, Any]], records)
 
     async def search_pharmacies(
         self,
@@ -860,9 +862,7 @@ class SUKLClient:
         # Filtr podle pohotovosti
         if has_24h:
             # POHOTOVOST sloupec může být prázdný nebo obsahovat text
-            results = results[
-                results["POHOTOVOST"].notna() & (results["POHOTOVOST"].str.len() > 0)
-            ]
+            results = results[results["POHOTOVOST"].notna() & (results["POHOTOVOST"].str.len() > 0)]
 
         # Filtr podle zásilkového prodeje
         if has_internet_sales:
@@ -878,25 +878,27 @@ class SUKLClient:
             pohotovost = row.get("POHOTOVOST")
             zasilkovy = str(row.get("ZASILKOVY_PRODEJ", ""))
 
-            output.append({
-                "ID_LEKARNY": row.get("KOD_LEKARNY", ""),
-                "NAZEV": row.get("NAZEV", ""),
-                "ULICE": row.get("ULICE", ""),
-                "MESTO": row.get("MESTO", ""),
-                "PSC": str(row.get("PSC", "")).replace(" ", ""),
-                "OKRES": None,  # Není v datech
-                "KRAJ": None,  # Není v datech
-                "TELEFON": row.get("TELEFON", ""),
-                "EMAIL": row.get("EMAIL", ""),
-                "WEB": row.get("WWW", ""),
-                "lat": None,  # Není v datech
-                "lon": None,  # Není v datech
-                "PROVOZOVATEL": None,
-                "nepretrzity_provoz": "ano" if pd.notna(pohotovost) and pohotovost else None,
-                "internetovy_prodej": "ano" if zasilkovy.upper() == "ANO" else None,
-                "pripravna": None,
-                "aktivni": "ano",
-            })
+            output.append(
+                {
+                    "ID_LEKARNY": row.get("KOD_LEKARNY", ""),
+                    "NAZEV": row.get("NAZEV", ""),
+                    "ULICE": row.get("ULICE", ""),
+                    "MESTO": row.get("MESTO", ""),
+                    "PSC": str(row.get("PSC", "")).replace(" ", ""),
+                    "OKRES": None,  # Není v datech
+                    "KRAJ": None,  # Není v datech
+                    "TELEFON": row.get("TELEFON", ""),
+                    "EMAIL": row.get("EMAIL", ""),
+                    "WEB": row.get("WWW", ""),
+                    "lat": None,  # Není v datech
+                    "lon": None,  # Není v datech
+                    "PROVOZOVATEL": None,
+                    "nepretrzity_provoz": "ano" if pd.notna(pohotovost) and pohotovost else None,
+                    "internetovy_prodej": "ano" if zasilkovy.upper() == "ANO" else None,
+                    "pripravna": None,
+                    "aktivni": "ano",
+                }
+            )
 
         return output
 
@@ -924,7 +926,8 @@ class SUKLClient:
             results = df
 
         # Vrať max 100 výsledků
-        return results.head(100).to_dict("records")
+        records = results.head(100).to_dict("records")
+        return cast(list[dict[Any, Any]], records)
 
     async def get_price_info(self, sukl_code: str) -> dict | None:
         """
