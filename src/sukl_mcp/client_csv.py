@@ -36,6 +36,14 @@ def _get_opendata_url() -> str:
     )
 
 
+def _get_pharmacy_url() -> str:
+    """Get SÚKL pharmacy list URL from ENV or default."""
+    return os.getenv(
+        "SUKL_PHARMACY_URL",
+        "https://opendata.sukl.cz/soubory/SOD20251223/LEKARNY20251223.zip",
+    )
+
+
 def _get_cache_dir() -> Path:
     """Get cache directory from ENV or default."""
     return Path(os.getenv("SUKL_CACHE_DIR", "/tmp/sukl_dlp_cache"))
@@ -56,6 +64,7 @@ class SUKLConfig(BaseModel):
 
     # Open Data URL
     opendata_dlp_url: str = Field(default_factory=_get_opendata_url)
+    opendata_pharmacy_url: str = Field(default_factory=_get_pharmacy_url)
 
     # Local cache
     cache_dir: Path = Field(default_factory=_get_cache_dir)
@@ -85,14 +94,21 @@ class SUKLDataLoader:
         self.config.cache_dir.mkdir(parents=True, exist_ok=True)
         self.config.data_dir.mkdir(parents=True, exist_ok=True)
 
-        # Stáhni ZIP pokud neexistuje
-        zip_path = self.config.cache_dir / "DLP.zip"
-        if not zip_path.exists():
-            await self._download_zip(zip_path)
+        # Stáhni a rozbal DLP ZIP
+        dlp_zip_path = self.config.cache_dir / "DLP.zip"
+        if not dlp_zip_path.exists():
+            await self._download_zip(dlp_zip_path, self.config.opendata_dlp_url)
 
-        # Rozbal ZIP
         if not (self.config.data_dir / "dlp_lecivepripravky.csv").exists():
-            await self._extract_zip(zip_path)
+            await self._extract_zip(dlp_zip_path)
+
+        # Stáhni a rozbal seznam lékáren
+        lekarny_zip_path = self.config.cache_dir / "LEKARNY.zip"
+        if not lekarny_zip_path.exists():
+            await self._download_zip(lekarny_zip_path, self.config.opendata_pharmacy_url)
+
+        if not (self.config.data_dir / "lekarny_seznam.csv").exists():
+            await self._extract_zip(lekarny_zip_path)
 
         # Načti klíčové CSV soubory
         await self._load_csvs()
@@ -100,12 +116,12 @@ class SUKLDataLoader:
         self._loaded = True
         logger.info(f"Data načtena: {len(self._data)} tabulek")
 
-    async def _download_zip(self, zip_path: Path) -> None:
-        """Stáhni DLP ZIP soubor."""
-        logger.info(f"Stahuji {self.config.opendata_dlp_url}...")
+    async def _download_zip(self, zip_path: Path, url: str) -> None:
+        """Stáhni ZIP soubor z URL."""
+        logger.info(f"Stahuji {url}...")
 
         async with httpx.AsyncClient(timeout=self.config.download_timeout) as client:
-            async with client.stream("GET", self.config.opendata_dlp_url) as resp:
+            async with client.stream("GET", url) as resp:
                 resp.raise_for_status()
 
                 with open(zip_path, "wb") as f:
@@ -142,7 +158,7 @@ class SUKLDataLoader:
         """Načti CSV soubory paralelně do pandas DataFrames."""
         logger.info("Načítám CSV soubory...")
 
-        # Klíčové tabulky
+        # Klíčové tabulky DLP
         tables = [
             "dlp_lecivepripravky",  # Hlavní tabulka léčiv
             "dlp_slozeni",  # Složení
@@ -150,6 +166,10 @@ class SUKLDataLoader:
             "dlp_atc",  # ATC kódy
             "dlp_nazvydokumentu",  # Dokumenty (PIL)
             "dlp_cau",  # Cenové a úhradové údaje (EPIC 3)
+            # Tabulky lékáren
+            "lekarny_seznam",  # Seznam lékáren
+            "lekarny_prac_doba",  # Pracovní doba
+            "lekarny_typ",  # Typy lékáren
         ]
 
         def _load_single_csv(table: str) -> tuple[str, pd.DataFrame | None]:
@@ -747,12 +767,12 @@ class SUKLClient:
 
         return results
 
-    async def get_medicine_detail(self, sukl_code: str) -> dict | None:
+    async def get_medicine_detail(self, sukl_code: str | int) -> dict | None:
         """Získej detail léčivého přípravku."""
-        # Input validace
-        if not sukl_code or not sukl_code.strip():
+        # Input validace - konverze na string
+        sukl_code = str(sukl_code).strip() if sukl_code is not None else ""
+        if not sukl_code:
             raise SUKLValidationError("SÚKL kód nesmí být prázdný")
-        sukl_code = sukl_code.strip()
         if not sukl_code.isdigit():
             raise SUKLValidationError(f"SÚKL kód musí být číselný (zadáno: {sukl_code})")
         if len(sukl_code) > 7:
@@ -776,7 +796,7 @@ class SUKLClient:
 
         return result.iloc[0].to_dict()
 
-    async def get_composition(self, sukl_code: str) -> list[dict]:
+    async def get_composition(self, sukl_code: str | int) -> list[dict]:
         """Získej složení léčivého přípravku."""
         if not self._initialized:
             await self.initialize()
@@ -785,8 +805,9 @@ class SUKLClient:
         if df_composition is None:
             return []
 
-        # Normalizuj kód
-        sukl_code_normalized = str(int(sukl_code)) if sukl_code.isdigit() else sukl_code
+        # Normalizuj kód (podporuje int i string)
+        sukl_code_str = str(sukl_code).strip()
+        sukl_code_normalized = str(int(sukl_code_str)) if sukl_code_str.isdigit() else sukl_code_str
         results = df_composition[df_composition["KOD_SUKL"].astype(str) == sukl_code_normalized]
         return results.to_dict("records")
 
@@ -798,13 +819,86 @@ class SUKLClient:
         has_internet_sales: bool = False,
         limit: int = 20,
     ) -> list[dict]:
-        """Vyhledej lékárny podle kritérií."""
+        """
+        Vyhledej lékárny podle kritérií.
+
+        Args:
+            city: Název města (case-insensitive)
+            postal_code: PSČ (5 číslic)
+            has_24h: Pouze lékárny s pohotovostí
+            has_internet_sales: Pouze lékárny se zásilkovým prodejem
+            limit: Max počet výsledků
+
+        Returns:
+            Seznam lékáren jako dict records
+        """
         if not self._initialized:
             await self.initialize()
 
-        # Pro teď vrátíme prázdný seznam, protože nemáme data o lékárnách v DLP
-        logger.warning("Vyhledávání lékáren není implementováno - DLP neobsahuje data o lékárnách")
-        return []
+        df = self._loader.get_table("lekarny_seznam")
+        if df is None:
+            logger.warning("Tabulka lekarny_seznam není načtena")
+            return []
+
+        # Kopie pro filtrování
+        results = df.copy()
+
+        # Filtr podle města
+        if city:
+            city_upper = city.upper().strip()
+            results = results[
+                results["MESTO"].str.upper().str.contains(city_upper, na=False, regex=False)
+            ]
+
+        # Filtr podle PSČ
+        if postal_code:
+            psc_clean = postal_code.replace(" ", "").strip()
+            results = results[
+                results["PSC"].astype(str).str.replace(" ", "", regex=False) == psc_clean
+            ]
+
+        # Filtr podle pohotovosti
+        if has_24h:
+            # POHOTOVOST sloupec může být prázdný nebo obsahovat text
+            results = results[
+                results["POHOTOVOST"].notna() & (results["POHOTOVOST"].str.len() > 0)
+            ]
+
+        # Filtr podle zásilkového prodeje
+        if has_internet_sales:
+            results = results[results["ZASILKOVY_PRODEJ"].str.upper() == "ANO"]
+
+        # Limit
+        results = results.head(limit)
+
+        # Konverze na standardní formát pro server.py
+        output = []
+        for _, row in results.iterrows():
+            # Bezpečné získání hodnot s kontrolou NA
+            pohotovost = row.get("POHOTOVOST")
+            zasilkovy = str(row.get("ZASILKOVY_PRODEJ", ""))
+
+            output.append({
+                "ID_LEKARNY": row.get("KOD_LEKARNY", ""),
+                "NAZEV": row.get("NAZEV", ""),
+                "ULICE": row.get("ULICE", ""),
+                "MESTO": row.get("MESTO", ""),
+                "PSC": str(row.get("PSC", "")).replace(" ", ""),
+                "OKRES": None,  # Není v datech
+                "KRAJ": None,  # Není v datech
+                "TELEFON": row.get("TELEFON", ""),
+                "EMAIL": row.get("EMAIL", ""),
+                "WEB": row.get("WWW", ""),
+                "lat": None,  # Není v datech
+                "lon": None,  # Není v datech
+                "PROVOZOVATEL": None,
+                "nepretrzity_provoz": "ano" if pd.notna(pohotovost) and pohotovost else None,
+                "internetovy_prodej": "ano" if zasilkovy.upper() == "ANO" else None,
+                "pripravna": None,
+                "aktivni": "ano",
+            })
+
+        return output
 
     async def get_atc_groups(self, atc_prefix: str | None = None) -> list[dict]:
         """Získej ATC skupiny podle prefixu."""
