@@ -11,7 +11,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from fastmcp.dependencies import Progress
 from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
 from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
@@ -243,6 +244,7 @@ async def search_medicine(
     only_reimbursed: bool = False,
     limit: int = 20,
     use_fuzzy: bool = True,
+    ctx: Context | None = None,
 ) -> SearchResponse:
     """
     Vyhledá léčivé přípravky v databázi SÚKL (v4.0: REST API + CSV fallback).
@@ -277,16 +279,34 @@ async def search_medicine(
     """
     start_time = datetime.now()
 
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Searching for: {query}")
+        if only_available:
+            await ctx.debug("Filter: only available medicines")
+        if only_reimbursed:
+            await ctx.debug("Filter: only reimbursed medicines")
+
     # TRY: REST API (primary)
     rest_result = await _try_rest_search(query, limit)
 
     if rest_result is not None:
         # REST API success
         raw_results, match_type = rest_result
+        if ctx:
+            await ctx.info(f"Found {len(raw_results)} results via REST API")
     else:
         # FALLBACK: CSV client
         logger.info(f"🔄 Falling back to CSV for query: '{query}'")
-        client = await get_sukl_client()
+        if ctx:
+            await ctx.warning("REST API unavailable, using CSV fallback")
+            # Use context for client access
+            app_ctx = ctx.request_context.lifespan_context
+            client = app_ctx.client
+        else:
+            # FALLBACK: Use global getter (backward compatible)
+            client = await get_sukl_client()
+
         raw_results, match_type = await client.search_medicines(
             query=query,
             limit=limit,
@@ -295,6 +315,8 @@ async def search_medicine(
             use_fuzzy=use_fuzzy,
         )
         match_type = f"csv_{match_type}"
+        if ctx:
+            await ctx.info(f"Found {len(raw_results)} results via CSV")
 
     # Transformace na Pydantic modely
     results = []
@@ -390,7 +412,10 @@ async def _try_rest_get_detail(sukl_code: str) -> dict | None:
     tags={"medicines", "details"},
     annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
+async def get_medicine_details(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
 
@@ -413,17 +438,34 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     # Normalizace kódu
     sukl_code = sukl_code.strip().zfill(7)
 
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Getting details for medicine: {sukl_code}")
+
     # TRY: REST API pro základní data
     data = await _try_rest_get_detail(sukl_code)
 
     if data is None:
         # FALLBACK: CSV
         logger.info(f"🔄 Falling back to CSV for medicine: {sukl_code}")
-        csv_client = await get_sukl_client()
+        if ctx:
+            await ctx.warning("REST API unavailable, using CSV fallback")
+            # Use context for client access
+            app_ctx = ctx.request_context.lifespan_context
+            csv_client = app_ctx.client
+        else:
+            # FALLBACK: Use global getter (backward compatible)
+            csv_client = await get_sukl_client()
+
         data = await csv_client.get_medicine_detail(sukl_code)
 
         if not data:
+            if ctx:
+                await ctx.warning(f"Medicine {sukl_code} not found")
             return None
+    else:
+        if ctx:
+            await ctx.info("Retrieved medicine data via REST API")
 
     # Helper pro získání hodnoty z dict (velká písmena)
     def get_val(key_upper: str, default: str | None = None) -> str | None:
@@ -431,7 +473,13 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
         return data.get(key_upper, data.get(key_upper.lower(), default))
 
     # ALWAYS: Získej cenové údaje z CSV (REST API je nemá)
-    csv_client = await get_sukl_client()
+    if ctx:
+        await ctx.debug("Fetching price info from CSV")
+        app_ctx = ctx.request_context.lifespan_context
+        csv_client = app_ctx.client
+    else:
+        csv_client = await get_sukl_client()
+
     price_info = await csv_client.get_price_info(sukl_code)
 
     return MedicineDetail(
@@ -469,7 +517,10 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     tags={"documents", "patient-info"},
     annotations={"readOnlyHint": True},
 )
-async def get_pil_content(sukl_code: str) -> PILContent | None:
+async def get_pil_content(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> PILContent | None:
     """
     Získá obsah příbalového letáku (PIL) pro pacienty.
 
@@ -487,9 +538,20 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
     Examples:
         - get_pil_content("0254045")
     """
-    client = await get_sukl_client()
-    parser = get_document_parser()
     sukl_code = sukl_code.strip().zfill(7)
+
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Fetching PIL (patient info) for medicine: {sukl_code}")
+
+    # Get client and parser
+    if ctx:
+        app_ctx = ctx.request_context.lifespan_context
+        client = app_ctx.client
+    else:
+        client = await get_sukl_client()
+
+    parser = get_document_parser()
 
     # Získej detail pro název
     detail = await client.get_medicine_detail(sukl_code)
@@ -529,7 +591,10 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
     tags={"documents", "professional-info"},
     annotations={"readOnlyHint": True},
 )
-async def get_spc_content(sukl_code: str) -> PILContent | None:
+async def get_spc_content(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> PILContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
 
@@ -545,9 +610,20 @@ async def get_spc_content(sukl_code: str) -> PILContent | None:
     Examples:
         - get_spc_content("0254045")
     """
-    client = await get_sukl_client()
-    parser = get_document_parser()
     sukl_code = sukl_code.strip().zfill(7)
+
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Fetching SPC (professional info) for medicine: {sukl_code}")
+
+    # Get client and parser
+    if ctx:
+        app_ctx = ctx.request_context.lifespan_context
+        client = app_ctx.client
+    else:
+        client = await get_sukl_client()
+
+    parser = get_document_parser()
 
     # Získej detail pro název
     detail = await client.get_medicine_detail(sukl_code)
@@ -591,6 +667,7 @@ async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
     limit: int = 5,
+    ctx: Context | None = None,
 ) -> AvailabilityInfo | None:
     """
     Zkontroluje aktuální dostupnost léčivého přípravku na českém trhu.
@@ -613,21 +690,42 @@ async def check_availability(
     """
     sukl_code = sukl_code.strip().zfill(7)
 
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Checking availability for medicine: {sukl_code}")
+
     # TRY: REST API pro dostupnost
     detail = await _try_rest_get_detail(sukl_code)
 
     if detail is None:
         # FALLBACK: CSV
         logger.info(f"🔄 Falling back to CSV for availability check: {sukl_code}")
-        csv_client = await get_sukl_client()
+        if ctx:
+            await ctx.warning("REST API unavailable, using CSV fallback")
+            app_ctx = ctx.request_context.lifespan_context
+            csv_client = app_ctx.client
+        else:
+            csv_client = await get_sukl_client()
+
         detail = await csv_client.get_medicine_detail(sukl_code)
 
         if not detail:
+            if ctx:
+                await ctx.warning(f"Medicine {sukl_code} not found")
             return None
+    else:
+        # Get CSV client for subsequent operations
+        if ctx:
+            app_ctx = ctx.request_context.lifespan_context
+            csv_client = app_ctx.client
+        else:
+            csv_client = await get_sukl_client()
 
     # Zkontroluj dostupnost
-    csv_client = await get_sukl_client()
     availability = csv_client._normalize_availability(detail.get("DODAVKY"))
+
+    if ctx:
+        await ctx.info(f"Availability status: {availability}")
 
     # Import zde pro circular dependency
     from sukl_mcp.models import AlternativeMedicine, AvailabilityStatus
@@ -639,8 +737,11 @@ async def check_availability(
     recommendation = None
 
     if include_alternatives and not is_available:
+        if ctx:
+            await ctx.info("Medicine not available, searching for alternatives")
+
         # Použij find_generic_alternatives pro nalezení alternativ
-        alt_results = await client.find_generic_alternatives(sukl_code, limit=limit)
+        alt_results = await csv_client.find_generic_alternatives(sukl_code, limit=limit)
 
         # Konverze na AlternativeMedicine modely
         for alt in alt_results:
@@ -658,6 +759,9 @@ async def check_availability(
                     patient_copay=alt.get("patient_copay"),
                 )
             )
+
+        if ctx:
+            await ctx.info(f"Found {len(alternatives)} alternative(s)")
 
         # Generuj doporučení
         if alternatives:
@@ -687,7 +791,10 @@ async def check_availability(
     tags={"pricing", "reimbursement"},
     annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
+async def get_reimbursement(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> ReimbursementInfo | None:
     """
     Získá informace o úhradě léčivého přípravku zdravotní pojišťovnou.
 
@@ -720,20 +827,37 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
     """
     sukl_code = sukl_code.strip().zfill(7)
 
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Fetching reimbursement info for medicine: {sukl_code}")
+
     # OPTIONAL: REST API pro název léčiva (rychlejší než CSV)
     medicine_name = ""
     try:
-        api_client = await get_api_client()
+        if ctx:
+            app_ctx = ctx.request_context.lifespan_context
+            api_client = app_ctx.api_client
+        else:
+            api_client = await get_api_client()
+
         medicine = await api_client.get_medicine(sukl_code)
         if medicine:
             medicine_name = medicine.nazev
             logger.info(f"✅ REST API: medicine name for {sukl_code}")
+            if ctx:
+                await ctx.debug("Retrieved medicine name via REST API")
     except (SUKLAPIError, Exception) as e:
         logger.debug(f"REST API name fetch failed: {e}, using CSV")
+        if ctx:
+            await ctx.debug("REST API failed, will use CSV for medicine name")
         pass  # Fallback na CSV název
 
     # ALWAYS: Získej základní informace a cenové údaje z CSV
-    csv_client = await get_sukl_client()
+    if ctx:
+        app_ctx = ctx.request_context.lifespan_context
+        csv_client = app_ctx.client
+    else:
+        csv_client = await get_sukl_client()
 
     if not medicine_name:
         detail = await csv_client.get_medicine_detail(sukl_code)
@@ -786,6 +910,7 @@ async def find_pharmacies(
     has_24h_service: bool = False,
     has_internet_sales: bool = False,
     limit: int = 20,
+    ctx: Context | None = None,
 ) -> list[PharmacyInfo]:
     """
     Vyhledá lékárny podle zadaných kritérií.
@@ -805,7 +930,26 @@ async def find_pharmacies(
         - find_pharmacies(has_24h_service=True)
         - find_pharmacies(postal_code="11000")
     """
-    client = await get_sukl_client()
+    # Context-aware logging
+    if ctx:
+        filters = []
+        if city:
+            filters.append(f"city={city}")
+        if postal_code:
+            filters.append(f"postal_code={postal_code}")
+        if has_24h_service:
+            filters.append("24h service")
+        if has_internet_sales:
+            filters.append("internet sales")
+        filter_str = ", ".join(filters) if filters else "no filters"
+        await ctx.info(f"Searching pharmacies: {filter_str}")
+
+    # Get client
+    if ctx:
+        app_ctx = ctx.request_context.lifespan_context
+        client = app_ctx.client
+    else:
+        client = await get_sukl_client()
 
     raw_results = await client.search_pharmacies(
         city=city,
@@ -849,7 +993,10 @@ async def find_pharmacies(
     tags={"classification", "atc"},
     annotations={"readOnlyHint": True, "idempotentHint": True},
 )
-async def get_atc_info(atc_code: str) -> dict:
+async def get_atc_info(
+    atc_code: str,
+    ctx: Context | None = None,
+) -> dict:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.
 
@@ -867,7 +1014,16 @@ async def get_atc_info(atc_code: str) -> dict:
         - get_atc_info("N02") - Analgetika
         - get_atc_info("N02BE01") - Paracetamol
     """
-    client = await get_sukl_client()
+    # Context-aware logging
+    if ctx:
+        await ctx.info(f"Fetching ATC classification info for: {atc_code}")
+
+    # Get client
+    if ctx:
+        app_ctx = ctx.request_context.lifespan_context
+        client = app_ctx.client
+    else:
+        client = await get_sukl_client()
 
     groups = await client.get_atc_groups(atc_code if len(atc_code) < 7 else None)
 
