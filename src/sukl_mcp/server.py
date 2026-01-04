@@ -529,7 +529,7 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
     tags={"documents", "professional-info"},
     annotations={"readOnlyHint": True},
 )
-async def get_spc_content(sukl_code: str) -> SPCContent | None:
+async def get_spc_content(sukl_code: str) -> PILContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
 
