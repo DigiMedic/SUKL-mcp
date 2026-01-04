@@ -1,14 +1,19 @@
-.PHONY: help install test lint format clean run
+.PHONY: help install test lint format clean run api-test api-health
 
 help:
-	@echo "SÚKL MCP Server - Makefile příkazy"
+	@echo "SÚKL MCP Server v4.0 - Makefile příkazy"
 	@echo ""
 	@echo "  make install    - Instalace projektu s dev závislostmi"
 	@echo "  make test       - Spuštění testů"
+	@echo "  make test-cov   - Spuštění testů s coverage"
 	@echo "  make lint       - Kontrola kódu (ruff, mypy)"
 	@echo "  make format     - Formátování kódu (black)"
 	@echo "  make clean      - Vyčištění build artifacts"
 	@echo "  make run        - Spuštění MCP serveru"
+	@echo ""
+	@echo "  API Development:"
+	@echo "  make api-test   - Spuštění integračních testů REST API"
+	@echo "  make api-health - Rychlá kontrola dostupnosti SÚKL API"
 	@echo ""
 
 install:
@@ -61,3 +66,15 @@ dev:
 	@make test
 	@make lint
 	@echo "✅ Vše hotovo!"
+# === API Development ===
+
+api-test:
+	@echo "🌐 Spouštění integračních testů REST API..."
+	pytest tests/test_api_client.py -v -m integration
+	@echo "✅ Integrační testy dokončeny"
+
+api-health:
+	@echo "🏥 Kontrola dostupnosti SÚKL REST API..."
+	@curl -s -o /dev/null -w "HTTP Status: %{http_code}\nLatency: %{time_total}s\n" \
+		"https://prehledy.sukl.cz/dlp/v1/lecive-pripravky/0254045"
+	@echo "✅ API je dostupné"

@@ -4,8 +4,8 @@
 
 **SÚKL MCP Server** is a production-ready FastMCP server providing AI agents access to the Czech pharmaceutical database maintained by SÚKL (Státní ústav pro kontrolu léčiv / State Institute for Drug Control).
 
-**Version:** 2.1.0
-**Status:** Production/Stable
+**Version:** 4.0.0
+**Status:** Production Ready (REST API Migration Complete)
 **Language:** Python 3.10+
 **License:** MIT
 
@@ -17,7 +17,17 @@
 - **6,907** ATC classification codes
 - **61,240** documents (PIL/SPC)
 - **7** MCP tools
-- **23** comprehensive tests
+- **241** comprehensive tests
+
+## 🆕 What's New in v4.0.0
+
+- **REST API Integration**: Hybrid architecture s REST API + CSV fallback
+- **3 Tools Migrated**: search_medicine, get_medicine_details, check_availability
+- **Performance Benchmarks**: Comprehensive performance testing suite
+- **241 Tests**: 100% pass rate včetně integration a performance testů
+- **Phase-01 Complete**: 75% REST API migration dokončena
+
+See [Phase-01 Migration Plan](Phase-01-REST-API-Migration-Plan.md) for details.
 
 ## Documentation Structure
 
@@ -119,10 +129,13 @@ docker run -p 8000:8000 sukl-mcp
 
 ```
 SÚKL Open Data → SUKLDataLoader → SUKLClient → FastMCP Server → AI Agents
+                      ↓
+                 REST API ← SUKLAPIClient (v4.0)
 ```
 
 ### Key Features
 
+- **Hybrid Architecture (v4.0)**: REST API primary + CSV fallback pro 100% uptime
 - **Async I/O**: Non-blocking ZIP extraction and CSV loading
 - **Thread-Safe**: Race condition protection with asyncio.Lock
 - **Security**: ZIP bomb protection, regex injection prevention
@@ -168,5 +181,5 @@ Data provided by SÚKL under Open Data terms: https://opendata.sukl.cz/?q=podmin
 
 ---
 
-**Last Updated**: December 29, 2024
-**Documentation Version**: 2.1.0
+**Last Updated**: January 4, 2026
+**Documentation Version**: 4.0.0

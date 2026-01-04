@@ -5,8 +5,8 @@
 This directory contains comprehensive technical documentation for the SÚKL MCP Server - a production-ready FastMCP server providing access to the Czech pharmaceutical database.
 
 **Total Documentation**: 125+ pages across 8 documents
-**Last Updated**: December 29, 2024
-**Version**: 2.1.0
+**Last Updated**: January 4, 2026
+**Version**: 4.0.0
 
 ## Documentation Index
 
@@ -19,6 +19,26 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 - Project structure overview
 
 **Start here** if you're new to the project.
+
+---
+
+### 🆕 [Phase-01-REST-API-Migration-Plan.md](Phase-01-REST-API-Migration-Plan.md) - REST API Migration (v4.0.0)
+**Live Document** | Phase 01 migration status and implementation details
+
+**Status**: ✅ 75% DOKONČENO (3/4 tools migrated)
+
+**Migrated Tools**:
+- ✅ `search_medicine` - Hybrid REST API + CSV fallback
+- ✅ `get_medicine_details` - Hybrid REST API + CSV fallback
+- ✅ `check_availability` - Hybrid REST API + CSV fallback
+- 📄 `get_reimbursement` - CSV-only (documented)
+
+**Performance Benchmarks**:
+- REST API: 0-1ms (p50) with cache
+- CSV fallback: 5-13ms (p50)
+- Hybrid workflows validated with 241 tests
+
+**Read this** to understand the v4.0.0 hybrid architecture.
 
 ---
 
@@ -86,7 +106,7 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 - Development environment setup (Python 3.10+, venv, pip)
 - Project structure walkthrough
 - Adding new MCP tools (step-by-step)
-- Testing guide (pytest, 23 tests)
+- Testing guide (pytest, 241 tests including integration and performance tests)
 - Code quality tools (black, ruff, mypy)
 - Debugging techniques (VS Code, pdb, logging)
 - Performance profiling (cProfile, memory_profiler)
@@ -406,8 +426,8 @@ Found an error or have suggestions?
 
 ---
 
-**Documentation Generated**: December 29, 2024
-**Project Version**: 2.1.0
+**Documentation Generated**: January 4, 2026
+**Project Version**: 4.0.0
 **Python Version**: 3.10+
 **Total Words**: ~50,000
 **Total Pages**: 125+

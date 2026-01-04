@@ -62,10 +62,9 @@ def calculate_ranking_score(
     if pd.notna(row.get("DODAVKY")) and str(row.get("DODAVKY")).upper() == "A":
         score += 10.0
 
-    # Úhrada bonus (pokud existuje sloupec)
-    # TODO: Přidat po implementaci EPIC 3
-    # if row.get("has_reimbursement"):
-    #     score += 5.0
+    # Úhrada bonus (EPIC 3 implementováno)
+    if row.get("has_reimbursement"):
+        score += 5.0
 
     return score
 
