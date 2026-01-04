@@ -917,25 +917,154 @@ async def get_health_resource() -> dict:
 @mcp.resource("sukl://atc-groups/top-level")
 async def get_top_level_atc_groups() -> dict:
     """
-    Seznam hlavních ATC skupin (1. úroveň klasifikace).
+    Seznam hlavních ATC skupin (1. úroveň klasifikace) s navigačními URI.
 
     ATC = Anatomicko-terapeuticko-chemická klasifikace léčiv.
-    Vrací 14 hlavních skupin (A-V) s jejich názvy.
+    Vrací 14 hlavních skupin (A-V) s jejich názvy a odkazy pro procházení hierarchie.
     """
     client = await get_sukl_client()
     groups = await client.get_atc_groups(None)
 
-    # Filtruj pouze top-level skupiny (1 znak)
+    # Filtruj pouze top-level skupiny (1 znak) a přidej URI
     top_level = [
-        {"code": g.get("kod", g.get("KOD", "")), "name": g.get("nazev", g.get("NAZEV", ""))}
+        {
+            "code": g.get("kod", g.get("KOD", "")),
+            "name": g.get("nazev", g.get("NAZEV", "")),
+            "uri": f"sukl://atc/{g.get('kod', g.get('KOD', ''))}",  # Add navigation URI
+        }
         for g in groups
         if len(g.get("kod", g.get("KOD", ""))) == 1
     ]
 
     return {
-        "description": "Hlavní ATC skupiny (1. úroveň)",
+        "description": "Hlavní ATC skupiny (1. úroveň) s navigačními URI",
         "total": len(top_level),
         "groups": top_level,
+    }
+
+
+@mcp.resource("sukl://atc/level/{level}")
+async def get_atc_by_level(level: int) -> dict:
+    """
+    Browse ATC codes by hierarchical level (1-5).
+
+    Level 1: Anatomical (14 groups) - A,B,C,D,G,H,J,L,M,N,P,R,S,V
+    Level 2: Therapeutic (~80 groups)
+    Level 3: Pharmacological (~250 groups)
+    Level 4: Chemical (~900 groups)
+    Level 5: Substance (~5,700 codes)
+    """
+    if not 1 <= level <= 5:
+        raise ValueError("Level must be 1-5")
+
+    client = await get_sukl_client()
+    df = client._loader.get_table("dlp_atc")
+
+    # Filter by code length (level 1 = 1 char, level 2 = 3 chars, etc.)
+    code_lengths = {1: 1, 2: 3, 3: 4, 4: 5, 5: 7}
+    target_length = code_lengths[level]
+
+    filtered = df[df["KOD"].str.len() == target_length]
+
+    return {
+        "level": level,
+        "total": len(filtered),
+        "codes": [
+            {
+                "code": row["KOD"],
+                "name": row["NAZEV"],
+                "name_en": row.get("NAZEV_EN"),
+            }
+            for _, row in filtered.head(100).iterrows()  # Limit 100 per level
+        ],
+    }
+
+
+@mcp.resource("sukl://atc/{code}")
+async def get_atc_code_resource(code: str) -> dict:
+    """
+    Get ATC code details with parent and children navigation.
+
+    Examples:
+    - sukl://atc/N → Nervous system (level 1)
+    - sukl://atc/N02 → Analgesics (level 2)
+    - sukl://atc/N02BE → Anilides (level 3)
+    - sukl://atc/N02BE01 → Paracetamol (level 5)
+    """
+    client = await get_sukl_client()
+    df = client._loader.get_table("dlp_atc")
+
+    # Get current code
+    current = df[df["KOD"] == code.upper()]
+    if current.empty:
+        return {"error": f"ATC code {code} not found", "code": code}
+
+    row = current.iloc[0]
+    code_len = len(code)
+
+    # Determine level
+    level_map = {1: 1, 3: 2, 4: 3, 5: 4, 7: 5}
+    level = level_map.get(code_len, 0)
+
+    # Get parent (1 level up)
+    parent_code = None
+    if code_len > 1:
+        parent_lengths = {3: 1, 4: 3, 5: 4, 7: 5}
+        parent_len = parent_lengths.get(code_len)
+        if parent_len:
+            parent_code = code[:parent_len]
+
+    # Get children (1 level down)
+    children = []
+    if level < 5:  # Not at substance level
+        child_df = df[df["KOD"].str.startswith(code) & (df["KOD"].str.len() > code_len)]
+        # Group by next level length
+        next_lengths = {1: 3, 3: 4, 4: 5, 5: 7}
+        next_len = next_lengths.get(code_len)
+        if next_len:
+            child_df = child_df[child_df["KOD"].str.len() == next_len]
+            children = [
+                {"code": c["KOD"], "name": c["NAZEV"]} for _, c in child_df.head(20).iterrows()
+            ]
+
+    return {
+        "code": row["KOD"],
+        "name": row["NAZEV"],
+        "name_en": row.get("NAZEV_EN"),
+        "level": level,
+        "parent": parent_code,
+        "children": children,
+        "total_children": len(children),
+        "uri_parent": f"sukl://atc/{parent_code}" if parent_code else None,
+        "uri_children": [f"sukl://atc/{c['code']}" for c in children[:5]],  # First 5
+    }
+
+
+@mcp.resource("sukl://atc/tree/{root_code}")
+async def get_atc_subtree(root_code: str) -> dict:
+    """
+    Get complete subtree from ATC code (all descendants).
+
+    Example: sukl://atc/tree/N02 → all analgesics
+    Warning: Large subtrees may return 100+ codes
+    """
+    client = await get_sukl_client()
+    df = client._loader.get_table("dlp_atc")
+
+    # Get all codes starting with root_code
+    subtree = df[df["KOD"].str.startswith(root_code.upper())]
+
+    return {
+        "root_code": root_code.upper(),
+        "total_descendants": len(subtree),
+        "codes": [
+            {
+                "code": row["KOD"],
+                "name": row["NAZEV"],
+                "level": {1: 1, 3: 2, 4: 3, 5: 4, 7: 5}.get(len(row["KOD"]), 0),
+            }
+            for _, row in subtree.head(100).iterrows()
+        ],
     }
 
 
@@ -967,6 +1096,113 @@ async def get_database_statistics() -> dict:
         "unavailable_medicines": total_medicines - available_count,
         "data_source": "SÚKL Open Data",
         "server_version": "4.0.0",
+    }
+
+
+@mcp.resource("sukl://pharmacies/regions")
+async def get_pharmacy_regions() -> list[str]:
+    """
+    Seznam všech českých krajů (14 krajů) pro regionální vyhledávání lékáren.
+
+    Vrací seznam názvů krajů, které lze použít pro filtrování lékáren
+    prostřednictvím resource sukl://pharmacies/region/{region_name}.
+    """
+    client = await get_sukl_client()
+    df = client._loader.get_table("lekarny_seznam")
+
+    if df is None or df.empty:
+        return []
+
+    # Get unique regions and sort them
+    regions = df["KRAJ"].dropna().drop_duplicates().sort_values().tolist()
+    return regions
+
+
+@mcp.resource("sukl://pharmacies/region/{region_name}")
+async def get_pharmacies_by_region(region_name: str) -> dict:
+    """
+    Seznam lékáren v konkrétním kraji.
+
+    Args:
+        region_name: Název kraje (např. "Praha", "Středočeský", "Jihomoravský")
+
+    Returns:
+        Slovník s celkovým počtem a seznamem lékáren (max 50).
+    """
+    client = await get_sukl_client()
+    df = client._loader.get_table("lekarny_seznam")
+
+    if df is None or df.empty:
+        return {"region": region_name, "total": 0, "pharmacies": []}
+
+    # Filter by region (case-insensitive partial match)
+    filtered = df[df["KRAJ"].str.contains(region_name, case=False, na=False)]
+
+    pharmacies = [
+        {
+            "name": row.get("NAZEV"),
+            "city": row.get("MESTO"),
+            "street": row.get("ULICE"),
+            "postal_code": row.get("PSC"),
+        }
+        for _, row in filtered.head(50).iterrows()
+    ]
+
+    return {"region": region_name, "total": len(filtered), "pharmacies": pharmacies}
+
+
+@mcp.resource("sukl://statistics/detailed")
+async def get_detailed_statistics() -> dict:
+    """
+    Komplexní statistiky databáze SÚKL.
+
+    Poskytuje podrobné informace o:
+    - Léčivých přípravcích (celkem, dostupné, nedostupné)
+    - Léčivých látkách
+    - ATC hierarchii (počty na každé úrovni)
+    - Lékárnách
+
+    Rychlejší alternativa k opakovaným tool calls pro získání statistik.
+    """
+    client = await get_sukl_client()
+
+    # Medicines stats
+    dlp = client._loader.get_table("dlp")
+    total_medicines = len(dlp) if dlp is not None else 0
+    available_count = int((dlp["DODAVKY"] == "A").sum()) if dlp is not None and "DODAVKY" in dlp.columns else 0
+
+    # Substances count
+    substances_df = client._loader.get_table("dlp_lecivelatky")
+    total_substances = len(substances_df) if substances_df is not None else 0
+
+    # ATC hierarchy
+    atc_df = client._loader.get_table("dlp_atc")
+    atc_counts = {}
+    if atc_df is not None:
+        atc_counts = {
+            "level_1": len(atc_df[atc_df["KOD"].str.len() == 1]),
+            "level_2": len(atc_df[atc_df["KOD"].str.len() == 3]),
+            "level_3": len(atc_df[atc_df["KOD"].str.len() == 4]),
+            "level_4": len(atc_df[atc_df["KOD"].str.len() == 5]),
+            "level_5": len(atc_df[atc_df["KOD"].str.len() == 7]),
+        }
+
+    # Pharmacies
+    pharmacies_df = client._loader.get_table("lekarny_seznam")
+    total_pharmacies = len(pharmacies_df) if pharmacies_df is not None else 0
+
+    return {
+        "medicines": {
+            "total": total_medicines,
+            "available": available_count,
+            "unavailable": total_medicines - available_count,
+        },
+        "substances": {"total": total_substances},
+        "atc_hierarchy": atc_counts,
+        "pharmacies": {"total": total_pharmacies},
+        "data_source": "SÚKL Open Data",
+        "server_version": "4.1.0",
+        "last_update": "2024-12-23",
     }
 
 
