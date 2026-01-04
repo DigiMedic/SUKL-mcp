@@ -71,10 +71,12 @@ async def test_rest_api_search_helper():
     """Test _try_rest_search() helper function."""
     async with server_lifespan(mcp):
         # Test vyhledávání PARALEN
-        results = await _try_rest_search("PARALEN", limit=5)
+        result_tuple = await _try_rest_search("PARALEN", limit=5)
 
-        if results:
+        if result_tuple:
+            results, source = result_tuple  # Unpack tuple[list[dict], str]
             assert len(results) > 0, "Should return search results"
+            assert source == "rest_api", "Should be from REST API"
             # První result by měl mít atc a doplnek
             first = results[0]
             assert isinstance(first, dict), "Should be dict"
