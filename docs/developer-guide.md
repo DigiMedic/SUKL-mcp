@@ -13,8 +13,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/fastmcp-boilerplate.git
-cd fastmcp-boilerplate
+git clone https://github.com/DigiMedic/SUKL-mcp.git
+cd SUKL-mcp
 
 # Create virtual environment
 python3 -m venv venv
@@ -51,20 +51,27 @@ dev = [
 ## Project Structure
 
 ```
-fastmcp-boilerplate/
+SUKL-mcp/
 ├── src/
 │   └── sukl_mcp/
 │       ├── __init__.py          # Package exports
 │       ├── __main__.py          # Entry point (python -m sukl_mcp)
-│       ├── server.py            # FastMCP server + 7 MCP tools
+│       ├── server.py            # FastMCP server + 8 MCP tools
 │       ├── client_csv.py        # Data loader + SÚKL client
 │       ├── models.py            # Pydantic data models
+│       ├── document_parser.py   # PDF/DOCX parser with LRU cache
+│       ├── fuzzy_search.py      # Multi-level fuzzy search
+│       ├── price_calculator.py  # Reimbursement calculations
 │       └── exceptions.py        # Custom exceptions
 │
 ├── tests/
 │   ├── __init__.py
 │   ├── test_validation.py       # Input validation tests
-│   └── test_async_io.py         # Async I/O tests
+│   ├── test_async_io.py         # Async I/O tests
+│   ├── test_availability.py     # Availability & alternatives tests
+│   ├── test_document_parser.py  # Document parsing tests
+│   ├── test_fuzzy_search.py     # Fuzzy search tests
+│   └── test_price_calculator.py # Price calculation tests
 │
 ├── docs/                        # Documentation (this folder)
 │   ├── index.md
@@ -817,7 +824,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 pip install -e .
 
 # Or set PYTHONPATH
-export PYTHONPATH="${PYTHONPATH}:/path/to/fastmcp-boilerplate/src"
+export PYTHONPATH="${PYTHONPATH}:/path/to/SUKL-mcp/src"
 ```
 
 **Issue**: `asyncio.Lock` error in tests

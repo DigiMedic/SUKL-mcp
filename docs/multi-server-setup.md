@@ -381,7 +381,7 @@ Najdeš je na:
 
 ## 📞 Support
 
-- **SÚKL MCP Server issues:** https://github.com/<your-org>/SUKL-mcp/issues
+- **SÚKL MCP Server issues:** https://github.com/DigiMedic/SUKL-mcp/issues
 - **FastMCP documentation:** https://gofastmcp.com
 - **MCP Protocol spec:** https://modelcontextprotocol.io
 

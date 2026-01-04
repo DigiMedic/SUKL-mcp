@@ -19,8 +19,8 @@ The SÚKL MCP Server provides AI agents like Claude with access to the Czech pha
 ```bash
 # macOS/Linux
 cd ~/Documents
-git clone https://github.com/your-org/fastmcp-boilerplate.git
-cd fastmcp-boilerplate
+git clone https://github.com/DigiMedic/SUKL-mcp.git
+cd SUKL-mcp
 python3 -m venv venv
 source venv/bin/activate
 pip install -e .
@@ -45,14 +45,14 @@ Add server configuration:
       "command": "python",
       "args": ["-m", "sukl_mcp.server"],
       "env": {
-        "PYTHONPATH": "/Users/yourname/Documents/fastmcp-boilerplate/src"
+        "PYTHONPATH": "/Users/yourname/Documents/SUKL-mcp/src"
       }
     }
   }
 }
 ```
 
-Replace `/Users/yourname/Documents/fastmcp-boilerplate/src` with your actual path.
+Replace `/Users/yourname/Documents/SUKL-mcp/src` with your actual path.
 
 #### 3. Restart Claude Desktop
 
@@ -506,7 +506,7 @@ Example:
 
 ### Report Issues
 
-GitHub Issues: https://github.com/your-org/fastmcp-boilerplate/issues
+GitHub Issues: https://github.com/DigiMedic/SUKL-mcp/issues
 
 ### Documentation
 

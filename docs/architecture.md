@@ -33,10 +33,11 @@ graph TB
         T1[search_medicine]
         T2[get_medicine_details]
         T3[get_pil_content]
-        T4[check_availability]
-        T5[get_reimbursement]
-        T6[find_pharmacies]
-        T7[get_atc_info]
+        T4[get_spc_content]
+        T5[check_availability]
+        T6[get_reimbursement]
+        T7[find_pharmacies]
+        T8[get_atc_info]
     end
 
     subgraph "Transport Layer"
@@ -70,6 +71,7 @@ graph TB
     Server --> T5
     Server --> T6
     Server --> T7
+    Server --> T8
 
     T1 --> STDIO
     T1 --> HTTP
@@ -85,6 +87,8 @@ graph TB
     T6 --> HTTP
     T7 --> STDIO
     T7 --> HTTP
+    T8 --> STDIO
+    T8 --> HTTP
 
     STDIO --> Claude
     HTTP --> AI

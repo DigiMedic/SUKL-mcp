@@ -19,7 +19,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 
 ### Klíčové vlastnosti
 
-- 🔍 **7 MCP tools** pro komplexní práci s farmaceutickými daty
+- 🔍 **8 MCP tools** pro komplexní práci s farmaceutickými daty
 - 🌐 **Hybrid Architecture (v4.0)**: REST API + CSV fallback pro 100% uptime
   - **3/10 tools migrované** na dual-mode (search, details, availability)
   - REST API primary (~100-160ms) → CSV fallback (~50ms)
@@ -34,6 +34,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 - 🏆 **Type-safe**: Pydantic v2 modely s runtime validací
 - 🚀 **Dual deployment**: FastMCP Cloud (stdio) + Smithery (HTTP/Docker)
 - ✅ **241 comprehensive tests** s pytest a coverage >85%
+- 🎯 **Full FastMCP 2.14+**: Context logging, Progress reporting, Resource templates, Tool annotations
 
 ### Datová základna
 
@@ -53,7 +54,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 
 ```bash
 # 1. Klonovat repozitář
-git clone https://github.com/your-org/SUKL-mcp.git
+git clone https://github.com/DigiMedic/SUKL-mcp.git
 cd SUKL-mcp
 
 # 2. Vytvořit virtuální prostředí
@@ -101,9 +102,11 @@ Restart Claude Desktop a server bude k dispozici.
 
 ## 🛠️ MCP Tools
 
-Server poskytuje 7 specializovaných nástrojů pro práci s farmaceutickými daty:
+Server poskytuje **8 specializovaných nástrojů** pro práci s farmaceutickými daty (+ 5 MCP resources včetně 2 dynamických templates a 3 prompty):
 
-### 1. `search_medicines` - Vyhledávání léčivých přípravků
+> 💡 **FastMCP Best Practices**: Všechny nástroje používají `readOnlyHint` annotation pro přeskočení potvrzovacích dialogů, `Context` objekt pro client-side logging a `tags` pro kategorizaci.
+
+### 1. `search_medicine` - Vyhledávání léčivých přípravků
 **Smart Search** s multi-level pipeline a fuzzy matchingem pro toleranci překlepů.
 
 **Pipeline:**
@@ -116,22 +119,22 @@ Server poskytuje 7 specializovaných nástrojů pro práci s farmaceutickými da
 
 ```python
 # Příklady
-search_medicines(query="ibuprofen", limit=10)
+search_medicine(query="ibuprofen", limit=10)
 # → [{'sukl_code': '12345', 'name': 'IBUPROFEN TABLETA 400MG', 'match_score': 30.0, 'match_type': 'exact', ...}, ...]
 
-search_medicines(query="ibuprofn", use_fuzzy=True)  # Oprava překlepu
+search_medicine(query="ibuprofn", use_fuzzy=True)  # Oprava překlepu
 # → [{'name': 'IBUPROFEN...', 'match_type': 'fuzzy', 'fuzzy_score': 85.0, ...}, ...]
 ```
 
-### 2. `get_medicine_detail` - Detaily konkrétního přípravku
+### 2. `get_medicine_details` - Detaily konkrétního přípravku
 Kompletní informace o léčivém přípravku včetně složení a registračních údajů.
 
 ```python
-get_medicine_detail(sukl_code="12345")
+get_medicine_details(sukl_code="12345")
 # → {'name': '...', 'dosage_form': '...', 'composition': [...], ...}
 ```
 
-### 3. `get_pil_document` - Příbalové informace (PIL)
+### 3. `get_pil_content` - Příbalové informace (PIL)
 Automatická extrakce textu z příbalového letáku (PDF/DOCX) s cachingem (24h TTL, 50 docs).
 
 **Features:**
@@ -141,11 +144,19 @@ Automatická extrakce textu z příbalového letáku (PDF/DOCX) s cachingem (24h
 - Graceful error handling s fallback na URL
 
 ```python
-get_pil_document(sukl_code="12345")
+get_pil_content(sukl_code="12345")
 # → {'sukl_code': '12345', 'full_text': 'Přečtěte si pozorně...', 'document_format': 'pdf', 'url': 'https://...'}
 ```
 
-### 4. `check_medicine_availability` - Dostupnost a alternativy
+### 4. `get_spc_content` - Souhrn údajů o přípravku (SPC)
+Odborné informace pro zdravotnické pracovníky (farmakologie, indikace, kontraindikace).
+
+```python
+get_spc_content(sukl_code="12345")
+# → {'sukl_code': '12345', 'full_text': 'Souhrn údajů o přípravku...', 'document_format': 'pdf'}
+```
+
+### 5. `check_availability` - Dostupnost a alternativy
 Kontrola dostupnosti s automatickým doporučením náhradních léků při nedostupnosti.
 
 **Features:**
@@ -155,7 +166,7 @@ Kontrola dostupnosti s automatickým doporučením náhradních léků při nedo
 - Obohacení o cenové údaje a doplatky pacienta
 
 ```python
-check_medicine_availability(sukl_code="12345", include_alternatives=True, limit=5)
+check_availability(sukl_code="12345", include_alternatives=True, limit=5)
 # → {
 #     'available': False,
 #     'status': 'unavailable',
@@ -167,28 +178,28 @@ check_medicine_availability(sukl_code="12345", include_alternatives=True, limit=
 # }
 ```
 
-### 5. `get_reimbursement_info` - Informace o úhradách
+### 6. `get_reimbursement` - Informace o úhradách
 Úhradové kategorie a podmínky preskripce.
 
 ```python
-get_reimbursement_info(sukl_code="12345")
+get_reimbursement(sukl_code="12345")
 # → {'reimbursed': True, 'category': 'A', 'prescription_required': True}
 ```
 
-### 6. `search_pharmacies` - Vyhledávání lékáren
+### 7. `find_pharmacies` - Vyhledávání lékáren
 Vyhledávání lékáren podle lokace a dalších kritérií.
 
 ```python
-search_pharmacies(region="Praha", limit=20)
+find_pharmacies(city="Praha", limit=20)
 # → [{'name': 'Lékárna U Anděla', 'address': '...', ...}, ...]
 ```
 
-### 7. `get_atc_groups` - ATC klasifikace
+### 8. `get_atc_info` - ATC klasifikace
 Anatomicko-terapeuticko-chemická klasifikace léčiv.
 
 ```python
-get_atc_groups(atc_prefix="N02")
-# → [{'code': 'N02BE01', 'name': 'Paracetamol', ...}, ...]
+get_atc_info(atc_code="N02")
+# → {'code': 'N02BE01', 'name': 'Paracetamol', ...}
 ```
 
 Detailní dokumentace všech tools: **[API Reference](docs/api-reference.md)**
@@ -207,6 +218,7 @@ Detailní dokumentace všech tools: **[API Reference](docs/api-reference.md)**
                      │ MCP Protocol
 ┌────────────────────▼────────────────────────────────────┐
 │                FastMCP Server                           │
+<<<<<<< HEAD
 │         (7 MCP tools pro farmaceutická data)            │
 └─────────────┬──────────────────────┬────────────────────┘
               │                      │
@@ -228,6 +240,20 @@ Detailní dokumentace všech tools: **[API Reference](docs/api-reference.md)**
      ✅ Fast (0-1ms p50)    ✅ Reliable (50ms)
      ✅ Real-time data      ✅ Price data (CAU)
      ⚠️  No price data      ⚠️  Monthly updates
+=======
+│         (8 MCP tools pro farmaceutická data)            │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│                  SUKLClient                             │
+│     (CSV data loading, in-memory queries)               │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│              SÚKL Open Data                             │
+│        (opendata.sukl.cz - CSV v ZIP)                   │
+└─────────────────────────────────────────────────────────┘
+>>>>>>> main
 ```
 
 ### Klíčové komponenty
@@ -371,7 +397,11 @@ Developer guide: **[Developer Documentation](docs/developer-guide.md)**
 
 ## 🧪 Testing
 
+<<<<<<< HEAD
 Projekt obsahuje **241 comprehensive tests** pokrývající:
+=======
+Projekt obsahuje **197 comprehensive tests** pokrývající:
+>>>>>>> main
 
 ### Core Functionality (23 tests)
 - ✅ Input validation (search query, SÚKL kódy, ATC prefixy)
@@ -448,7 +478,7 @@ Kompletní dokumentace v **[docs/](docs/)** adresáři:
 - **[Product Specification](PRODUCT_SPECIFICATION.md)** - 📋 Vize, architektura, roadmapa vývoje
 - **[Getting Started](docs/index.md)** - Rychlý úvod a instalace
 - **[Architecture](docs/architecture.md)** - Systémová architektura (6 Mermaid diagramů)
-- **[API Reference](docs/api-reference.md)** - Kompletní dokumentace 7 MCP tools
+- **[API Reference](docs/api-reference.md)** - Kompletní dokumentace 8 MCP tools + 5 resources
 - **[Developer Guide](docs/developer-guide.md)** - Development setup a workflow
 - **[Examples](docs/examples.md)** - 15 code examples
 
@@ -566,7 +596,7 @@ Data poskytnutá SÚKL pod podmínkami Open Data: https://opendata.sukl.cz/?q=po
 - **FastMCP Framework**: https://gofastmcp.com
 - **SÚKL Open Data**: https://opendata.sukl.cz
 - **Model Context Protocol**: https://modelcontextprotocol.io
-- **Issues & Support**: https://github.com/your-org/SUKL-mcp/issues
+- **Issues & Support**: https://github.com/DigiMedic/SUKL-mcp/issues
 
 ---
 

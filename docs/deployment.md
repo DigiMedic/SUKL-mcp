@@ -20,8 +20,8 @@ The SÚKL MCP Server supports three deployment modes:
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/fastmcp-boilerplate.git
-cd fastmcp-boilerplate
+git clone https://github.com/DigiMedic/SUKL-mcp.git
+cd SUKL-mcp
 python3 -m venv venv
 source venv/bin/activate
 pip install -e ".[dev]"
@@ -44,7 +44,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
         "sukl_mcp.server"
       ],
       "env": {
-        "PYTHONPATH": "/absolute/path/to/fastmcp-boilerplate/src",
+        "PYTHONPATH": "/absolute/path/to/SUKL-mcp/src",
         "SUKL_CACHE_DIR": "/tmp/sukl_dlp_cache",
         "SUKL_DATA_DIR": "/tmp/sukl_dlp_data",
         "LOG_LEVEL": "INFO"

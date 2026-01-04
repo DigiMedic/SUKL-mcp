@@ -67,6 +67,7 @@ dev = [
     "black>=24.0.0",
     "ruff>=0.3.0",
     "mypy>=1.8.0",
+    "pandas-stubs>=2.0.0",        # Type stubs for pandas
 ]
 server = [
     "uvicorn>=0.27.0",
@@ -79,12 +80,12 @@ all = [
 sukl-mcp = "sukl_mcp.server:main"
 
 [project.urls]
-Homepage = "https://github.com/your-org/fastmcp-boilerplate"
-Documentation = "https://github.com/your-org/fastmcp-boilerplate/tree/main/sukl_mcp"
-Repository = "https://github.com/your-org/fastmcp-boilerplate"
-"Bug Tracker" = "https://github.com/your-org/fastmcp-boilerplate/issues"
+Homepage = "https://github.com/DigiMedic/SUKL-mcp"
+Documentation = "https://github.com/DigiMedic/SUKL-mcp/tree/main/docs"
+Repository = "https://github.com/DigiMedic/SUKL-mcp"
+"Bug Tracker" = "https://github.com/DigiMedic/SUKL-mcp/issues"
 "SÚKL Open Data" = "https://opendata.sukl.cz"
-Changelog = "https://github.com/your-org/fastmcp-boilerplate/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/DigiMedic/SUKL-mcp/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sukl_mcp"]

@@ -86,6 +86,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
 mcp = FastMCP(
     name="SÚKL MCP Server",
     version="4.0.0",
+    website_url="https://github.com/DigiMedic/SUKL-mcp",
     lifespan=server_lifespan,
     instructions="""
     Tento MCP server poskytuje přístup k databázi léčivých přípravků SÚKL.
@@ -232,7 +233,10 @@ async def _try_rest_search(
         return None
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"search", "medicines"},
+    annotations={"readOnlyHint": True, "openWorldHint": True, "idempotentHint": True},
+)
 async def search_medicine(
     query: str,
     only_available: bool = False,
@@ -382,7 +386,10 @@ async def _try_rest_get_detail(sukl_code: str) -> dict | None:
         return None
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"medicines", "details"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
@@ -458,7 +465,10 @@ async def get_medicine_details(sukl_code: str) -> MedicineDetail | None:
     )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"documents", "patient-info"},
+    annotations={"readOnlyHint": True},
+)
 async def get_pil_content(sukl_code: str) -> PILContent | None:
     """
     Získá obsah příbalového letáku (PIL) pro pacienty.
@@ -515,8 +525,11 @@ async def get_pil_content(sukl_code: str) -> PILContent | None:
         )
 
 
-@mcp.tool
-async def get_spc_content(sukl_code: str) -> PILContent | None:
+@mcp.tool(
+    tags={"documents", "professional-info"},
+    annotations={"readOnlyHint": True},
+)
+async def get_spc_content(sukl_code: str) -> SPCContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
 
@@ -570,7 +583,10 @@ async def get_spc_content(sukl_code: str) -> PILContent | None:
         )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"availability", "alternatives"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
@@ -667,7 +683,10 @@ async def check_availability(
     )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"pricing", "reimbursement"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
     """
     Získá informace o úhradě léčivého přípravku zdravotní pojišťovnou.
@@ -757,7 +776,10 @@ async def get_reimbursement(sukl_code: str) -> ReimbursementInfo | None:
         )
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"pharmacies", "location"},
+    annotations={"readOnlyHint": True, "openWorldHint": True},
+)
 async def find_pharmacies(
     city: str | None = None,
     postal_code: str | None = None,
@@ -823,7 +845,10 @@ async def find_pharmacies(
     return results
 
 
-@mcp.tool
+@mcp.tool(
+    tags={"classification", "atc"},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
+)
 async def get_atc_info(atc_code: str) -> dict:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.

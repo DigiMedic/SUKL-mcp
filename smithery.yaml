@@ -51,8 +51,8 @@ metadata:
   description: "Production-ready FastMCP server pro přístup k české databázi léčivých přípravků SÚKL (68,248 přípravků)"
   author: "FastMCP Community"
   license: "MIT"
-  homepage: "https://github.com/your-org/fastmcp-boilerplate"
-  repository: "https://github.com/your-org/fastmcp-boilerplate"
+  homepage: "https://github.com/DigiMedic/SUKL-mcp"
+  repository: "https://github.com/DigiMedic/SUKL-mcp"
 
   # Tags pro Smithery registry
   tags:

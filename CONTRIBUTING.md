@@ -9,8 +9,8 @@ Děkujeme za zájem o přispění do projektu! Tato příručka vám pomůže za
 ```bash
 # Fork repozitář na GitHubu
 # Pak naklonuj svůj fork
-git clone https://github.com/your-username/fastmcp-boilerplate.git
-cd fastmcp-boilerplate
+git clone https://github.com/your-username/SUKL-mcp.git
+cd SUKL-mcp
 ```
 
 ### 2. Nastavení vývojového prostředí
@@ -210,7 +210,7 @@ git commit -m "docs(readme): update installation instructions"
 
 Pokud najdeš bug:
 
-1. Zkontroluj, jestli už není [reported](https://github.com/your-org/fastmcp-boilerplate/issues)
+1. Zkontroluj, jestli už není [reported](https://github.com/DigiMedic/SUKL-mcp/issues)
 2. Vytvoř nový issue s:
    - Popisem problému
    - Kroky k reprodukci
@@ -242,4 +242,4 @@ Děkujeme všem přispěvatelům za pomoc s vylepšováním SÚKL MCP Server!
 
 ---
 
-**Máš otázky?** Otevři [discussion](https://github.com/your-org/fastmcp-boilerplate/discussions) nebo se zeptej v issues.
+**Máš otázky?** Otevři [discussion](https://github.com/DigiMedic/SUKL-mcp/discussions) nebo se zeptej v issues.

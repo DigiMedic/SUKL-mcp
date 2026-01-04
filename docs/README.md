@@ -14,7 +14,7 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 **4 pages** | Overview and navigation guide
 
 - Quick start guide
-- Key statistics (68,248 medicines, 7 MCP tools)
+- Key statistics (68,248 medicines, 8 MCP tools)
 - Technology stack
 - Project structure overview
 
@@ -56,7 +56,7 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 **Key Topics**:
 - SUKLDataLoader: Async data acquisition (15s download, 8s extraction, 8s CSV loading)
 - SUKLClient: In-memory pandas DataFrame queries
-- FastMCP Server: 7 MCP tools with Pydantic validation
+- FastMCP Server: 8 MCP tools with Pydantic validation
 - Deployment architectures (FastMCP Cloud vs Smithery)
 
 **Read this** to understand the "why" behind architectural choices.
@@ -64,7 +64,7 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 ---
 
 ### 🔧 [api-reference.md](api-reference.md) - Complete API Documentation
-**22 pages** | All 7 MCP tools with full specifications
+**25 pages** | All 8 MCP tools with full specifications
 
 **Tools Documented**:
 
@@ -358,7 +358,7 @@ This directory contains comprehensive technical documentation for the SÚKL MCP 
 - ✅ **Cross-referenced**: Internal links between documents
 - ✅ **Versioned**: Dated with version numbers
 - ✅ **Accurate**: Generated from actual source code
-- ✅ **Complete**: API reference for all 7 MCP tools
+- ✅ **Complete**: API reference for all 8 MCP tools
 
 ## Contributing to Documentation
 
@@ -421,8 +421,8 @@ mkdocs-pdf-export-plugin
 
 Found an error or have suggestions?
 
-- **GitHub Issues**: https://github.com/your-org/fastmcp-boilerplate/issues
-- **Pull Requests**: https://github.com/your-org/fastmcp-boilerplate/pulls
+- **GitHub Issues**: https://github.com/DigiMedic/SUKL-mcp/issues
+- **Pull Requests**: https://github.com/DigiMedic/SUKL-mcp/pulls
 
 ---
 

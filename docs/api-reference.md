@@ -2,19 +2,34 @@
 
 ## Overview
 
-The SÚKL MCP Server exposes 7 MCP tools for accessing Czech pharmaceutical data. All tools are async and return structured Pydantic models serialized to JSON.
+The SÚKL MCP Server exposes **8 MCP tools** and **5 MCP resources** (including 2 dynamic templates) for accessing Czech pharmaceutical data. All tools are async and return structured Pydantic models serialized to JSON.
 
 **Base URL** (HTTP transport): `http://localhost:8000`
 **Transport**: stdio (FastMCP Cloud) or HTTP/SSE (Smithery)
 **Protocol**: Model Context Protocol (MCP)
+**Version**: 3.1.0
+
+### FastMCP 2.14+ Features
+
+All tools in this server use modern FastMCP features:
+
+| Feature | Description |
+|---------|-------------|
+| **`readOnlyHint`** | All tools marked as read-only, ChatGPT skips confirmation dialogs |
+| **`Context` logging** | Client-side logging via `ctx.info()`, `ctx.warning()` |
+| **`Progress` reporting** | Progress indicators for document parsing (`ctx.report_progress()`) |
+| **Tags** | Tools categorized by `search`, `detail`, `documents`, `pricing`, etc. |
+| **Resource Templates** | Dynamic resources `sukl://medicine/{code}` and `sukl://atc/{code}` |
 
 ## MCP Tools
 
 ### 1. search_medicine
 
-Search for medicines in the SÚKL database by name, active substance, or ATC code.
+Search for medicines in the SÚKL database by name, active substance, or ATC code with multi-level pipeline and fuzzy matching.
 
-**Location**: `/src/sukl_mcp/server.py` (lines 72-136)
+**Location**: `/src/sukl_mcp/server.py`
+**Tags**: `search`, `medicines`
+**Annotations**: `readOnlyHint: true`, `openWorldHint: true`
 
 #### Signature
 
@@ -24,6 +39,8 @@ async def search_medicine(
     only_available: bool = False,
     only_reimbursed: bool = False,
     limit: int = 20,
+    use_fuzzy: bool = True,
+    ctx: Context = None,
 ) -> SearchResponse
 ```
 
@@ -338,7 +355,7 @@ interface PILContent {
 #### Important Notes
 
 - **Disclaimer**: Information is for informational purposes only. Always follow doctor's instructions.
-- **Current Implementation**: Returns PDF URL, not full text extraction
+- **Current Implementation**: Automatic text extraction from PDF/DOCX with LRU cache (50 docs, 24h TTL)
 - **Language**: Always Czech ("cs")
 
 #### Error Codes
@@ -349,11 +366,83 @@ interface PILContent {
 
 ---
 
-### 4. check_availability
+### 4. get_spc_content
+
+Get the Summary of Product Characteristics (SPC) for healthcare professionals.
+
+**Location**: `/src/sukl_mcp/server.py`
+
+#### Signature
+
+```python
+async def get_spc_content(
+    sukl_code: str,
+    ctx: Context | None = None,
+) -> PILContent | None
+```
+
+#### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `sukl_code` | string | Yes | SÚKL code (7 digits) |
+
+#### Return Type
+
+```typescript
+interface PILContent {
+  sukl_code: string;           // SÚKL code
+  medicine_name: string;       // Medicine name
+  document_url: string | null; // URL to PDF document
+  language: string;            // Document language (default: "cs")
+  full_text: string | null;    // Extracted text content
+  document_format: string | null; // Format: "pdf" or "docx"
+}
+```
+
+#### Examples
+
+**Get SPC**:
+```json
+{
+  "tool": "get_spc_content",
+  "params": {
+    "sukl_code": "254045"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "sukl_code": "0254045",
+  "medicine_name": "PARALEN 500",
+  "document_url": "https://prehledy.sukl.cz/spc/0254045.pdf",
+  "language": "cs",
+  "full_text": "Souhrn údajů o přípravku...",
+  "document_format": "pdf"
+}
+```
+
+#### Important Notes
+
+- **Target Audience**: Healthcare professionals (pharmacists, doctors)
+- **Content**: Pharmacology, indications, contraindications, interactions, dosing
+- **Implementation**: Same parsing engine as PIL with caching
+
+#### Error Codes
+
+| Error | Cause | HTTP Status |
+|-------|-------|-------------|
+| Medicine not found | Invalid SÚKL code | Returns `null` |
+
+---
+
+### 5. check_availability
 
 **EPIC 4: Intelligent Alternatives** - Check current market availability of a medicine with automatic alternative recommendations when unavailable.
 
-**Location**: `/src/sukl_mcp/server.py` (lines 341-428)
+**Location**: `/src/sukl_mcp/server.py` (lines 427-510)
 
 #### Signature
 
@@ -543,7 +632,7 @@ Alternatives are ranked using weighted scoring:
 
 ---
 
-### 5. get_reimbursement
+### 6. get_reimbursement
 
 Get reimbursement information for a medicine.
 
@@ -629,7 +718,7 @@ Actual copay may vary by:
 
 ---
 
-### 6. find_pharmacies
+### 7. find_pharmacies
 
 Find pharmacies by location and service filters.
 
@@ -746,7 +835,7 @@ interface PharmacyInfo {
 
 ---
 
-### 7. get_atc_info
+### 8. get_atc_info
 
 Get information about ATC (Anatomical Therapeutic Chemical) classification.
 
@@ -1042,6 +1131,122 @@ return result  # Serialized to JSON automatically
   }
 }
 ```
+
+## MCP Resources
+
+The server exposes **5 MCP resources** for direct data access without tool calls.
+
+### Static Resources
+
+#### 1. sukl://health
+
+Server health status and database statistics.
+
+**Tags**: `system`, `monitoring`
+**Annotations**: `readOnlyHint: true`, `idempotentHint: true`
+
+```json
+{
+  "status": "healthy",
+  "tables_loaded": 5,
+  "total_records": 68248,
+  "last_updated": "2024-12-23T10:30:00Z"
+}
+```
+
+#### 2. sukl://statistics
+
+Database statistics summary.
+
+**Tags**: `system`, `statistics`
+**Annotations**: `readOnlyHint: true`, `idempotentHint: true`
+
+```json
+{
+  "total_medicines": 68248,
+  "available_medicines": 45120,
+  "unavailable_medicines": 23128,
+  "data_source": "SÚKL Open Data",
+  "server_version": "3.1.0"
+}
+```
+
+#### 3. sukl://atc-groups/top-level
+
+Main ATC classification groups (1st level, A-V).
+
+**Tags**: `classification`, `atc`, `reference`
+**Annotations**: `readOnlyHint: true`, `idempotentHint: true`
+
+```json
+{
+  "description": "Hlavní ATC skupiny (1. úroveň)",
+  "total": 14,
+  "groups": [
+    {"code": "A", "name": "Trávicí trakt a metabolismus"},
+    {"code": "B", "name": "Krev a krvetvorné orgány"},
+    {"code": "C", "name": "Kardiovaskulární systém"},
+    ...
+  ]
+}
+```
+
+### Resource Templates (Dynamic)
+
+#### 4. sukl://medicine/{sukl_code}
+
+Dynamic resource template for medicine details by SÚKL code.
+
+**Tags**: `medicines`, `detail`
+**Annotations**: `readOnlyHint: true`
+**URI Parameter**: `sukl_code` (7-digit SÚKL code)
+
+**Example**: `sukl://medicine/0254045`
+
+```json
+{
+  "sukl_code": "0254045",
+  "name": "PARALEN 500",
+  "supplement": "tablety",
+  "strength": "500MG",
+  "form": "POR TBL NOB",
+  "atc_code": "N02BE01",
+  "registration_holder": "ZENTIVA",
+  "is_available": true,
+  "dispensation_mode": "F",
+  "price_info": {
+    "max_price": 45.50,
+    "reimbursement_amount": 30.00,
+    "patient_copay": 15.50
+  }
+}
+```
+
+#### 5. sukl://atc/{atc_code}
+
+Dynamic resource template for ATC classification group.
+
+**Tags**: `classification`, `atc`
+**Annotations**: `readOnlyHint: true`, `idempotentHint: true`
+**URI Parameter**: `atc_code` (1-7 character ATC code)
+
+**Example**: `sukl://atc/N02`
+
+```json
+{
+  "code": "N02",
+  "name": "ANALGETIKA",
+  "level": 2,
+  "children": [
+    {"code": "N02A", "name": "Opioidy"},
+    {"code": "N02B", "name": "Jiná analgetika a antipyretika"},
+    {"code": "N02C", "name": "Antimigrenika"}
+  ],
+  "total_children": 3
+}
+```
+
+---
 
 ## Performance Guidelines
 
