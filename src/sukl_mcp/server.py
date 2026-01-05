@@ -12,8 +12,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
+from rapidfuzz import fuzz
 from fastmcp import Context, FastMCP
-from fastmcp.dependencies import Progress
+from fastmcp.dependencies import Progress, CurrentContext
 from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
 from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
@@ -170,6 +171,55 @@ Srovnej:
 Použij search_medicine pro oba léky a get_reimbursement pro cenové údaje."""
 
 
+# === Helper Functions ===
+
+
+def _calculate_match_quality(query: str, medicine_name: str) -> tuple[float, str]:
+    """
+    Vypočítá match score a typ na základě similarity query a názvu léku.
+
+    Args:
+        query: Hledaný výraz (case-insensitive)
+        medicine_name: Název léku z API
+
+    Returns:
+        tuple[float, str]: (match_score, match_type)
+            - match_score: 0-100 (vyšší = lepší shoda)
+            - match_type: "exact" | "substring" | "fuzzy"
+    """
+    query_lower = query.lower().strip()
+    name_lower = medicine_name.lower().strip()
+
+    # 1. Exact match - absolutní shoda
+    if query_lower == name_lower:
+        return 100.0, "exact"
+
+    # 2. Substring match - query je podřetězec názvu
+    if query_lower in name_lower:
+        # Score based on length ratio (delší match = vyšší score)
+        ratio = len(query_lower) / len(name_lower)
+        score = 80.0 + (ratio * 15.0)  # 80-95 range
+        return score, "substring"
+
+    # 3. Fuzzy match - podobnost pomocí rapidfuzz
+    fuzzy_score = fuzz.ratio(query_lower, name_lower)
+
+    if fuzzy_score >= 80:
+        return fuzzy_score, "fuzzy"
+
+    # 4. Partial ratio - pro částečné shody
+    partial_score = fuzz.partial_ratio(query_lower, name_lower)
+
+    if partial_score >= 80:
+        return partial_score * 0.9, "fuzzy"  # Mírně nižší score pro partial
+
+    # 5. Token sort ratio - ignoruje pořadí slov
+    token_score = fuzz.token_sort_ratio(query_lower, name_lower)
+
+    # Minimální score je token_score * 0.8
+    return max(token_score * 0.8, 20.0), "fuzzy"
+
+
 # === MCP Tools ===
 
 
@@ -209,6 +259,9 @@ async def _try_rest_search(
         # Convert APILecivyPripravek -> dict pro kompatibilitu
         results = []
         for med in medicines:
+            # Calculate actual match quality based on query vs medicine name
+            match_score, match_type = _calculate_match_quality(query, med.nazev)
+
             results.append(
                 {
                     "kod_sukl": med.kodSUKL,
@@ -221,14 +274,18 @@ async def _try_rest_search(
                     "stav_registrace": med.stavRegistraceKod,
                     "vydej": med.zpusobVydejeKod,
                     "dostupnost": "ano" if med.jeDodavka else "ne",
-                    # Match metadata (REST API vrací exact match)
-                    "match_score": 20.0,
-                    "match_type": "exact",
+                    # Match metadata - calculated based on actual similarity
+                    "match_score": match_score,
+                    "match_type": match_type,
                 }
             )
 
-        logger.info(f"✅ REST API: {len(results)}/{len(search_result.codes)} results")
-        return results, "rest_api"
+        # Enrich with price data from CSV (REST API doesn't have price fields)
+        csv_client = await get_sukl_client()
+        enriched_results = await csv_client._enrich_with_price_data(results)
+
+        logger.info(f"✅ REST API: {len(enriched_results)}/{len(search_result.codes)} results (enriched)")
+        return enriched_results, "rest_api"
 
     except (SUKLAPIError, Exception) as e:
         logger.warning(f"⚠️  REST API search failed: {e}")
@@ -501,7 +558,8 @@ async def get_medicine_details(
         is_available=get_val("DODAVKY") != "0",
         is_marketed=True,  # Pokud je v databázi, je registrován
         # Cenové údaje z dlp_cau (EPIC 3)
-        has_reimbursement=price_info.get("is_reimbursed", False) if price_info else False,
+        # Note: None = data unavailable, False = not reimbursed, True = reimbursed
+        has_reimbursement=price_info.get("is_reimbursed") if price_info else None,
         max_price=price_info.get("max_price") if price_info else None,
         reimbursement_amount=price_info.get("reimbursement_amount") if price_info else None,
         patient_copay=price_info.get("patient_copay") if price_info else None,
@@ -733,13 +791,13 @@ async def check_availability(
 
     is_available = availability == AvailabilityStatus.AVAILABLE
 
-    # Hledání alternativ (pouze pokud není dostupný)
+    # Hledání alternativ (pokud je požadováno)
     alternatives = []
     recommendation = None
 
-    if include_alternatives and not is_available:
+    if include_alternatives:
         if ctx:
-            await ctx.info("Medicine not available, searching for alternatives")
+            await ctx.info("Searching for alternatives")
 
         # Použij find_generic_alternatives pro nalezení alternativ
         alt_results = await csv_client.find_generic_alternatives(sukl_code, limit=limit)
@@ -767,12 +825,21 @@ async def check_availability(
         # Generuj doporučení
         if alternatives:
             top_alt = alternatives[0]
-            recommendation = (
-                f"Tento přípravek není dostupný. "
-                f"Doporučujeme alternativu: {top_alt.name} "
-                f"(relevance: {top_alt.relevance_score:.0f}/100, "
-                f"důvod: {top_alt.match_reason})"
-            )
+            if not is_available:
+                # Lék není dostupný - doporuč alternativu
+                recommendation = (
+                    f"Tento přípravek není dostupný. "
+                    f"Doporučujeme alternativu: {top_alt.name} "
+                    f"(relevance: {top_alt.relevance_score:.0f}/100, "
+                    f"důvod: {top_alt.match_reason})"
+                )
+            else:
+                # Lék je dostupný - zobraz alternativy pro porovnání
+                recommendation = (
+                    f"Dostupných {len(alternatives)} alternativ. "
+                    f"Nejlepší: {top_alt.name} "
+                    f"(relevance: {top_alt.relevance_score:.0f}/100)"
+                )
         else:
             recommendation = "Tento přípravek není dostupný a nebyly nalezeny žádné alternativy."
 
@@ -1063,7 +1130,7 @@ async def get_atc_info(
 async def batch_check_availability(
     sukl_codes: list[str],
     progress: Progress = Progress(),
-    ctx: Context | None = None,
+    ctx: Context = CurrentContext(),
 ) -> dict:
     """
     Zkontroluje dostupnost více léčiv najednou na pozadí.
@@ -1093,14 +1160,12 @@ async def batch_check_availability(
 
     # Limit maximum batch size
     if len(sukl_codes) > 100:
-        if ctx:
-            await ctx.warning(f"Batch size {len(sukl_codes)} exceeds limit 100, truncating")
+        await ctx.warning(f"Batch size {len(sukl_codes)} exceeds limit 100, truncating")
         sukl_codes = sukl_codes[:100]
 
     await progress.set_total(len(sukl_codes))
 
-    if ctx:
-        await ctx.info(f"Starting batch availability check for {len(sukl_codes)} medicines")
+    await ctx.info(f"Starting batch availability check for {len(sukl_codes)} medicines")
 
     results = []
     available_count = 0
@@ -1120,7 +1185,6 @@ async def batch_check_availability(
                 "sukl_code": code,
                 "is_available": is_available,
                 "name": result.name if result else None,
-                "registration_number": result.registration_number if result else None,
             })
 
             await progress.increment()
@@ -1137,10 +1201,9 @@ async def batch_check_availability(
             })
             await progress.increment()
 
-    if ctx:
-        await ctx.info(
-            f"Batch check complete: {available_count}/{len(sukl_codes)} medicines available"
-        )
+    await ctx.info(
+        f"Batch check complete: {available_count}/{len(sukl_codes)} medicines available"
+    )
 
     return {
         "total": len(sukl_codes),
