@@ -165,7 +165,7 @@ class SUKLDataFetcher:
             "dlp_lecivelatky",  # Léčivé látky
             "dlp_atc",  # ATC kódy
             "dlp_nazvydokumentu",  # Dokumenty (PIL)
-            "dlp_cau",  # Cenové a úhradové údaje (EPIC 3)
+            # "dlp_cau",  # TODO: Pricing data není v SÚKL Open Data ZIP
             # Tabulky lékáren
             "lekarny_seznam",  # Seznam lékáren
             "lekarny_prac_doba",  # Pracovní doba
@@ -731,6 +731,11 @@ class SUKLClient:
         df_cau = self._loader.get_table("dlp_cau")
         if df_cau is None:
             # Pokud dlp_cau není k dispozici, vrať results s None hodnotami
+            logger.warning(
+                "⚠️  CENOVÁ DATA NEDOSTUPNÁ: dlp_cau.csv není v SÚKL Open Data. "
+                "Ceny a úhrady budou null. "
+                "TODO: Zjistit správný zdroj cenových dat."
+            )
             for result in results:
                 result["has_reimbursement"] = False
                 result["max_price"] = None
