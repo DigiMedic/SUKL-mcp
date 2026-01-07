@@ -216,8 +216,8 @@ def _calculate_match_quality(query: str, medicine_name: str) -> tuple[float, str
     # 5. Token sort ratio - ignoruje pořadí slov
     token_score = fuzz.token_sort_ratio(query_lower, name_lower)
 
-    # Minimální score je token_score * 0.8
-    return max(token_score * 0.8, 20.0), "fuzzy"
+    # Odstraněn minimum score floor pro lepší filtrování irelevantních výsledků
+    return token_score * 0.8, "fuzzy"
 
 
 # === MCP Tools ===

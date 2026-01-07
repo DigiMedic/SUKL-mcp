@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # === Configuration ===
 
-FUZZY_THRESHOLD = 80  # Minimální skóre pro fuzzy match (0-100)
+FUZZY_THRESHOLD = 70  # Minimální skóre pro fuzzy match (0-100) - sníženo pro lepší recall
 FUZZY_MIN_QUERY_LENGTH = 3  # Minimální délka query pro fuzzy search
 FUZZY_CANDIDATE_LIMIT = 1000  # Max kandidátů pro fuzzy matching
 
@@ -297,8 +297,11 @@ class FuzzyMatcher:
         """
         loop = asyncio.get_running_loop()
 
-        # Limit kandidátů pro performance
-        candidates_df = df_medicines.head(self.candidate_limit)
+        # Random sampling pro lepší coverage při zachování performance
+        if len(df_medicines) > self.candidate_limit:
+            candidates_df = df_medicines.sample(n=self.candidate_limit, random_state=42)
+        else:
+            candidates_df = df_medicines
 
         # Extrahuj názvy pro fuzzy matching
         names = candidates_df["NAZEV"].fillna("").tolist()
