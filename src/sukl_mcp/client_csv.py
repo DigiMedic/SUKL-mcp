@@ -51,13 +51,20 @@ def _get_cache_dir() -> Path:
 
 def _get_data_dir() -> Path:
     """Get data directory from ENV or default."""
-    base_dir = Path(__file__).parent.parent.parent
-    default_dir = base_dir / "data"
-
     env_dir = os.getenv("SUKL_DATA_DIR")
     if env_dir:
         return Path(env_dir)
-    return default_dir
+
+    cwd_data = Path.cwd() / "data"
+    if cwd_data.exists() and (cwd_data / "dlp_lecivepripravky.csv").exists():
+        return cwd_data
+
+    base_dir = Path(__file__).parent.parent.parent
+    default_dir = base_dir / "data"
+    if default_dir.exists() and (default_dir / "dlp_lecivepripravky.csv").exists():
+        return default_dir
+
+    return Path("/tmp/sukl_dlp_data")
 
 
 def _get_download_timeout() -> float:
@@ -96,9 +103,12 @@ class SUKLDataFetcher:
 
         logger.info("Načítám SÚKL DLP data...")
 
-        # Vytvořím adresáře
-        self.config.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.config.data_dir.mkdir(parents=True, exist_ok=True)
+        for d in [self.config.cache_dir, self.config.data_dir]:
+            if not d.exists():
+                try:
+                    d.mkdir(parents=True, exist_ok=True)
+                except OSError as e:
+                    logger.warning(f"Nepodařilo se vytvořit adresář {d}: {e}")
 
         # Stáhni a rozbal DLP ZIP
         dlp_zip_path = self.config.cache_dir / "DLP.zip"
