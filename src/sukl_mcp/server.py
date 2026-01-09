@@ -15,7 +15,7 @@ from typing import Annotated, Literal, Optional
 import httpx
 from rapidfuzz import fuzz
 from fastmcp import Context, FastMCP
-from fastmcp.dependencies import Progress, CurrentContext
+from fastmcp.dependencies import Depends, Progress, CurrentContext
 
 from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
 from fastmcp.server.middleware.logging import LoggingMiddleware
@@ -1317,13 +1317,8 @@ async def get_atc_info(
 
     if len(atc_code) == 7:
         # Level 5: Direct lookup - hledáme konkrétní kód v celém datasetu
-        all_groups = await client.get_atc_groups(atc_prefix=None)  # Všechny řádky
-        target = None
-        for group in all_groups:
-            code = group.get("ATC", group.get("atc", ""))
-            if code == atc_code:
-                target = group
-                break
+        groups = await client.get_atc_groups(atc_prefix=atc_code)
+        target = groups[0] if groups else None
 
         return {
             "code": atc_code,
@@ -1332,7 +1327,7 @@ async def get_atc_info(
                 if target
                 else "Neznámá skupina"
             ),
-            "level": 7,
+            "level": 5,
             "children": [],  # Level 5 nemá děti
             "total_children": 0,
         }
@@ -1352,6 +1347,9 @@ async def get_atc_info(
             elif code.startswith(atc_code) and len(code) > len(atc_code):
                 children.append({"code": code, "name": group.get("nazev", group.get("NAZEV", ""))})
 
+        level_map = {1: 1, 3: 2, 4: 3, 5: 4}
+        atc_level = level_map.get(len(atc_code), len(atc_code))
+
         return {
             "code": atc_code,
             "name": (
@@ -1359,7 +1357,7 @@ async def get_atc_info(
                 if target
                 else "Neznámá skupina"
             ),
-            "level": len(atc_code),
+            "level": atc_level,
             "children": children[:20],
             "total_children": len(children),
         }
@@ -1376,7 +1374,7 @@ async def get_atc_info(
 async def batch_check_availability(
     sukl_codes: list[str],
     ctx: Annotated[Context, CurrentContext] = None,
-    progress: Progress | None = None,
+    progress: Progress = Depends(Progress),
 ) -> dict:
     """
     Zkontroluje dostupnost více léčiv najednou na pozadí.
@@ -1406,13 +1404,15 @@ async def batch_check_availability(
 
     # Limit maximum batch size
     if len(sukl_codes) > 100:
-        await ctx.warning(f"Batch size {len(sukl_codes)} exceeds limit 100, truncating")
+        if ctx:
+            await ctx.warning(f"Batch size {len(sukl_codes)} exceeds limit 100, truncating")
         sukl_codes = sukl_codes[:100]
 
     if progress:
         await progress.set_total(len(sukl_codes))
 
-    await ctx.info(f"Starting batch availability check for {len(sukl_codes)} medicines")
+    if ctx:
+        await ctx.info(f"Starting batch availability check for {len(sukl_codes)} medicines")
 
     results = []
     available_count = 0
@@ -1455,13 +1455,16 @@ async def batch_check_availability(
             if progress:
                 await progress.increment()
 
-    await ctx.info(f"Batch check complete: {available_count}/{len(sukl_codes)} medicines available")
+    if ctx:
+        await ctx.info(
+            f"Batch check complete: {available_count}/{len(sukl_codes)} medicines available"
+        )
 
     return {
         "total": len(sukl_codes),
         "available": available_count,
-        "unavailable": len(sukl_codes) - available_count,
         "results": results,
+        "timestamp": datetime.now(),
     }
 
 

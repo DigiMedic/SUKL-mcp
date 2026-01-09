@@ -25,8 +25,8 @@ class TestSearchMedicineFix:
     @pytest.mark.asyncio
     async def test_search_ibuprofen_returns_results(self):
         """search_medicine('ibuprofen') by měl vrátit výsledky."""
-        result = await search_medicine(query="ibuprofen", limit=10)
-        
+        result = await search_medicine.fn(query="ibuprofen", limit=10)
+
         assert result is not None, "Výsledek nesmí být None"
         assert result.total_results > 0, "Mělo by se vrátit alespoň jeden výsledek"
         assert len(result.results) > 0, "Mělo by existovat alespoň jeden lék"
@@ -37,8 +37,8 @@ class TestSearchMedicineFix:
     @pytest.mark.asyncio
     async def test_search_paralen_returns_results(self):
         """search_medicine('Paralen') by měl vrátit výsledky."""
-        result = await search_medicine(query="Paralen", limit=10)
-        
+        result = await search_medicine.fn(query="Paralen", limit=10)
+
         assert result is not None, "Výsledek nesmí být None"
         assert result.total_results > 0, "Mělo by se vrátit alespoň jeden výsledek"
         assert len(result.results) > 0, "Mělo by existovat alespoň jeden lék"
@@ -47,8 +47,8 @@ class TestSearchMedicineFix:
     @pytest.mark.asyncio
     async def test_search_atc_code_returns_results(self):
         """search_medicine('N02BE01') by měl vrátit výsledky (paracetamol)."""
-        result = await search_medicine(query="N02BE01", limit=10)
-        
+        result = await search_medicine.fn(query="N02BE01", limit=10)
+
         assert result is not None, "Výsledek nesmí být None"
         # ATC kód může vrátit méně výsledků, ale alespoň jeden
         assert result.total_results > 0, "Mělo by se vrátit alespoň jeden výsledek"
@@ -61,10 +61,19 @@ class TestBatchAvailabilityFix:
     @pytest.mark.asyncio
     async def test_batch_check_availability_works(self):
         """batch_check_availability by neměl vyhodit dependency error."""
+        from unittest.mock import MagicMock
+
         try:
-            result = await batch_check_availability(
-                sukl_codes=["0254045", "0123456"],
-                limit=2
+            mock_progress = MagicMock()
+            mock_progress.set_total = MagicMock(return_value=asyncio.Future())
+            mock_progress.set_total.return_value.set_result(None)
+            mock_progress.set_message = MagicMock(return_value=asyncio.Future())
+            mock_progress.set_message.return_value.set_result(None)
+            mock_progress.increment = MagicMock(return_value=asyncio.Future())
+            mock_progress.increment.return_value.set_result(None)
+
+            result = await batch_check_availability.fn(
+                sukl_codes=["0254045", "0123456"], progress=mock_progress
             )
             assert result is not None, "Výsledek nesmí být None"
             assert "total" in result, "Měl by obsahovat 'total'"
@@ -81,25 +90,26 @@ class TestATCInfoFix:
     @pytest.mark.asyncio
     async def test_atc_info_level_5_works(self):
         """get_atc_info('N02BE01') by měl vrátit název 'Paracetamol'."""
-        result = await get_atc_info(atc_code="N02BE01")
-        
+        result = await get_atc_info.fn(atc_code="N02BE01")
+
         assert result is not None, "Výsledek nesmí být None"
         assert result.get("name") is not None, "ATC kód by měl mít název"
         name = result.get("name", "")
-        assert "Neznámá skupina" not in name, \
-               f"ATC kód N02BE01 by neměl vracet 'Neznámá skupina', ale dostal: {name}"
+        assert "Neznámá skupina" not in name, (
+            f"ATC kód N02BE01 by neměl vracet 'Neznámá skupina', ale dostal: {name}"
+        )
         print(f"✅ get_atc_info('N02BE01') vrací: {name}")
         assert result.get("level") == 5, "Level 5 by měl mít level=5"
 
     @pytest.mark.asyncio
     async def test_atc_info_level_1_works(self):
         """get_atc_info('N') by měl vrátit 'Nervový systém'."""
-        result = await get_atc_info(atc_code="N")
-        
+        result = await get_atc_info.fn(atc_code="N")
+
         assert result is not None, "Výsledek nesmí být None"
-        assert "Nervový systém" in result.get("name", "") or \
-               "nervov" in result.get("name", "").lower(), \
-               f"Očekáváno 'Nervový systém', ale dostal: {result.get('name')}"
+        assert (
+            "Nervový systém" in result.get("name", "") or "nervov" in result.get("name", "").lower()
+        ), f"Očekáváno 'Nervový systém', ale dostal: {result.get('name')}"
         print(f"✅ get_atc_info('N') vrací: {result.get('name')}")
         assert result.get("level") == 1, "Level 1 by měl mít level=1"
 
@@ -116,9 +126,11 @@ class TestDocumentation:
         # - region (kraj)
         # - latitude, longitude (souřadnice)
         # - operator (provozovatel)
-        
+
         # Toto je známé omezení SÚKL Open Data
-        print("✅ Dokumentováno: lekarny_seznam.csv neobsahuje okres, kraj, souřadnice, provozovatel")
+        print(
+            "✅ Dokumentováno: lekarny_seznam.csv neobsahuje okres, kraj, souřadnice, provozovatel"
+        )
         print("   Dostupné sloupce: NAZEV, MESTO, ULICE, PSC, TEL, EMAIL, WWW")
 
     def test_price_data_unavailable_documented(self):
@@ -127,7 +139,7 @@ class TestDocumentation:
         # - dlp_cau.csv NEEXISTUJE
         # - Žádný jiný CSV s cenami není dostupný
         # - Výchozí hodnoty: max_price=None, patient_copay=None, has_reimbursement=None
-        
+
         # Toto je známé omezení SÚKL Open Data
         print("✅ Dokumentováno: Cenové údaje nejsou v SÚKL Open Data ZIP souboru")
         print("   Hledané soubory: dlp_cau.csv (nenalezen)")

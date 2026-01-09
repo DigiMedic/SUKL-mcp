@@ -1000,7 +1000,7 @@ class SUKLClient:
 
         return output
 
-    async def get_atc_groups(self, atc_prefix: str | None = None) -> list[dict]:
+    async def get_atc_groups(self, atc_prefix: str | None = None, limit: int = 100) -> list[dict]:
         """Získej ATC skupiny podle prefixu."""
         # Input validace
         if atc_prefix:
@@ -1023,8 +1023,11 @@ class SUKLClient:
         else:
             results = df
 
-        # Vrať max 100 výsledků
-        records = results.head(100).to_dict("records")
+        # Vrať omezený počet výsledků (pokud limit > 0)
+        if limit > 0:
+            results = results.head(limit)
+
+        records = results.to_dict("records")
         return cast(list[dict[Any, Any]], records)
 
     async def get_price_info(self, sukl_code: str) -> dict | None:

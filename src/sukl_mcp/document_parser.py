@@ -278,7 +278,10 @@ class DocumentParser:
             SUKLParseError: Když parsing selže
         """
         # Získej filename z CSV dlp_nazvydokumentu.csv
-        df_docs = self.loader.get_table("dlp_nazvydokumentu")
+        df_docs = None
+        if self.loader:
+            df_docs = self.loader.get_table("dlp_nazvydokumentu")
+
         if df_docs is None or df_docs.empty:
             logger.warning(f"dllp_nazvydokumentu.csv not available, using default URL pattern")
             filename = f"{sukl_code}.pdf"

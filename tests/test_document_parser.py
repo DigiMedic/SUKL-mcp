@@ -31,6 +31,17 @@ from sukl_mcp.document_parser import (
 )
 from sukl_mcp.exceptions import SUKLDocumentError, SUKLParseError
 
+
+@pytest.fixture(autouse=True)
+def clear_parser_cache():
+    DocumentParser.get_document_content.cache_clear()
+    parser = get_document_parser()
+    parser.clear_cache()
+    yield
+    DocumentParser.get_document_content.cache_clear()
+    parser.clear_cache()
+
+
 # === Fixtures ===
 
 
@@ -579,6 +590,7 @@ class TestDocumentParser:
     @pytest.mark.asyncio
     async def test_get_document_content_pdf_success(self, httpx_mock, sample_pdf_with_text):
         """Test úspěšného stažení a parsování PIL (PDF)."""
+        DocumentParser.get_document_content.cache_clear()
         pdf_bytes, expected_text = sample_pdf_with_text
         sukl_code = "0254045"
         doc_type = "pil"

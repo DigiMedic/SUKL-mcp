@@ -54,7 +54,7 @@ def calculate_ranking_score(
         score += 20.0
     elif match_type == "substance":
         score += 15.0
-    elif match_type == "substring":
+    elif match_type == "substring" or match_type == "atc":
         score += 10.0
     elif match_type == "fuzzy":
         score += fuzzy_score / 10.0  # 0-10 bodů
@@ -139,6 +139,11 @@ class FuzzyMatcher:
             if results:
                 logger.info(f"Found {len(results)} results via substance search")
                 return (results, "substance")
+
+        results = self._search_by_atc(query, df_medicines, limit)
+        if results:
+            logger.info(f"Found {len(results)} results via ATC search")
+            return (results, "atc")
 
         # Step 2: Exact match v názvu
         results = self._search_exact(query_lower, df_medicines, limit)
@@ -355,6 +360,41 @@ class FuzzyMatcher:
             result["match_score"] = result.pop("_score", 0.0)
             result["fuzzy_score"] = result.pop("_fuzzy_score", 0.0)
             result["match_type"] = "fuzzy"
+
+        return results
+
+    def _search_by_atc(
+        self,
+        query: str,
+        df_medicines: pd.DataFrame,
+        limit: int,
+    ) -> list[dict[Any, Any]]:
+        if not query or len(query) < 1:
+            return []
+
+        if "ATC_WHO" not in df_medicines.columns:
+            return []
+
+        mask = df_medicines["ATC_WHO"].str.startswith(query.upper(), na=False)
+        results_df = df_medicines[mask]
+
+        if results_df.empty:
+            return []
+
+        results_df = results_df.copy()
+        results_df["_score"] = results_df.apply(
+            lambda row: calculate_ranking_score(row, query, "atc"),
+            axis=1,
+        )
+
+        results_df = results_df.sort_values("_score", ascending=False)
+
+        records = results_df.head(limit).to_dict("records")
+        results: list[dict[Any, Any]] = cast(list[dict[Any, Any]], records)
+
+        for result in results:
+            result["match_score"] = result.pop("_score", 0.0)
+            result["match_type"] = "atc"
 
         return results
 
