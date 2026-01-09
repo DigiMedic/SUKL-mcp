@@ -51,14 +51,13 @@ def _get_cache_dir() -> Path:
 
 def _get_data_dir() -> Path:
     """Get data directory from ENV or default."""
-    # OPRAVA v4.0: Použít absolutní cestu k data adresáři
-    # Data jsou v /Users/petrsovadina/Desktop/Develope/personal/SUKL-mcp/data
-    data_dir = Path("/Users/petrsovadina/Desktop/Develope/personal/SUKL-mcp/data")
+    base_dir = Path(__file__).parent.parent.parent
+    default_dir = base_dir / "data"
+
     env_dir = os.getenv("SUKL_DATA_DIR")
-    if env_dir and env_dir != "/tmp/sukl_dlp_data":
-        # Pokud uživatel explicitně nastavil jinou cestu, použij ji
-        data_dir = Path(env_dir)
-    return data_dir
+    if env_dir:
+        return Path(env_dir)
+    return default_dir
 
 
 def _get_download_timeout() -> float:
