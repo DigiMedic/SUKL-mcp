@@ -51,7 +51,14 @@ def _get_cache_dir() -> Path:
 
 def _get_data_dir() -> Path:
     """Get data directory from ENV or default."""
-    return Path(os.getenv("SUKL_DATA_DIR", "/tmp/sukl_dlp_data"))
+    # OPRAVA v4.0: Použít absolutní cestu k data adresáři
+    # Data jsou v /Users/petrsovadina/Desktop/Develope/personal/SUKL-mcp/data
+    data_dir = Path("/Users/petrsovadina/Desktop/Develope/personal/SUKL-mcp/data")
+    env_dir = os.getenv("SUKL_DATA_DIR")
+    if env_dir and env_dir != "/tmp/sukl_dlp_data":
+        # Pokud uživatel explicitně nastavil jinou cestu, použij ji
+        data_dir = Path(env_dir)
+    return data_dir
 
 
 def _get_download_timeout() -> float:
@@ -230,6 +237,43 @@ class SUKLClient:
             "tables_loaded": len(self._loader._data),
             "timestamp": datetime.now().isoformat(),
         }
+
+    async def get_document_filename(
+        self,
+        sukl_code: str,
+        doc_type: Literal["pil", "spc"],
+    ) -> str | None:
+        """
+        Získej filename dokumentu (PIL nebo SPC) z CSV dlp_nazvydokumentu.csv.
+
+        Args:
+            sukl_code: SÚKL kód léčiva
+            doc_type: Typ dokumentu ("pil" nebo "spc")
+
+        Returns:
+            Filename (např. PI223082.pdf) nebo None
+        """
+        df_docs = self._loader.get_table("dlp_nazvydokumentu")
+        if df_docs is None or df_docs.empty:
+            return None
+
+        sukl_int = int(sukl_code) if sukl_code.isdigit() else None
+        if sukl_int is None:
+            return None
+
+        # Filtruj podle SÚKL kódu
+        row = df_docs[df_docs["KOD_SUKL"] == sukl_int]
+
+        if row.empty:
+            return None
+
+        column = doc_type.upper()  # "PIL" nebo "SPC"
+        filename = row.iloc[0][column]
+
+        if pd.isna(filename) or not filename:
+            return None
+
+        return filename
 
     async def search_medicines(
         self,

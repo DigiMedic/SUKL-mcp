@@ -1,0 +1,83 @@
+OBAL;NAZEV;NAZEV_EN;KOD_EDQM
+AAP;Jehlový aplikátor;Needle applicator;30043000
+AMP;Ampulka (Ampule);Ampoule;30001000
+APL;Aplikátor;Applicator;30002000
+APM;Multipunkèní aplikátor;Multipuncturer;30040000
+APP;Pipetový aplikátor;Pipette applicator;30047000
+APS;Aplikaèní systém;Administration system;30000500
+APT;Aplikátor vpichových testù;Prick test applicator;30053000
+APZ;Aplikátor zásypu;Dredging applicator;30019000
+BLI;Blistr;Blister;30007000
+BLJ;Jednodávkový blistr;Unit-dose blister;13059000
+BOX;Krabièka;Box;30009000
+CAN;Kanyla;Cannula;30012000
+CAP;Víèko;Cap;30013000
+CIS;Cisterna;Cistern;
+COM;Odmìrná lžièka;Measuring spoon;30034000
+CON;Obal;Container;30015500
+CUP;Odmìrka;Cup;30016000
+CVD;Vícedávkový obal;Multidose container;30038000
+CVI;Vícedávkový obal s dávkovací pumpou;Multidose container with metering pump;30039400
+CVM;Vícedávkový obal s  pumpou;Multidose container with pump;30039500
+CVP;Vícedávkový obal s odvzdušòovací pumpou;Multidose container with airless pump;30039000
+DBU;Dìtský bezpeènostní uzávìr;Child-resistant closure;30015000
+DSD;Dávkovací zaøízení;Dose dispenser;30018200
+FCV;Fixní kryogenní nádoba;Fixed cryogenic vessel;30023005
+GSB;Svazek tlakových lahví;Gas cylinder bundle;13156000
+GSL;Tlaková lahev;Gas cylinder;30024000
+IHL;Inhalátor;Inhaler;30026500
+IJA;Injekèní jehla;Injection needle;30028000
+IJT;Injekèní støíkaèka;Injection syringe;30029000
+INA;Obal umožòující zasypávání;Dredging container;30020000
+ISP;Pøedplnìná injekèní støíkaèka;Pre-filled syringe;30051000
+JAR;Kelímek;Jar;30032000
+LAG;Lahev (Lahvièka);Bottle;30008000
+LGT;Kapací lahvièka;Dropper container;30023000
+LID;Tìsnící víèko;Lid;13132000
+LRA;Obal s kulièkovým aplikátorem;Roll-on container;30053500
+MCV;Mobilní kryogenní nádoba;Mobile cryogenic vessel;30036005
+MDC;Jednodávkový obal;Single-dose container;30057000
+MSD;Dávkovaè;Measuring device;30033000
+NAP;Nanášecí aplikátor;Dabbing applicator;30017000
+NBS;Rozprašovaè;Nebuliser;30042000
+NOZ;Hubice;Nozzle;30044000
+NSA;Nosní aplikátor;Nasal applicator;30041000
+OCV;Pøetlaková kryogenní nádoba;Overpressure cryogenic vessel;
+OPL;Aplikátor pro perorální podání;Oral applicator;13072000
+OST;Náustek;Mouthpiece;30037000
+PEN;Pero;Pen;13114000
+PEP;Pøedplnìné pero;Pre-filled pen;30050000
+PFC;Pøedplnìný válec;Pre-filled cylinder;
+PFI;Pøedplnìný injektor;Pre-filled injector;13063000
+PFS;Pøedplnìná støíkaèka pro perorální podání;Pre-filled oral syringe;13073000
+PGT;Pøedplnìná gastroenterální sonda;Pre-filled gastroenteral tube;30049000
+PIP;Pipeta;Pipette;30046000
+PMM;Dávkovací pumpa;Metering pump;30035000
+POH;Váèek;Pouch;13142000
+POS;Støíkaèka pro perorální podání;Oral syringe;30045000
+PPL;Pøedplnìný aplikátor pro perorální podání;Pre-filled oral applicator;13074000
+PSS;Tlakový obal;Pressurised container;30052000
+SCC;Sáèek;Sachet;30054000
+SCP;Šroubovací uzávìr;Screw cap;30056000
+SPA;Špachtle;Spatula;30058000
+SPN;Obal na sprej;Spray container;30060000
+SPP;Mechanický rozprašovaè;Spray pump;30061000
+SPV;Kontinuální rozprašovací ventil;Spray valve;30062000
+STA;Štìteèkový aplikátor;Brush applicator;30011000
+STP;Zátka;Stopper;30064000
+STR;Strip;Strip;30065000
+STT;Štìteèek;Brush;30010000
+STW;Brèko;Straw;30064500
+SUD;Sud;Barrel;30006000
+TBC;Obal na tablety;Tablet container;30066000
+TBT;Tuba na tablety;Tablet tube;13151000
+TDP;Tlakový injektor;Needle free injector;30043500
+TUB;Tuba;Tube;30067000
+UGT;Uzávìr s kapátkem;Dropper applicator;30022000
+VAK;Vak;Bag;30004000
+VIA;Injekèní lahvièka;Vial;30069000
+VLV;Ventil;Valve;13070000
+VNM;Dávkovací ventil;Metering valve;30036000
+WRP;Pøebal;Wrapper;13125000
+ZDD;Zásobní vložka pro dávkovací zaøízení;Dose-dispenser cartridge;30018300
+ZVL;Zásobní vložka;Cartridge;30014000

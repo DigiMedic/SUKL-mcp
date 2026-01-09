@@ -234,14 +234,17 @@ class DocumentParser:
     Hlavní parser pro SÚKL dokumenty s async cachingem.
 
     Podporuje PDF a DOCX formáty s automatickou detekcí.
+    OPRAVA v4.0: Získává filenames z CSV dlp_nazvydokumentu.csv
     """
 
     def __init__(
         self,
+        loader=None,  # Loader pro přístup k CSV (parametr)
         downloader: DocumentDownloader | None = None,
         pdf_parser: PDFParser | None = None,
         docx_parser: DOCXParser | None = None,
     ):
+        self.loader = loader
         self.downloader = downloader or DocumentDownloader()
         self.pdf_parser = pdf_parser or PDFParser()
         self.docx_parser = docx_parser or DOCXParser()
@@ -273,10 +276,34 @@ class DocumentParser:
             SUKLDocumentError: Když download selže
             SUKLParseError: Když parsing selže
         """
+        # Získej filename z CSV dlp_nazvydokumentu.csv
+        df_docs = self._loader.get_table("dlp_nazvydokumentu")
+        if df_docs is None or df_docs.empty:
+            logger.warning(f"dllp_nazvydokumentu.csv not available, using default URL pattern")
+            filename = f"{sukl_code}.pdf"
+        else:
+            sukl_int = int(sukl_code) if sukl_code.isdigit() else None
+            if sukl_int is None:
+                logger.warning(f"Invalid sukl_code: {sukl_code}, using default URL pattern")
+                filename = f"{sukl_code}.pdf"
+            else:
+                row = df_docs[df_docs["KOD_SUKL"] == sukl_int]
+                if row.empty:
+                    logger.warning(f"No document record for {sukl_code}")
+                    filename = f"{sukl_code}.pdf"
+                else:
+                    column = doc_type.upper()  # "PIL" nebo "SPC"
+                    filename = row.iloc[0][column]
+                    if pd.isna(filename) or not filename:
+                        logger.warning(f"No {column} filename for {sukl_code}")
+                        filename = f"{sukl_code}.pdf"
+
+        logger.info(f"Document filename from CSV: {filename}")
+
         # Konstruuj URL podle SÚKL formátu
-        # Příklad: https://prehledy.sukl.cz/pil/0254045.pdf
+        # Příklad: https://prehledy.sukl.cz/pil/PI224024.pdf
         base_url = "https://prehledy.sukl.cz"
-        url = f"{base_url}/{doc_type.lower()}/{sukl_code}.pdf"
+        url = f"{base_url}/{doc_type.lower()}/{filename}"
 
         logger.info(f"Získávám dokument: {doc_type.upper()} pro {sukl_code}")
 

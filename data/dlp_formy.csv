@@ -1,0 +1,638 @@
+FORMA;NAZEV;NAZEV_EN;NAZEV_LAT;JE_KONOPI;KOD_EDQM
+ADT BAL;Pøísada do koupele;Bath additive;Additivum pro balneo;;10501000
+AUR CRM;Ušní krém;Ear cream;Cremor auricularis;;10701000
+AUR GEL;Ušní gel;Ear gel;Gelatum auriculare;;10702000
+AUR GTT EML;Ušní kapky, emulze;Ear drops, emulsion;Otoguttae in emulsione;;10706000
+AUR GTT PLQ SUS;Ušní kapky, prášek a rozpouštìdlo pro suspenzi;Ear drops, powder and solvent for suspension;Pulvis et liquefactorium pro otoguttis in suspensione;;10707000
+AUR GTT PSU;Ušní kapky, prášek pro suspenzi;Ear drops, powder for suspension;Pulvis pro otoguttis in suspensione;;13006000
+AUR GTT SOL;Ušní kapky, roztok;Ear drops, solution;Otoguttae in solutione;;10704000
+AUR GTT SOL MDC;Ušní kapky, roztok v jednodávkovém obalu;Ear drops, solution in single-dose container;Otoguttae in solutione in vase monodosali;;50017200
+AUR GTT SUS;Ušní kapky, suspenze;Ear drops, suspension;Otoguttae in suspensione;;10705000
+AUR GTT SUS MDC;Ušní kapky, suspenze v jednodávkovém obalu;Ear drops, suspension in single-dose container;Otoguttae in suspensione in vase monodosali;;50017550
+AUR LOT EML;Ušní výplach, emulze;Ear wash, emulsion;Lotio auricularis in emulsione;;10713000
+AUR LOT SOL;Ušní výplach, roztok;Ear wash, solution;Lotio auricularis in solutione;;10712000
+AUR PLV ADS;Ušní zásyp;Ear powder;Pulvis adspersorius auricularis;;10708000
+AUR SPR EML;Ušní sprej, emulze;Ear spray, emulsion;Emulsio pro aerodispersione auriculari;;10711000
+AUR SPR SOL;Ušní sprej, roztok;Ear spray, solution;Solutio pro aerodispersione auriculari;;10709000
+AUR SPR SUS;Ušní sprej, suspenze;Ear spray, suspension;Suspensio pro aerodispersione auriculari;;10710000
+AUR STL;Ušní tyèinka;Ear stick;Stylus auricularis;;10715000
+AUR TMP;Ušní tampon;Ear tampon;Tamponum auriculare;;10714000
+AUR UNG;Ušní mast;Ear ointment;Unguentum auriculare;;10703000
+AUR/NAS GTT SUS;Ušní/nosní kapky, suspenze;Ear/nasal drops, suspension;Oto/rhinoguttae in suspensione;;50020200
+AUR/OPH GTT SOL;Ušní/oèní kapky, roztok;Ear/eye drops, solution;Oto/oculoguttae in solutione;;50018000
+AUR/OPH GTT SUS;Ušní/oèní kapky, suspenze;Ear/eye drops, suspension;Oto/oculoguttae in suspensione;;50018500
+AUR/OPH UNG;Ušní/oèní mast;Ear/eye ointment;Unguentum auriculare/ophthalmicum;;50019000
+AUR/OPH/NAS GTT SOL;Ušní/oèní/nosní kapky, roztok;Ear/eye/nasal drops, solution;Oto/oculo/rhinoguttae in solutione;;50019500
+BUC FLM;Bukální film;Buccal film;Lamina buccalis;;10314011
+BUC TBL ADH;Mukoadhezivní bukální tableta;Muco-adhesive buccal tablet;Tabuletta buccalis mucoadhesiva;;10319000
+BUC TBL NOB;Bukální tableta;Buccal tablet;Tabuletta buccalis;;10320000
+CDP SOL;Roztok pro kardioplegii;Solution for cardioplegia;Solutio pro cardioplegia;;11209500
+CDP SOL/SOL CNS ORG;Roztok pro kardioplegii/konzervování orgánù;Solution for cardioplegia/organ preservation;Solutio pro cardioplegia/conservatione organorum;;13107000
+CNC GGR;Koncentrát pro kloktadlo;Concentrate for gargle;Concentratum pro gargarismate;;10302000
+CNC SOL NEB;Koncentrát pro roztok k rozprašování;Concentrate for nebuliser solution;Concentratum pro solutione ad nebulisationem;;13002000
+CPS AMY;Škrobová tobolka;Cachet;Capsula amylacea;;10209000
+CPS DUR;Tvrdá tobolka;Capsule, hard;Capsula dura;A;10210000
+CPS DUR MRL;Tvrdá tobolka s øízeným uvolòováním;Modified-release capsule, hard;Capsula dura cum liberatione modificata;;10217000
+CPS DUR OPE;Tvrdá tobolka k otevøení;Capsule, hard for opening;;;
+CPS DUR+TBL NOB;Tvrdá tobolka + tableta;Capsule, hard  + tablet;Capsula dura et tabuletta;;14013000
+CPS ETD;Enterosolventní tvrdá tobolka;Gastro-resistant capsule, hard;Capsula enterosolvens dura;;10212000
+CPS ETM;Enterosolventní mìkká tobolka;Gastro-resistant capsule, soft;Capsula enterosolvens mollis;;10213000
+CPS MDM;Žvýkací mìkká tobolka;Chewable capsule, soft;Capsula manducabilis mollis;;10214000
+CPS MOL;Mìkká tobolka;Capsule, soft;Capsula mollis;;10211000
+CPS MOL MRL;Mìkká tobolka s øízeným uvolòováním;Modified-release capsule, soft;Capsula mollis cum liberatione modificata;;10218000
+CPS MOL+TBL NOB;Mìkká tobolka + tableta;Capsule, soft  +  tablet;Capsula mollis et tabuletta;;14012000
+CPS PML;Mìkká tobolka s prodlouženým uvolòováním;Prolonged-release capsule, soft;Capsula mollis cum liberatione prolongata;;10216000
+CPS PRO;Tvrdá tobolka s prodlouženým uvolòováním;Prolonged-release capsule, hard;Capsula dura cum liberatione prolongata;;10215000
+CRM;Krém;Cream;Cremor cutaneus;A;10502000
+CRM+VAG CPS MOL;Krém + mìkká vaginální tobolka;Cream + vaginal capsule, soft;Cremor et capsula vaginalis mollis;;14009000
+CRM+VAG GLB;Krém + vaginální kulièka;Cream + pessary;Cremor et globulus vaginalis;;14001000
+CRM+VAG TBL NOB;Krém + vaginální tableta;Cream + vaginal tablet;Cremor et tabuletta vaginalis;;14010000
+CTP;Kataplazma;Poultice;Cataplasma;;10522000
+DIS NEB;Disperze k rozprašování;Nebuliser dispersion;Dispersio ad nebulisationem;;13129000
+DNT CMN;Zubní cement;Dental cement;Cementum dentale;;10401500
+DNT EML;Dentální emulze;Dental emulsion;Emulsio dentalis;;10408000
+DNT GEL;Dentální gel;Dental gel;Gelatum dentale;;10402000
+DNT LAC;Zubní lak;Denture lacquer;Lacca dentalis;;12101000
+DNT PLQ GEL;Prášek a rozpouštìdlo pro dentální gel;Powder and solvent for dental gel;Pulvis et liquefactorium pro gelato dentali;;50071000
+DNT PLV;Dentální prášek;Dental powder;Pulvis dentalis;;10405000
+DNT PLV CMN;Prášek pro zubní cement;Powder for dental cement;Pulvis pro cemento dentali;;10413000
+DNT PLV GEL;Prášek pro dentální gel;Powder for dental gel;Pulvis pro gelato dentali;;13022000
+DNT PLV SOL;Prášek pro dentální roztok;Powder for dental solution;Pulvis pro solutione dentali;;50049270
+DNT PSL CMN;Prášek a roztok pro zubní cement;Powder and solution for dental cement;Pulvis et solutio pro cemento dentali;;10412000
+DNT PST;Zubní pasta;Toothpaste;Pasta stomatologica;;10409000
+DNT PST MED;Dentální pasta;Dental paste;Pasta dentalis;;50017000
+DNT SOL;Dentální roztok;Dental solution;Solutio dentalis;;10406000
+DNT SOL CMN;Roztok pro zubní cement;Solution for dental cement;Solutio pro cemento dentali;;10414000
+DNT STL;Dentální tyèinka;Dental stick;Stylus dentalis;;10403000
+DNT SUS;Dentální suspenze;Dental suspension;Suspensio dentalis;;10407000
+DRM CNC EML;Koncentrát pro kožní emulzi;Concentrate for cutaneous emulsion;Concentratum pro emulsione cutanea;;13162000
+DRM CNC SOL;Koncentrát pro kožní roztok;Concentrate for cutaneous solution;Concentratum pro solutione cutaneo;;10514000
+DRM CSL LQF;Koncentrát a rozpouštìdlo pro kožní roztok;Concentrate and solvent for cutaneous solution;Concentratum et liquefactorium pro solutione cutaneo;;50003000
+DRM EML;Kožní emulze;Cutaneous emulsion;Emulsio cutanea;;10516000
+DRM EMP;Kožní náplast;Cutaneous patch;Emplastrum cutaneum;;10517500
+DRM LAC;Kožní lak;Collodion;Lacca cutanea;;10520000
+DRM LIQ;Kožní tekutina;Cutaneous liquid;Liquidum cutaneum;A;10512000
+DRM PLQ SOL;Prášek a rozpouštìdlo pro kožní roztok;Powder and solvent for cutaneous solution;Pulvis et liquefactorium pro solutione cutaneo;;50044000
+DRM PLV ADS;Kožní zásyp;Cutaneous powder;Pulvis adspersorius;;10517000
+DRM PLV SOL;Prášek pro kožní roztok;Powder for cutaneous solution;Pulvis pro solutione cutaneo;;10514500
+DRM PST;Kožní pasta;Cutaneous paste;Pasta cutanea;;10505000
+DRM PTC PSO;Prášek pro roztok pro kožní prick test;Powder for solution for skin-prick test;Pulvis pro solutione pro prick-testo cutaneo;;13032000
+DRM PTC SOL;Roztok pro kožní prick test;Solution for skin-prick test;Solutio pro prick-testo cutaneo;;10548000
+DRM SOL;Kožní roztok;Cutaneous solution;Solutio cutanea;;10513000
+DRM SOL MDC;Kožní roztok v jednodávkovém obalu;Cutaneous solution in single-dose container;Solutio cutanea in vase monodosali;;13103000
+DRM SOL/ORM CNC SOL;Kožní roztok/koncentrát pro orální roztok;Cutaneous solution/concentrate for oromucosal solution;Solutio cutanea/concentratum pro solutione oromucosali;;50015450
+DRM SOL+SPO MED;Kožní roztok + léèivá hubka;Cutaneous solution + medicated sponge;Solutio cutanea et spongiola medicinalis;;14002000
+DRM SPM;Kožní pìna;Cutaneous foam;Spuma cutanea;;10507000
+DRM SPR CML;Koncentrát pro kožní sprej, emulze;Concentrate for cutaneous spray, emulsion;Concentratum pro aerodispersione cutaneo in emulsione;;50009000
+DRM SPR EML;Kožní sprej, emulze;Cutaneous spray, emulsion;Emulsio pro aerodispersione cutaneo;;50015500
+DRM SPR PLV;Kožní sprej, prášek;Cutaneous spray, powder;Pulvis adspersorius pro aerodispersione;;10511000
+DRM SPR SOL;Kožní sprej, roztok;Cutaneous spray, solution;Solutio pro aerodispersione cutaneo;;10509000
+DRM SPR SUS;Kožní sprej, suspenze;Cutaneous spray, suspension;Suspensio pro aerodispersione cutaneo;;10510000
+DRM SPR UNG;Kožní sprej, mast;Cutaneous spray, ointment;Unguentum pro aerodispersione cutaneo;;50016000
+DRM STC SOL;Roztok pro kožní scratch test;Solution for skin-scratch test;Solutio pro scratch-testo cutaneo;;10549000
+DRM STL;Kožní tyèinka;Cutaneous stick;Stylus cutaneus;;10523000
+DRM SUS;Kožní suspenze;Cutaneous suspension;Suspensio cutanea;;10515000
+DRM TBL SOL;Tableta pro kožní roztok;Tablet for cutaneous solution;Tabuletta pro solutione cutaneo;;13066000
+DRM TMP IPR;Impregnovaný kožní tampon;Impregnated cutaneous swab;Tamponum cutaneum impraegnatum;;13145000
+DRM/NAS UNG;Kožní/nosní mast;Cutaneous/nasal ointment;Unguentum cutaneum/nasale;;50015200
+DRM/ORM SOL;Kožní/orální roztok;Cutaneous/oromucosal solution;Solutio cutanea/oromucosalis;;13140000
+EML NEB;Emulze k rozprašování;Nebuliser emulsion;Emulsio ad nebulisationem;;11105000
+EMP MED;Léèivá náplast;Medicated plaster;Emplastrum medicinalis;;10506000
+EMP PRV;Náplast pro provokaèní test;Plaster for provocation test;Emplastrum pro testo provocante;;10550000
+ENC GEL;Endocervikální gel;Endocervical gel;Gelatum endocervicale;;11701000
+ENC PLQ GEL;Prášek a rozpouštìdlo pro endocervikální gel;Powder and solvent for endocervical gel;Pulvis et liquefactorium pro gelato endocervicali;;11702000
+ENC PLV GEL;Prášek pro endocervikální gel;Powder for endocervical gel;Pulvis pro gelato endocervicali;;13024000
+ENS IRR SUS;Suspenze k výplachu paranazálních dutin;Endosinusial wash, suspension;Suspensio pro lotione endosinusiali;;50022000
+ENS PLQ SOL;Prášek a rozpouštìdlo pro roztok k výplachu paranazálních dutin;Powder and solvent for endosinusial solution;Pulvis et liquefactorium pro solutione endosinusiali;;50045000
+ENS PLV SOL;Prášek pro roztok k výplachu paranazálních dutin;Powder for endosinusial solution;Pulvis pro solutione endosinusiali;;13025000
+ENS SOL;Roztok k výplachu paranazálních dutin;Endosinusial solution;Solutio endosinusialis;;13041000
+EPL PLQ SOL;Prášek a rozpouštìdlo pro epilezionální roztok;Powder and solvent for epilesional solution;Pulvis et liquefactorium pro solutione epilaesionali;;50045500
+EPL PLV SOL;Prášek pro epilezionální roztok;Powder for epilesional solution;Pulvis pro solutione epilaesionali;;50049300
+EPL SOL;Epilezionální roztok;Epilesional solution;Solutio epilaesionalis;;13042000
+ETP ISL PLQ SOL;Endotracheopulmonální instilace, prášek a rozpouštìdlo pro roztok;Endotracheopulmonary instillation, powder and solvent for solution;Pulvis et liquefactorium pro solutione ad instillationem endotracheopulmonalem;;11604000
+ETP ISL PLQ SUS;Endotracheopulmonální instilace, prášek a rozpouštìdlo pro suspenzi;Endotracheopulmonary instillation, powder and solvent for suspension;Pulvis et liquefactorium pro suspensione ad instillationem endotracheopulmonalem;;11605000
+ETP ISL PSO;Endotracheopulmonální instilace, prášek pro roztok;Endotracheopulmonary instillation, powder for solution;Pulvis pro solutione ad instillationem endotracheopulmonalem;;11602000
+ETP ISL PSU;Endotracheopulmonální instilace, prášek pro suspenzi;Endotracheopulmonary instillation, powder for suspension;Pulvis pro suspensione ad instillationem endotracheopulmonalem;;13009000
+ETP ISL SOL;Roztok k endotracheopulmonální instilaci;Endotracheopulmonary instillation, solution;Solutio ad instillationem endotracheopulmonalem;;11601000
+ETP ISL SUS;Suspenze k endotracheopulmonální instilaci;Endotracheopulmonary instillation, suspension;Suspensio ad instillationem endotracheopulmonalem;;11603000
+FIL MED;Léèivé vlákno;Medicated thread;Filum medicinale;;12130000
+GAS CRS;Medicinální plyn, stlaèený;Medicinal gas, compressed;Gasum medicinale compressum;;12301000
+GAS CRY;Medicinální plyn, kryogenní;Medicinal gas, cryogenic;Gasum medicinale cryogenum;;12302000
+GAS LIQ;Medicinální plyn, zkapalnìný;Medicinal gas, liquefied;Gasum medicinale liquefactum;;12303000
+GEL;Gel;Gel;Gelatum cutaneum;;10503000
+GEL GEL;Gel pro pøípravu gelu;Gel for gel;Gelatum pro gelato;;13014000
+GEL PSS;Gel v tlakovém obalu;Gel in pressurised container;Gelatum in vase cum pressu;;50026400
+GEL SCC;Gel v sáèku;Gel in sachet;Gelatum in sacullo;;13069000
+GGR;Kloktadlo;Gargle;Gargarisma;;10301000
+GGR/GNG AQA;Kloktadlo/ústní výplach;Gargle/mouth wash;Gargarisma/aqua gingivalis;;50024000
+GGR/NAS LOT;Kloktadlo/nosní výplach;Gargle/nasal wash;Gargarisma/lotio nasalis;;50024500
+GKU;Tkáòové lepidlo;Sealant;Glutinum telae vivae;;12115000
+GKU PLV;Tkáòové lepidlo, prášek;Sealant powder;Glutino telae vivae, pulvis;;12115200
+GLB;Perorální globule;Oral globule;Globulus perorales;;
+GNG AQA;Roztok pro ústní výplach;Mouthwash;Aqua gingivalis;;10310000
+GNG GEL;Gel na dásnì;Gingival gel;Gelatum gingivale;;10315000
+GNG PLQ GEL;Prášek a rozpouštìdlo pro gel na dásnì;Powder and solvent for gingival gel;Pulvis et liquefactorium pro gelato gingivali;;50046000
+GNG PLV AQA;Ústní výplach, prášek pro roztok;Mouthwash, powder for solution;Pulvis pro aqua gingivali;;50036050
+GNG PLV GEL;Prášek pro gel na dásnì;Powder for gingival gel;Pulvis pro gelato gingivali;;13026000
+GNG PST;Pasta na dásnì;Gingival paste;Pasta gingivalis;;10316000
+GNG SOL;Roztok na dásnì;Gingival solution;Solutio gingivalis;;10312000
+GNG TBL AQA;Ústní výplach, tableta pro roztok;Mouthwash, tablet for solution;Tabuletta pro aqua gingivali;;10311000
+GRA;Granule;Granules;Granula;;10204000
+GRA CPS OPE;Granule v tobolce k otevøení;Granules in capsule for opening;Granula in capsula aperta;;13197000
+GRA EFF;Šumivé granule;Effervescent granules;Granula effervescentia;;10205000
+GRA EFF+TBL ENT;Šumivé granule + enterosolventní tableta;Effervescent granules + gastro-resistant tablet;Granula effervescentia et tabuletta enterosolvens;;14016000
+GRA EFF+TBL FLM;Šumivé granule + potahovaná tableta;Effervescent granules + film-coated tablet;Granula effervescentia et tabuletta filmo obducta;;14006000
+GRA ENP;Enterosolventní granule s prodlouženým uvolòováním;Gastro-resistant prolonged release granules;Granula enterosolventia cum liberatione prolongata;;50026250
+GRA ENT;Enterosolventní granule;Gastro-resistant granules;Granula enterosolventia;;10206000
+GRA FLM;Potahované granule;Film-coated granules;Granula film obducta;;13046000
+GRA FLM MDC;Potahované granule v jednodávkovém obalu;Film-coated granules in single-dose container;Granula film obducta in vase monodosali;;13155000
+GRA FLM SCC;Potahované granule v sáèku;Film-coated granules in sachet;Granula film obducta in sacculo;;13195000
+GRA MDC;Granule v jednodávkovém obalu;Granules in single-dose container;Granula in vase monodosali;;13090000
+GRA MRL;Granule s øízeným uvolòováním;Modified-release granules;Granula cum liberatione modificata;;10208000
+GRA OBD;Obalené granule;Coated granules;Granula obducta;;13046000
+GRA OBD SCC;Obalené granule v sáèku;Coated granules in sachet;Granula obducta in sacullo;;50001250
+GRA PRO;Granule s prodlouženým uvolòováním;Prolonged-release granules;Granula cum liberatione prolongata;;10207000
+GRA PRO SCC;Granule s prodlouženým uvolòováním v sáèku;Prolonged-release granules in sachet;Granula cum liberatione prolongata in sacullo;;50056200
+GRA SCC;Granule v sáèku;Granules in sachet;Granula in sacullo;;50029550
+GRA SIR;Granule pro sirup;Granules for syrup;Granula pro sirupo;;10119000
+GST EML;Gastroenterální emulze;Gastroenteral emulsion;Emulsio gastroenteralis;;12111000
+GST SOL;Gastroenterální roztok;Gastroenteral solution;Solutio gastroenteralis;;12108000
+GST SUS;Gastroenterální suspenze;Gastroenteral suspension;Suspensio gastroenteralis;;12110000
+GUM MND;Léèivá žvýkací guma;Medicated chewing-gum;Gummi manducabile medicinale;;10229000
+HDF SOL;Roztok pro hemodiafiltraci;Solution for haemodiafiltration;Solutio pro haemodiafiltratione;;11403000
+HFL SOL;Roztok pro hemofiltraci;Solution for haemofiltration;Solutio pro haemofiltratione;;11402000
+HFL/HMD/HDF SOL;Roztok pro hemofiltraci, hemodialýzu a hemodiafiltraci;Solution for /hemofiltration/haemodialysis/haemodiafiltration;;;
+HIR MED;Pijavka lékaøská;Medicinal leech;Hirudo medicinalis;;13115000
+HMD CNC SOL;Koncentrát pro roztok k hemodialýze;Concentrate for solution for haemodialysis;Concentratum pro solutione ad haemodialysim;;11405000
+HMD PCC SOL;Prášek pro koncentrát pro roztok k hemodialýze;Powder for concentrate for solution for haemodialysis;Pulvis pro concentrato pro solutione ad haemodialysim;;50049200
+HMD SOL;Roztok pro hemodialýzu;Solution for haemodialysis;Solutio pro haemodialysi;;11404000
+HMD/HFL SOL;Roztok pro hemodialýzu/hemofiltraci;Solution for haemodialysis/haemofiltration;Solutio pro haemodialysi/haemofiltratio­ne;;50057000
+ICM IMP;Implantát do pøední oèní komory;Intracameral implant;Implantatum intracamerale;;13190000
+ICM IMP APL;Implantát do pøední oèní komory v aplikátoru;Intracameral implant in applicator;Implantatum intracamerale in instrumento ad applicationem;;13192000
+IMP;Implantát;Implant;Implantatum;;11301000
+IMP CAT;Implantaèní øetìzec;Implantation chain;Catena implantabilis;;11303000
+IMP GEL;Implantaèní gel;Implantation gel;Gelatum implantabile;;13186000
+IMP GEL DIS;Disperze pro implantaèní gel;Dispersion for implantation gel;Dispersio pro gelato implantabili;;13187000
+IMP GEL DSS;Disperze a roztok pro implantaèní gel;Dispersion and solution for implantation gel;Dispersio et solutio pro gelato implantabili;;13189000
+IMP GEL SOL;Roztok pro implantaèní gel;Solution for implantation gel;Solutio pro gelato implantabili;;13188000
+IMP ISP;Implantát v pøedplnìné injekèní støíkaèce;Implant in pre-filled syringe;Implantatum in syringa praeimpleta;;50029750
+IMP MTX;Implantaèní matrice;Implantation matrix;Matrix implantabilis;;11303300
+IMP MTX MTX;Nosiè pro implantaèní matrici;Matrix for implantation matrix;Matrix pro matrice implantabili;;13018000
+IMP PLM MTX;Prášek, rozpouštìdlo a nosiè pro implantaèní matrici;Powder, solvent and matrix for implantation matrix;Pulvis, liquefactorium et matrix pro matrix implantabili;;50055350
+IMP PLQ PST;Prášek a rozpouštìdlo pro implantaèní pastu;Powder and solvent for implantation paste;Pulvis et liquefactorium pro pasta implantabili;;11304000
+IMP PLV MTX;Prášek pro implantaèní matrici;Powder for implantation matrix;Pulvis pro matrice implantabili;;13027000
+IMP PLV PST;Prášek pro implantaèní pastu;Powder for implantation paste;Pulvis pro pasta implantabili;;13028000
+IMP PLV SUS;Prášek pro implantaèní suspenzi;Powder for implantation suspension;Pulvis pro suspensione implantabili;;50049500
+IMP PST;Implantaèní pasta;Implantation paste;Pasta implantabilis;;13043000
+IMP SUS;Implantaèní suspenze;Implantation suspension;Suspensio implantabilis;;11303500
+IMP TBL;Implantaèní tableta;Implantation tablet;Tabuletta implantabilis;;11302000
+INF CNC DIS;Koncentrát pro infuzní disperzi;Concentrate for dispersion for infusion;Concentratum pro dispersione infundibili;;50009300
+INF CNC EML;Koncentrát pro infuzní emulzi;Concentrate for emulsion for infusion;Concentratum pro emulsione  infundibili;;50009500
+INF CNC SOL;Koncentrát pro infuzní roztok;Concentrate for solution for infusion;Concentratum pro solutione infundibili;;11213000
+INF CSC SOL;Koncentrát pro koncentrát pro infuzní roztok;Concentrate for concentrate for solution for infusion;Concentratum pro concentrato pro solutione infundibili;;13001000
+INF CSL LQC;Koncentrát a rozpouštìdlo koncentrátu pro infuzní roztok;Concentrate and solvent for concentrate for solution for infusion;Concentratum et liquefactorium concentrati pro solutione infundibili;;50002000
+INF CSL LQF;Koncentrát a rozpouštìdlo pro infuzní roztok;Concentrate and solvent for solution for infusion;Concentratum et liquefactorium pro solutione infundibili;;50006000
+INF DCN DIS;Disperze pro koncentrát pro infuzní disperzi;Dispersion for concentrate for dispersion for infusion;Dispersio pro concentrato pro dispersione infundibili;;13005000
+INF DIS;Infuzní disperze;Dispersion for infusion;Dispersio infundibilis;;50017500
+INF DSP LQC DIS;Disperze, prášek a rozpouštìdlo koncentrátu pro infuzní disperzi;Dispersion, powder and solvent for concentrate for dispersion for infusion;Dispersio, pulvis et liquefactorium concentrati pro dispersione infundibili;;13170000
+INF EML;Infuzní emulze;Emulsion for infusion;Emulsio infundibilis;;11211000
+INF EML APS;Infuzní emulze v aplikaèním systému;Emulsion for infusion in administration system;Emulsio infundibilis in systemate ad applicationem;;13095000
+INF GAS DIS;Plyn pro infuzní disperzi;Gas for dispersion for infusion;Gasum pro dispersione infundibili;;13012000
+INF LQF SOL;Rozpouštìdlo pro infuzní roztok;Solvent for solution for infusion;Liquefactorium pro solutione infundibili;;50076000
+INF PCC DIS;Prášek pro koncentrát pro infuzní disperzi;Powder for concentrate for dispersion for infusion;Pulvis pro concentrato pro dispersione infundibili;;50048750
+INF PCS SOL;Prášek pro koncentrát a roztok pro infuzní roztok;Powder for concentrate and solution for solution for infusion;Pulvis pro concentrato et solutio pro solutione infundibili;;13062000
+INF PLQ CSL;Prášek a rozpouštìdlo pro koncentrát pro infuzní roztok;Powder and solvent for concentrate for solution for infusion;Pulvis et liquefactorium pro concentrato pro solutione infundibili;;50042000
+INF PLV CSL;Prášek pro koncentrát pro infuzní roztok;Powder for concentrate for solution for infusion;Pulvis pro concentrato pro solutione infundibili;;50043000
+INF PLV DIS;Prášek pro infuzní disperzi;Powder for dispersion for infusion;Pulvis pro dispersione infundibili;;11211500
+INF PLV SOL;Prášek pro infuzní roztok;Powder for solution for infusion;Pulvis pro solutione infundibili;;11212000
+INF PLV SUS;Prášek pro infuzní suspenzi;Powder for suspension for infusion;Pulvis pro suspensione infundibili;;11206000
+INF PSO LQF;Prášek a rozpouštìdlo pro infuzní roztok;Powder and solvent for solution for infusion;Pulvis et liquefactorium pro solutione infundibili;;11214000
+INF RAD KIT;Kit pro radiofarmakum pro infuzi;Kit for radiopharmaceutical preparations for infusion;;;
+INF SOL;Infuzní roztok;Solution for infusion;Solutio infundibilis;;11210000
+INF SOL APS;Infuzní roztok v aplikaèním systému;Solution for infusion in administration system;Solutio infundibilis in systemate ad applicationem;;11210500
+INF SOL ISP;Infuzní roztok v pøedplnìné injekèní støíkaèce;Solution for infusion in pre-filled syringe;Solutio infundibilis in syringa praeimpleta;;50058500
+INF SOL SOL;Roztok pro infuzní roztok;Solution for solution for infusion;Solutio pro solutione infundibili;;13061000
+INF SOL ZVL;Infuzní roztok v zásobní vložce;Solution for infusion in cartridge;Solutio infundibilis in explemento;;13122000
+INF/POR SOL;Infuzní/perorální roztok;Solution for infusion/oral solution;;;50058000
+INH CPS VAP;Tobolka k inhalaci parou;Inhalation vapour, capsule;Capsula ad inhalationem vapore paratam;;11113000
+INH EML PSS;Emulze k inhalaci v tlakovém obalu;Pressurised inhalation, emulsion;Emulsio ad inhalationem in vase cum pressu;;11108000
+INH EML VAP;Emulze k inhalaci parou;Inhalation vapour, emulsion;Emulsio ad inhalationem vapore paratam;;50032000
+INH LIQ;Tekutina k inhalaci;Inhalation liquid;Liquidum ad inhalationem;;
+INH LIQ VAP;Tekutina k inhalaci parou;Inhalation vapour, liquid;Liquidum ad inhalationem vapore paratam;;11117000
+INH PLG VAP;Impregnovaná vložka k inhalaci parou;Inhalation vapour, impregnated plug;Explementum impregnatum ad inhalationem vapore paratam;;50033100
+INH PLV;Prášek k inhalaci;Inhalation powder;Pulvis ad inhalationem;;11109000
+INH PLV CPS DUR;Prášek k inhalaci v tvrdé tobolce;Inhalation powder, hard capsule;Pulvis ad inhalationem in capsula dura;;11110000
+INH PLV DOS;Dávkovaný prášek k inhalaci;Inhalation powder, pre-dispensed;Pulvis ad inhalationem in dosibus;;11111000
+INH PLV VAP;Prášek k inhalaci parou;Inhalation vapour, powder;Pulvis ad inhalationem vapore paratam;;11112000
+INH SOL;Roztok k inhalaci;Inhalation solution;Solutio ad inhalationem;;50081000
+INH SOL PSS;Roztok k inhalaci v tlakovém obalu;Pressurised inhalation, solution;Solutio ad inhalationem in vase cum pressu;;11106000
+INH SOL VAP;Roztok k inhalaci parou;Inhalation vapour, solution;Solutio ad inhalationem vapore paratam;;11114000
+INH SUS PSS;Suspenze k inhalaci v tlakovém obalu;Pressurised inhalation, suspension;Suspensio ad inhalationem in vase cum pressu;;11107000
+INH TBL EFF VAP;Šumivá tableta k inhalaci parou;Inhalation vapour, effervescent tablet;Tabuletta effervescens ad inhalationem vapore paratam;;50031000
+INH TBL PLV;Prášek k inhalaci, tableta;Inhalation powder, tablet;Pulvis ad inhalationem in tabuletta;;50030000
+INH TBL VAP;Tableta k inhalaci parou;Inhalation vapour, tablet;Tabuletta ad inhalationem vapore paratam;;11115000
+INH TMP VAP;Impregnovaný tampon k inhalaci parou;Inhalation vapour, impregnated pad;Tamponum impregnatum ad inhalationem vapore paratam;;50033000
+INH UNG VAP;Mast k inhalaci parou;Inhalation vapour, ointment;Unguentum ad inhalationem vapore paratam;;11116000
+INJ CLQ DIS;Koncentrát a rozpouštìdlo pro injekèní disperzi;Concentrate and solvent for dispersion for injection;Concentratum et liquefactorium pro dispersione iniectabili;;13143000
+INJ CML LQF;Koncentrát a rozpouštìdlo pro injekèní emulzi;Concentrate and solvent for emulsion for injection;Concentratum et liquefactorium pro emulsione iniectabili;;13153000
+INJ CNC DIS;Koncentrát pro injekèní disperzi;Concentrate for dispersion for injection;Concentratum pro dispersione iniectabilli;;13139000
+INJ CNC EML;Koncentrát pro injekèní emulzi;Concentrate for emulsion for injection;Concentratum pro emulsione iniectabili;;13152000
+INJ CNC SOL;Koncentrát pro injekèní roztok;Concentrate for solution for injection;Concentratum pro solutione iniectabili;;11209000
+INJ CNC SUS;Koncentrát pro injekèní suspenzi;Concentrate for suspension for injection;Concentratum pro suspensione iniectabili;;13004000
+INJ CSL LQF;Koncentrát a rozpouštìdlo pro injekèní roztok;Concentrate and solvent for solution for injection;Concentratum et liquefactorium pro solutione iniectabili;;50007000
+INJ CSS LQF;Koncentrát a rozpouštìdlo pro injekèní suspenzi;Concentrate and solvent for suspension for injection;Concentratum et liquefactorium pro suspensione iniectabili;;50008000
+INJ DIS;Injekèní disperze;Dispersion for injection;Dispersio iniectabilis;;50077000
+INJ DIS ISP;Injekèní disperze v pøedplnìné injekèní støíkaèce;Dispersion for injection in pre-filled syringe;Dispersio iniectabilis in syringa praeimpleta;;13161000
+INJ DIS PRO;Injekèní disperze s prodlouženým uvolòováním;Prolonged-release dispersion for injection;Dispersio cum liberatione prolongata pro iniectione;;13126000
+INJ EML;Injekèní emulze;Emulsion for injection;Emulsio iniectabilis;;11203000
+INJ EML EML;Emulze pro injekèní emulzi;Emulsion for emulsion for injection;Emulsio pro emulsione iniectabili;;13008000
+INJ EML SUS;Emulze pro injekèní suspenzi;Emulsion for suspension for injection;Emulsio pro suspensione iniectabili;;13091000
+INJ EMO EML;Roztok a emulze pro injekèní emulzi;Solution and emulsion for emulsion for injection;;;
+INJ EMS EML;Emulze a suspenze pro injekèní emulzi;Emulsion and suspension for emulsion for injection;Emulsio et suspensio pro emulsione iniectabili;;50021500
+INJ GAS DIS;Plyn pro injekèní disperzi;Gas for dispersion for injection;Gasum pro dispersione iniectabili;;13013000
+INJ GEL;Injekèní gel;Gel for injection;Gelatum iniectabile;;11204000
+INJ GRA SUS;Granule pro injekèní suspenzi;Granules for suspension for injection;Granula pro suspensione iniectabili;;13048000
+INJ GRL SUS;Granule a rozpouštìdlo pro injekèní suspenzi;Granules and solvent for suspension for injection;Granula et liquefactorium pro suspensione iniectabili;;50027000
+INJ PLQ DIS;Prášek a rozpouštìdlo pro injekèní disperzi;Powder and solvent for dispersion for injection;Pulvis et liquefactorium pro dispersione iniectabili;;50044500
+INJ PLQ EML;Prášek a rozpouštìdlo pro injekèní emulzi;Powder and solvent for emulsion for injection;Pulvis et liquefactorium pro emulsione iniectabili;;50044700
+INJ PLQ SOL ISP;Prášek a rozpouštìdlo pro injekèní roztok v pøedplnìné injekèní støíkaèce;Powder and solvent for solution for injection in prefilled syringe;Pulvis et liquefactorium pro solutione iniectabili in syringa praeimpleta;;50048250
+INJ PLQ SOL PEP;Prášek a rozpouštìdlo pro injekèní roztok v pøedplnìném peru;Powder and solvent for solution for injection in prefilled pen;Pulvis et liquefactorium pro solutione iniectabili in stilo praeimpleto;;50048150
+INJ PLQ SOL VIA;Prášek a rozpouštìdlo pro injekèní roztok v injekèní lahvièce;Powder and solvent for solution for injection in vial;Pulvis et liquefactorium pro solutione iniectabili in;;
+INJ PLQ SOL ZVL;Prášek a rozpouštìdlo pro injekèní roztok v zásobní vložce;Powder and solvent for solution for injection in cartridge;Pulvis et liquefactorium pro solutione iniectabili in explemento;;50048050
+INJ PLQ SOL/DRM PTC SOL;Prášek a rozpouštìdlo pro injekèní roztok/roztok pro kožní prick test;Powder and solvent for solution for injection/skin-prick test;Pulvis et liquefactorium pro solutione iniectabili/solutione pro prick-testo cutaneo;;50048270
+INJ PLQ SUR ISP;Prášek a rozpouštìdlo pro injekèní suspenzi s prodlouženým uvolòováním v pøedplnìné injekèní støíkaèce;Powder and solvent for prolonged-release suspension for injection in pre-filled syringe;Pulvis et liquefactorium pro suspensione iniectabili cum liberatione prolongata in syringa praeimpleta;;13057000
+INJ PLQ SUR PEP;Prášek a rozpouštìdlo pro injekèní suspenzi s prodlouženým uvolòováním v pøedplnìném peru;Powder and solvent for prolonged-release suspension for injection in pre-filled pen;Pulvis et liquefactorium pro suspensione iniectabili cum liberatione prolongata in stilo praeimpleto;;50048010
+INJ PLQ SUS CVD;Prášek a rozpouštìdlo pro injekèní suspenzi ve vícedávkovém obalu;Powder and solvent for suspension for injection in multidose container;Pulvis et liquefactorium pro suspensione iniectabili in vase multidosali;;13108000
+INJ PLQ SUS ISP;Prášek a rozpouštìdlo pro injekèní suspenzi v pøedplnìné injekèní støíkaèce;Powder and solvent for suspension for injection in prefilled syringe;Pulvis et liquefactorium pro suspensione iniectabili in syringa praeimpleta;;50048300
+INJ PLQ SUS PRO;Prášek a rozpouštìdlo pro injekèní suspenzi s prodlouženým uvolòováním;Powder and solvent for prolonged-release suspension for injection;Pulvis et liquefactorium pro suspensione iniectabili cum liberatione prolongata;;50048000
+INJ PLS SUS;Prášek a suspenze pro injekèní suspenzi;Powder and suspension for suspension for injection;Pulvis et suspensio pro suspensione iniectabili;;50048500
+INJ PLV DIS;Prášek pro injekèní disperzi;Powder for dispersion for injection;Pulvis pro dispersione iniectabili;;13023000
+INJ PLV EML;Prášek pro injekèní emulzi;Powder for emulsion for injection;Pulvis pro emulsione iniectabili;;13040000
+INJ PLV SOL;Prášek pro injekèní roztok;Powder for solution for injection;Pulvis pro solutione iniectabili;;11205000
+INJ PLV SOL/DRM PTC SOL;Prášek pro injekèní roztok/roztok pro kožní prick test;Powder for solution for injection/skin-prick test;Pulvis pro solutione iniectabili/solutione pro prick-testo cutaneo;;13052000
+INJ PLV SOL/SOL NEB;Prášek pro injekèní roztok/roztok k rozprašování;Powder for solution for injection/nebuliser solution;;;
+INJ PLV SUS;Prášek pro injekèní suspenzi;Powder for suspension for injection;Pulvis pro suspensione iniectabili;;11206000
+INJ PSL SOL;Prášek a roztok pro injekèní roztok;Powder and solution for solution for injection;Pulvis et solutio pro solutione iniectabili;;50041500
+INJ PSL SUS;Prášek a roztok pro injekèní suspenzi;Powder and solution for suspension for injection;Pulvis et solutio pro suspensione iniectabili;;13121000
+INJ PSO LQF;Prášek a rozpouštìdlo pro injekèní roztok;Powder and solvent for solution for injection;Pulvis et liquefactorium pro solutione iniectabili;;11207000
+INJ PSU LQF;Prášek a rozpouštìdlo pro injekèní suspenzi;Powder and solvent for suspension for injection;Pulvis et liquefactorium pro suspensione iniectabili;;11208000
+INJ PSU PRO;Prášek pro injekèní suspenzi s prodlouženým uvolòováním;Powder for prolonged-release suspension for injection;Pulvis pro suspensione iniectabili cum liberatione prolongata;;11208400
+INJ SLO SUS ISP;Roztok a suspenze pro injekèní suspenzi v  pøedplnìné injekèní støíkaèce;Solution and suspension for suspension for injection in pre-filled syringe;Solutio et suspensio pro  suspensione iniectabili in syringa praeimpleta;;50056600
+INJ SOL;Injekèní roztok;Solution for injection;Solutio iniectabilis;;11201000
+INJ SOL APS;Injekèní roztok v aplikaèním systému;Solution for injection in administration system;Solutio iniectabilis in systemate ad applicationem;;13053000
+INJ SOL CVD;Injekèní roztok ve vícedávkovém obalu;Solution for injection in multidose container;Solutio iniectabilis in vase multidosali;;13109000
+INJ SOL ISP;Injekèní roztok v pøedplnìné injekèní støíkaèce;Solution for injection in pre-filled syringe;Solutio iniectabilis in syringa praeimpleta;;50060300
+INJ SOL PEP;Injekèní roztok v pøedplnìném peru;Solution for injection in pre-filled pen;Solutio iniectabilis in stilo praeimpleto;;50060200
+INJ SOL PFI;Injekèní roztok v pøedplnìném injektoru;Solution for injection in pre-filled injector;Solutio iniectabilis in  instrumento ad applicationem praeimpleto;;13068000
+INJ SOL PRO;Injekèní roztok s prodlouženým uvolòováním;Prolonged-release solution for injection;Solutio cum liberatione prolongata pro iniectione;;13076000
+INJ SOL PRO PEP;Injekèní roztok s prodlouženým uvolòováním v pøedplnìném peru;Prolonged-release solution for injection in pre-filled pen;Solutio cum liberatione prolongata pro iniectione in stilo praeimpleto;;13194000
+INJ SOL SOL;Roztok pro injekèní roztok;Solution for solution for injection;Solutio pro solutione iniectabili;;13033000
+INJ SOL SUS;Roztok pro injekèní suspenzi;Solution for suspension for injection;Solutio pro suspensione iniectabili;;13047000
+INJ SOL TDP;Injekèní roztok v tlakovém injektoru;Solution for injection in needle-free injector;Solutio iniectabilis in instrumento ad applicationem pressionem;;50060150
+INJ SOL VIA;Injekèní roztok v injekèní lahvièce;Solution for injection in vial;Solutio iniectabilis in;;
+INJ SOL ZDD;Injekèní roztok v zásobní vložce pro dávkovací zaøízení;Solution for injection in dose-dispenser cartridge;Solutio iniectabilis in explemento pro instrumento ad applicationem in dosibus;;13071000
+INJ SOL ZVL;Injekèní roztok v zásobní vložce;Solution for injection in cartridge;Solutio iniectabilis in explemento;;50060100
+INJ SOL/DRM PTC SOL;Injekèní roztok/roztok pro kožní prick test;Solution for injection/skin-prick test;Solutio iniectabilis/solutio pro prick-testo cutaneo;;13051000
+INJ SOL/INF CNC SOL;Injekèní roztok/koncenrát pro infuzní roztok;Solution for injection/Concentrate for solution for infusion;Solutio iniectabilis/concentratum pro solutione infundibili;;50059000
+INJ SOL/SOL NEB;Injekèní roztok/roztok k rozprašování;Solution for injection/nebuliser solution;Solutio iniectabilis/solutio ad nebulisationem;;
+INJ SUS;Injekèní suspenze;Suspension for injection;Suspensio iniectabilis;;11202000
+INJ SUS CVD;Injekèní suspenze ve vícedávkovém obalu;Suspension for injection in multidose container;Suspensio iniectabilis in vase multidosali;;13110000
+INJ SUS EML;Suspenze pro injekèní emulzi;Suspension for emulsion for injection;Suspensio pro emulsione iniectabili;;13036000
+INJ SUS ISP;Injekèní suspenze v pøedplnìné injekèní støíkaèce;Suspension for injection in pre-filled syringe;Suspensio iniectabilis in syringa praeimpleta;;50063300
+INJ SUS PEP;Injekèní suspenze v pøedplnìném peru;Suspension for injection in pre-filled pen;Suspensio iniectabilis in stilo praeimpleto;;50063200
+INJ SUS PFI;Injekèní suspenze v pøedplnìném injektoru;Suspension for injection in pre-filled injector;Suspensio iniectabilis in  instrumento ad applicationem praeimpleto;;13064000
+INJ SUS PRO;Injekèní suspenze s prodlouženým uvolòováním;Prolonged-release suspension for injection;Suspensio cum liberatione prolongata pro iniectione;;11208500
+INJ SUS PRO ISP;Injekèní suspenze s prodlouženým uvolòováním v pøedplnìné injekèní støíkaèce;Prolonged-release suspension for injection in pre-filled syringe;Suspensio cum liberatione prolongata pro iniectione in syringa praeimpleta;;50056250
+INJ SUS PRO PEP;Injekèní suspenze s prodlouženým uvolòováním v pøedplnìném peru;Prolonged-release suspension for injection in pre-filled pen;Suspensio cum liberatione prolongata pro iniectione in stilo praeimpleto;;13112000
+INJ SUS SUS;Suspenze pro injekèní suspenzi;Suspension for suspension for injection;Suspensio pro suspensione iniectabili;;13039000
+INJ SUS VIA;Injekèní suspenze v injekèní lahvièce;Suspension for injection in vial;;;
+INJ SUS ZVL;Injekèní suspenze v zásobní vložce;Suspension for injection in cartridge;Suspensio iniectabilis in explemento;;50063100
+INJ/INF CNC SOL;Koncentrát pro injekèní/infuzní roztok;Concentrate for solution for injection/infusion;Concentratum pro solutione  iniectabili/infundibili;;50079000
+INJ/INF CSL LQF;Koncentrát a rozpouštìdlo pro injekèní/infuzní roztok;Concentrate and solvent for solution for injection/infusion;Concentratum et liquefactorium pro solutione iniectabili/infundibili;;50007500
+INJ/INF DIS;Injekèní/infuzní disperze;Dispersion for injection/infusion;Dispersio iniectabilis/infundibilis;;13049000
+INJ/INF EML;Injekèní/infuzní emulze;Emulsion for injection/infusion;Emulsio iniectabilis/infundibilis;;50021000
+INJ/INF EML ISP;Injekèní/infuzní emulze v pøedplnìné injekèní støíkaèce;Emulsion for injection/infusion in pre-filled syringe;Emulsio iniectabilis/infundibilis in syringa praeimpleta;;50021250
+INJ/INF GAQ DIS;Plyn a rozpouštìdlo pro injekèní/infuzní disperzi;Gas and solvent for dispersion for injection/infusion;Gasum et liquefactorium pro dispersione iniectabili/infundibili;;50078000
+INJ/INF GAS DIS;Plyn pro injekèní/infuzní disperzi;Gas for dispersion for injection/infusion;Gasum pro dispersione iniectabili/infundibili;;13050000
+INJ/INF PLV CSL;Prášek pro koncentrát pro injekèní/infuzní roztok;Powder for concentrate for solution for injection/infusion;Pulvis pro concentrato pro solutione iniectabili seu infundibili;;50049250
+INJ/INF PLV SOL;Prášek pro injekèní/infuzní roztok;Powder for solution for injection/infusion;Pulvis pro solutione iniectabili/infundibili;;50053500
+INJ/INF PLV SOL/SOL NEB;Prášek pro injekèní/infuzní roztok/roztok k rozprašování;Powder for solution for injection/infusion/nebuliser solution;;;
+INJ/INF PSO LQF;Prášek a rozpouštìdlo pro injekèní/infuzní roztok;Powder and solvent for solution for injection/infusion;Pulvis et liquefactorium pro solutione iniectabili/infundibili;;50080000
+INJ/INF SOL;Injekèní/infuzní roztok;Solution for injection/infusion;Solutio iniectabilis seu infundibilis;;50060000
+INJ/INF SOL ISP;Injekèní/infuzní roztok v pøedplnìné injekèní støíkaèce;Solution for injection/infusion in pre-filled syringe;Solutio iniectabilis/infundibilis in syringa praeimpleta;;50060500
+INJ/INF/IVS PLV SOL;Prášek pro injekèní/infuzní nebo intravezikální roztok;Powder for solution for injection/infusion/intravesical solution;Pulvis pro solutione iniectabili/infundibili/intravesicali;;
+INJ/INF/POR PSO LQF;Prášek a rozpouštìdlo pro injekèní/infuzní roztok/perorální roztok;Powder and solvent for solution for injection/infusion/oral solution;Pulvis et liquefactorium pro solutione iniectabili/infundibili/perorali;;
+INJ/INF/RCT SOL;Injekèní/infuzní/rektální roztok;Solution for injection/infusion/rectal solution;;;50060700
+INJ/POR SOL;Injekèní/perorální roztok;Solution for injection/oral;;;
+INT GEL;Intestinální gel;Intestinal gel;Gelatum intestinale;;12120000
+IOC IRR CSL;Koncentrát pro roztok k nitrooènímu výplachu;Concentrate for solution for intraocular irrigation;Concentratum pro solutione ad irrigationem intraoculari;;10600500
+IOC IRR LQS;Rozpouštìdlo pro roztok k nitrooènímu výplachu;Solvent for solution for intraocular irrigation;Liquefactorium pro solutione ad irrigationem intraoculari;;50074000
+IOC IRR PSO;Prášek pro roztok k nitrooènímu výplachu;Powder for solution for intraocular irrigation;Pulvis pro solutione ad irrigationem intraoculari;;50073000
+IOC IRR SOL;Roztok k nitrooènímu výplachu;Solution for intraocular irrigation;Solutio ad irrigationem intraoculari;;50073500
+IOC ISL PLQ SOL;Prášek a rozpouštìdlo pro roztok k nitrooèní instilaci;Powder and solvent for instillation solution for intraocular use;Pulvis et liquefactorium pro solutione ad instilationem intraoculari;;50047000
+IOC ISL PSO;Prášek pro roztok k nitrooèní instilaci;Powder for intraocular instillation solution;Pulvis pro solutione ad instilationem intraoculari;;13029000
+IOC ISL SOL;Roztok k nitrooèní instilaci;Intraocular instillation solution;Solutio ad instilationem intraoculari;;13044000
+IPT SOL;Intraperitoneální roztok;Intraperitoneal solution;Solutio intraperitonealis;;12111500
+IUT GEL;Intrauterinní gel;Intrauterine gel;Gelatum intrauterinum;;13113000
+IUT INS;Intrauterinní inzert;Intrauterine delivery system;Insertum intrauterinum;;11901000
+IUT SPM;Intrauterinní pìna;Intrauterine foam;Spuma intrauterina;;50033300
+IVI IMP;Intravitreální implantát;Intravitreal implant;Implantatum intravitreale;;13191000
+IVI IMP APL;Intravitreální implantát v aplikátoru;Intravitreal implant in applicator;Implantatum intravitreale in instrumento ad applicationem;;50033500
+IVS CLQ SOL;Koncentrát a rozpouštìdlo pro intravezikální roztok;Concentrate and solvent for intravesical solution;Concentratum et liquefactorium pro solutione intravesicali;;13144000
+IVS CNC SOL;Koncentrát pro intravezikální roztok;Concentrate for intravesical solution;Concentratum pro solutione intravesicali;;50009750
+IVS CNC SOL/INJ SOL;Koncentrát pro intravezikální roztok/injekèní roztok;Concentrate for intravesical solution/solution for injection;Concentratum pro solutione intravesicali/Solutio iniectabilis;;
+IVS PCC SUS;Prášek pro koncentrát pro intravezikální suspenzi;Powder for concentrate for intravesical suspension;Pulvis pro concentrato pro suspensione intravesicali;;50049100
+IVS PLQ SOL;Prášek a rozpouštìdlo pro intravezikální roztok;Powder and solvent for intravesical solution;Pulvis et liquefactorium pro solutione intravesicali;;50047500
+IVS PLQ SUS;Prášek a rozpouštìdlo pro intravezikální suspenzi;Powder and solvent for intravesical suspension;Pulvis et liquefactorium pro suspensione intravesicali;;50047600
+IVS PLV SOL;Prášek pro intravezikální roztok;Powder for intravesical solution;Pulvis pro solutione intravesicali;;50050000
+IVS PLV SOL/INJ SOL;Prášek pro intravezikální roztok/injekèní roztok;Powder for intravesical solution/solution for injection;Pulvis pro solutione intravesicali/solutione iniectabili;;50050500
+IVS PLV SUS;Prášek pro intravezikální suspenzi;Powder for intravesical suspension;Pulvis pro suspensione ad usum intravesicalem;;50051000
+IVS SOL;Intravezikální roztok;Intravesical solution;Solutio intravesicalis;;11502500
+IVS SOL/INJ SOL;Intravezikální roztok/injekèní roztok;Intravesical solution/solution for injection;Solutio intravesicalis/solutio iniectabilis;;50033400
+IVS SUS;Intravezikální suspenze;Intravesical suspension;Suspensio intravesicalis;;13045000
+LAC UGC;Léèivý lak na nehty;Medicated nail lacquer;Lacca unguicularis medicinalis;;10521000
+LAR MED;Medicinální larvy;Medicinal larvae;Larvae medicinales;;13124000
+LIG IPR;Impregnovaný obvaz;Impregnated dressing;Ligamentum impraegnatum;;10525000
+LQF;Rozpouštìdlo pro ...;Solvent for ...;Liquefactorium pro ...;;13035000
+LRP SOL;Laryngofaryngeální roztok;Laryngopharyngeal solution;Solutio laryngopharyn­gealis;;13016000
+LRP SPR SOL;Laryngofaryngeální sprej, roztok;Laryngopharyngeal spray, solution;Solutio aerodispersione laryngopharyn­geali;;13017000
+MTX GKU;Matrice pro tkáòové lepidlo;Sealant matrix;Matrix pro glutino telae vivae;;12115100
+NAS CRM;Nosní krém;Nasal cream;Cremor nasalis;;10801000
+NAS GEL;Nosní gel;Nasal gel;Gelatum nasale;;10802000
+NAS GTT EML;Nosní kapky, emulze;Nasal drops, emulsion;Rhinoguttae in emulsione;;10806000
+NAS GTT PLQ SOL;Nosní kapky, prášek a rozpouštìdlo pro roztok;Nasal drops, powder and solvent for solution;Pulvis et liquefactorium pro rhinoguttis in solutione;;50047650
+NAS GTT PSO;Nosní kapky, prášek pro roztok;Nasal drops, powder for solution;Pulvis pro rhinoguttis in solutione;;13020000
+NAS GTT SOL;Nosní kapky, roztok;Nasal drops, solution;Rhinoguttae in solutione;;10804000
+NAS GTT SOL MDC;Nosní kapky, roztok v jednodávkovém obalu;Nasal drops, solution in single-dose container;Rhinoguttae in solutione in vase monodosali;;50036200
+NAS GTT SUS;Nosní kapky, suspenze;Nasal drops, suspension;Rhinoguttae in suspensione;;10805000
+NAS LOT;Nosní výplach;Nasal wash;Lotio nasalis;;10811000
+NAS PLV ADS;Nosní zásyp;Nasal powder;Pulvis adspersorius nasalis;;10807000
+NAS PLV ADS MDC;Nosní zásyp v jednodávkovém obalu;Nasal powder in single-dose container;Pulvis adspersorius nasalis in vase monodosali;;13120000
+NAS SPR EML;Nosní sprej, emulze;Nasal spray, emulsion;Emulsio pro aerodispersione nasali;;10810000
+NAS SPR PSO;Nosní sprej, prášek pro roztok;Nasal spray, powder for solution;Pulvis pro solutione pro aerodispersione nasali;;50037100
+NAS SPR SOL;Nosní sprej, roztok;Nasal spray, solution;Solutio pro aerodispersione nasali;;10808000
+NAS SPR SOL MDC;Nosní sprej, roztok v jednodávkovém obalu;Nasal spray, solution in single-dose container;Aerodispersio nasalis, solutio in vase monodosali;;50037250
+NAS SPR SOL/ORM SOL;Nosní sprej, roztok/orální roztok;Nasal spray, solution/oromucosal solution;Aerodispersio nasalis, solutio/solutio oromucosalis;;50037400
+NAS SPR SUS;Nosní sprej, suspenze;Nasal spray, suspension;Suspensio pro aerodispersione nasali;;10809000
+NAS STL;Nosní tyèinka;Nasal stick;Stylus nasalis;;10812000
+NAS UNG;Nosní mast;Nasal ointment;Unguentum nasale;;10803000
+NAS/ORM SOL;Nosní/orální roztok;Nasal/oromucosal solution;Solutio nasalis/oromucosalis;;50036500
+NAS/ORM SPR SOL;Nosní/orální sprej, roztok;Nasal/oromucosal spray, solution;Aerodispersio nasalis/oromucosalis, solutio;;50036700
+OPH AQA;Oèní voda;Eye lotion;Aqua ophthalmica;;10610000
+OPH AQA LQF;Oèní voda, rozpouštìdlo pro rekonstituci;Eye lotion, solvent for reconstitution;Liquefactorium pro aqua ophthalmica;;10611000
+OPH CRM;Oèní krém;Eye cream;Cremor ophthalmicus;;10601000
+OPH GEL;Oèní gel;Eye gel;Gelatum ophthalmicum;;10602000
+OPH GEL MDC;Oèní gel v jednodávkovém obalu;Eye gel in single-dose container;Gelatum ophthalmicum in vase monodosali;;50023300
+OPH GTT EML;Oèní kapky, emulze;Eye drops, emulsion;Oculoguttae in emulsione;;10604500
+OPH GTT EML MDC;Oèní kapky, emulze v jednodávkovém obalu;Eye drops, emulsion in single-dose container;Oculoguttae in emulsione in vase monodosali;;13104000
+OPH GTT LQF;Oèní kapky, rozpouštìdlo pro rekonstituci;Eye drops, solvent for reconstitution;Liquefactorium pro oculoguttis;;10608000
+OPH GTT PLQ SOL;Oèní kapky, prášek a rozpouštìdlo pro roztok;Eye drops, powder and solvent for solution;Pulvis et liquefactorium pro solutione ophthalmica;;10606000
+OPH GTT PLQ SUS;Oèní kapky, prášek a rozpouštìdlo pro suspenzi;Eye drops, powder and solvent for suspension;Pulvis et liquefactorium pro suspensione ophthalmica;;10607000
+OPH GTT PLV SUS;Oèní kapky, prášek pro suspenzi;Eye drops, powder for suspension;Pulvis pro suspensione ophthalmica;;13011000
+OPH GTT PSO;Oèní kapky, prášek pro roztok;Eye drops, powder for solution;Pulvis pro solutione ophthalmica;;13010000
+OPH GTT SOL;Oèní kapky, roztok;Eye drops, solution;Oculoguttae in solutione;;10604000
+OPH GTT SOL MDC;Oèní kapky, roztok v jednodávkovém obalu;Eye drops, solution in single-dose container;Oculoguttae in solutione in vase monodosali;;50023000
+OPH GTT SOL PRO;Oèní kapky, roztok s prodlouženým uvolòováním;Eye drops, prolonged-release solution;Oculoguttae in solutione cum liberatione prolongata;;13159000
+OPH GTT SOL PRO MDC;Oèní kapky, roztok s prodlouženým uvolòováním v jednodávkovém obalu;Eye drops, prolonged-release solution in single-dose container;Oculoguttae in solutione cum liberatione prolongata in vase monodosali;;50022500
+OPH GTT SOL+NAS SPR SOL;Oèní kapky, roztok+nosní sprej, roztok;Eye drops, solution+nasal spray, solution;Oculoguttae in solutione+Solutio pro aerodispersione nasali;;
+OPH GTT SOL+OPH UNG;Oèní kapky, roztok + oèní mast;Eye drops, solution + eye ointment;Oculoguttae in solutione et unguentum ophthalmicum;;14017000
+OPH GTT SUS;Oèní kapky, suspenze;Eye drops, suspension;Oculoguttae in suspensione;;10605000
+OPH GTT SUS MDC;Oèní kapky, suspenze v jednodávkovém obalu;Eye drops, suspension in single-dose container;Oculoguttae in suspensione in vase monodosali;;50023100
+OPH INS;Oèní inzert;Ophthalmic insert;Oculoinsertum;;10612000
+OPH STR;Oèní proužek;Ophthalmic strip;Lineola ophthalmica;;10613000
+OPH UNG;Oèní mast;Eye ointment;Unguentum ophthalmicum;;10603000
+OPH UNG MDC;Oèní mast v jednodávkovém obalu;Eye ointment in single-dose container;Unguentum ophthalmicum in vase monodosali;;50023400
+OPH/NAS GTT SOL;Oèní/nosní kapky, roztok;Eye/nasal drops, solution;Oculoguttae/rhinoguttae in solutione;;
+ORM CNC SOL;Koncentrát pro orální roztok;Concentrate for oromucosal solution;Concentratum pro solutione oromucosali;;13003000
+ORM CPS;Orální tobolka;Oromucosal capsule;Capsula oromucosalis;;10317000
+ORM CRM;Orální krém;Oromucosal cream;Cremor oromucosalis;;10314010
+ORM EMP;Orální náplast;Oromucosal patch;Emplastrum oromucosale;;50039000
+ORM FLM;Orální film;Oromucosal film;Lamina oromucosalis;;13149000
+ORM GEL;Orální gel;Oromucosal gel;Gelatum oromucosale;;10313000
+ORM GTT EML;Orální kapky, emulze;Oromucosal drops, emulsion;Guttae oromucosales in emulsione;;13167000
+ORM GTT SOL;Orální kapky, roztok;Oromucosal drops, solution;Guttae oromucosales  in solutione;;13168000
+ORM GTT SUS;Orální kapky, suspenze;Oromucosal drops, suspension;Guttae oromucosales in suspensione;;13169000
+ORM POH;Orální váèek;Oromucosal pouch;Sacculus oromucosalis;;13141000
+ORM PST;Orální pasta;Oromucosal paste;Pasta oromucosalis;;10314000
+ORM SOL;Orální roztok;Oromucosal solution;Solutio oromucosalis;;10305000
+ORM SPR EML;Orální sprej, emulze;Oromucosal spray, emulsion;Emulsio pro aerodispersione oromucosali;;10308100
+ORM SPR SOL;Orální sprej, roztok;Oromucosal spray, solution;Solutio pro aerodispersione oromucosali;;10308200
+ORM SPR SUS;Orální sprej, suspenze;Oromucosal spray, suspension;Suspensio pro aerodispersione oromucosali;;10308300
+ORM SUS;Orální suspenze;Oromucosal suspension;Suspensio oromucosalis;;10306000
+ORM UNG;Orální mast;Oromucosal ointment;Unguentum oromucosale;;10314005
+ORM/LRP SOL;Orální/laryngofaryngeální roztok;Oromucosal/laryngopharyngeal solution;Solutio oromucosalis/laryngopharyn­gealis;;50039500
+ORM/LRP SPR SOL;Orální/laryngofaryngeální roztok/sprej, roztok;Oromucosal/laryngopharyngeal solution/spray, solution;Solutio pro solutione aerodispersione oromucosali/laryngopharyn­geali;;50040500
+PAR LQF;Rozpouštìdlo pro parenterální použití;Solvent for parenteral use;Liquefactorium ad usum parenteralem;;11216000
+PAS;Pastilka;Lozenge;Pastillus;;10321000
+PAS CMP;Lisovaná pastilka;Compressed lozenge;Pastillus compressus;;10322000
+PAS MOL;Mìkká pastilka;Pastille;Pastillus mollis;;10323000
+PDN GEL;Periodontální gel;Periodontal gel;Gelatum periodontale;;10410000
+PDN INS;Periodontální inzert;Periodontal insert;Insertum periodontale;;10411000
+PDN PLV;Periodontální prášek;Periodontal powder;Pulvis periodontalis;;10401000
+PIL;Pilule;Pillules;Pilulae;;10231000
+PIL MDC;Pilule v jednodávkovém obalu;Pillules in single-dose container;Pilulae in vase monodosali;;50041000
+PLG IPR;Impregnovaná vložka;Impregnated plug;Explementum impraegnatum;;12117500
+PLQ GKU;Prášek a rozpouštìdlo pro tkáòové lepidlo;Powder and solvent for sealant;Pulvis et liquefactorium pro glutino telae vivae;;12116000
+PLQ SIR;Prášek a rozpouštìdlo pro sirup;Powder and solvent for syrup;Pulvis et liquefactorium pro sirupo;;10115500
+PLQ SOL NEB;Prášek a rozpouštìdlo pro roztok k rozprašování;Powder and solvent for nebuliser solution;Pulvis et liquefactorium pro solutio ad nebulisationem;;50047700
+PLV EFF;Šumivý prášek;Effervescent powder;Pulvis effervescens;;10203000
+PLV GEL;Prášek pro pøípravu gelu;Powder for gel;Pulvis pro gelato;;13021000
+PLV GGR;Kloktadlo, prášek pro roztok;Gargle, powder for solution;Pulvis pro gargarismate;;10303000
+PLV GKU;Prášek pro tkáòové lepidlo;Powder for sealant;Pulvis pro glutino telae vivae;;13031000
+PLV SIR;Prášek pro sirup;Powder for syrup;Pulvis pro sirupo;;10118000
+PLV SOL ION;Prášek pro roztok pro iontoforézu;Powder for solution for iontophoresis;Pulvis pro solutione pro iontophoresi;;10518500
+PLV SOL NEB;Prášek pro roztok k rozprašování;Powder for nebuliser solution;Pulvis pro solutione ad nebulisationem;;11104000
+PLV SUS NEB;Prášek pro suspenzi k rozprašování;Powder for nebuliser suspension;Pulvis pro suspensione ad nebulisationem;;11103000
+POR CNC SOL;Koncentrát pro perorální roztok;Concentrate for oral solution;Concentratum pro solutione perorali;;50010000
+POR CNC SUS;Koncentrát pro perorální suspenzi;Concentrate for oral suspension;Concentratum pro suspensione perorali;;10100500
+POR CSL LQF;Koncentrát a rozpouštìdlo pro perorální roztok;Concentrate and solvent for oral solution;Concentratum et liquefactorium pro solutione perorali;;13160000
+POR EML;Perorální emulze;Oral emulsion;Emulsio peroralis;;10107000
+POR EML SCC;Perorální emulze v sáèku;Oral emulsion in sachet;Emulsio peroralis in sacullo;;50037600
+POR FLM DIS;Film dispergovatelný v ústech;Orodispersible film;Lamina pro orodispersione;;10236100
+POR GEL;Perorální gel;Oral gel;Gelatum perorale;;10108000
+POR GRA SOL;Granule pro perorální roztok;Granules for oral solution;Granula pro solutione perorali;;10112000
+POR GRA SOL SCC;Granule pro perorální roztok v sáèku;Granules for oral solution in sachet;Granula pro solutione perorali in sacullo;;50029170
+POR GRA SUS;Granule pro perorální suspenzi;Granules for oral suspension;Granula pro suspensione perorali;;10113000
+POR GRA SUS SCC;Granule pro perorální suspenzi v sáèku;Granules for oral suspension in sachet;Granula pro suspensione perorali in sacullo;;50029200
+POR GRL SUS;Granule a rozpouštìdlo pro perorální suspenzi;Granules and solvent for oral suspension;Granula et liquefactorium pro suspensione perorali;;50026500
+POR GSU EFF;Šumivé granule pro perorální suspenzi;Effervescent granules for oral suspension;Granula effervescentia pro suspensione perorali;;13007000
+POR GSU ENT;Granule pro enterosolventní perorální suspenzi;Granules for gastro-resistant oral suspension;Granula pro suspensione enterosolventi perorali;;50026000
+POR GSU ENT SCC;Granule pro enterosolventní perorální suspenzi v sáèku;Granules for gastro-resistant oral suspension in sachet;Granula pro suspensione enterosolventi perorali in sacullo;;50026150
+POR GSU MRL;Granule pro perorální suspenzi s øízeným uvolòováním;Granules for modified-release oral suspension;Granula pro suspensione perorali cum liberatione modificata;;50036000
+POR GSU PRO;Granule pro perorální suspenzi s prodlouženým uvolòováním;Granules for prolonged-release oral suspension;Granula pro suspensione perorali cum liberatione prolongata;;50056000
+POR GSU PRO SCC;Granule pro perorální suspenzi s prodlouženým uvolòováním v sáèku;Granules for prolonged-release oral suspension in sachet;Granula pro suspensione perorali cum liberatione prolongata in sacullo;;50056150
+POR GTT EML;Perorální kapky, emulze;Oral drops, emulsion;Guttae perorales in emulsione;;10103000
+POR GTT GSO;Perorální kapky, granule pro roztok;Oral drops, granules for solution;Guttae perorales, granula pro solutione;;50037500
+POR GTT LIQ;Perorální kapky, tekutina;Oral drops, liquid;Guttae perorales, liquidum;;50037750
+POR GTT PSU;Perorální kapky, prášek pro suspenzi;Oral drops, powder for suspension;Pulvis pro guttis peroralibus in suspensione;;50082000
+POR GTT SOL;Perorální kapky, roztok;Oral drops, solution;Guttae perorales in solutione;;10101000
+POR GTT SUS;Perorální kapky, suspenze;Oral drops, suspension;Guttae perorales in suspensione;;10102000
+POR LIQ;Perorální tekutina;Oral liquid;Liquidum perorale;A;10104000
+POR LYO;Perorální lyofilizát;Oral lyophilisate;Lyophilisatum perorale;;10224000
+POR MTR HER;Perorální rostlinný materiál;Oral herbal material;Herbarum materia peroralis;A;13106000
+POR OLE;Perorální olej;Oral oil;;;
+POR PAS MOL;Perorální mìkká pastilka;Oral gum;;;10230000
+POR PEV SUS;Prášek a šumivý prášek pro perorální suspenzi;Powder and effervescent powder for oral suspension;Pulvis et pulvis effervescens pro suspensione perorali;;13171000
+POR PLQ SOL;Prášek a rozpouštìdlo pro perorální roztok;Powder and solvent for oral solution;Pulvis et liquefactorium pro solutione perorali;;10114000
+POR PLQ SUS;Prášek a rozpouštìdlo pro perorální suspenzi;Powder and solvent for oral suspension;Pulvis et liquefactorium pro suspensione perorali;;10115000
+POR PLV;Perorální prášek;Oral powder;Pulvis peroralis;;10201000
+POR PLV CPS OPE;Perorální prášek v tobolce k otevøení;Oral powder in capsule for opening;Pulvis peroralis in capsula aperta;;13198000
+POR PLV MDC;Perorální prášek v jednodávkovém obalu;Oral powder in single-dose container;Pulvis peroralis in vase monodosali;;13130000
+POR PLV SCC;Perorální prášek v sáèku;Oral powder in sachet;Pulvis peroralis in sacullo;;50037800
+POR PLV SOL;Prášek pro perorální roztok;Powder for oral solution;Pulvis pro solutione perorali;;10110000
+POR PLV SOL SCC;Prášek pro perorální roztok v sáèku;Powder for oral solution in sachet;Pulvis pro solutione perorali in sacullo;;50052500
+POR PLV SUS;Prášek pro perorální suspenzi;Powder for oral suspension;Pulvis pro suspensione perorali;;10111000
+POR PLV SUS SCC;Prášek pro perorální suspenzi v sáèku;Powder for oral suspension in sachet;Pulvis pro suspensione perorali in sacculo;;13147000
+POR PNQ SUS;Prášek a rozpouštìdlo pro enterosolventní perorální suspenzi;Powder and solvent for gastro-resistant oral suspension;Pulvis et liquefactorium pro suspensione enterosolventi perorali;;13138000
+POR PST;Perorální pasta;Oral paste;Pasta peroralis;;10109000
+POR PST SCC;Perorální pasta v sáèku;Oral paste in sachet;Pasta peroralis in sacullo;;50037700
+POR PSU ENT;Prášek pro enterosolventní perorální suspenzi;Powder for gastro-resistant oral suspension;Pulvis pro suspensione enterosolventi perorali;;13136000
+POR PSU PRO;Prášek pro perorální suspenzi s prodlouženým uvolòováním;Powder for prolonged-release oral suspension;Pulvis pro suspensione perorali cum liberatione prolongata;;13176000
+POR PTB SOL;Prášek a tableta pro perorální roztok;Powder and tablet for oral solution;Pulvis et tabuletta pro solutione perorali;;13172000
+POR SEG SUS;Šumivé granule a suspenze pro perorální suspenzi;Effervescent granules and suspension for oral suspension;Granula effervescentia et suspensio pro suspensione perorali;;50062000
+POR SEP SUS;Suspenze a šumivý prášek pro perorální suspenzi;Suspension and effervescent powder for oral suspension;Suspensio et pulvis effervescens pro suspensione perorali;;13173000
+POR SGE SUS;Suspenze a šumivé granule pro perorální suspenzi;Suspension and effervescent granules for oral suspension;Suspensio et granula effervescentia pro suspensione perorali;;50062000
+POR SOL;Perorální roztok;Oral solution;Solutio peroralis;;10105000
+POR SOL CVI;Perorální roztok ve vícedávkovém obalu s dávkovací pumpou;Oral solution in multidose container with metering pump;Solutio peroralis in vase multidosali cum antlia pro applicationem in dossibus;;13146000
+POR SOL MDC;Perorální roztok v jednodávkovém obalu;Oral solution in single-dose container;Solutio peroralis in vase monodosali;;50038650
+POR SOL SCC;Perorální roztok v sáèku;Oral solution in sachet;Solutio peroralis in sacullo;;50038600
+POR SOL/CNC SOL NEB;Perorální roztok/koncentrát pro roztok k rozprašování;Oral solution/concentrate for nebuliser solution;Solutio peroralis/concentratum pro solutio ad nebulisationem;;50038500
+POR SOL/DRM SOL;Perorální/kožní roztok;Oral/cutaneous solution;Solutio peroralis/cutaneous;;
+POR SOL/INH SOL;Perorální roztok/roztok k inhalaci;Oral/inhalation solution;Solutio peroralis/ad inhalationem;;
+POR SUS;Perorální suspenze;Oral suspension;Suspensio peroralis;;10106000
+POR SUS ENT;Enterosolventní perorální suspenze;Gastro-resistant oral suspension;Suspensio peroralis enterosolvens;;13133000
+POR SUS MRL;Perorální suspenze s øízeným uvolòováním;Modified-release oral suspension;Suspensio peroralis cum liberatione modificata;;13135000
+POR SUS PPE;Šumivý prášek a prášek pro perorální suspenzi;Effervescent powder and powder for oral suspension;Pulvis effervescens et pulvis pro suspensione perorali;;13119000
+POR SUS PPL;Perorální suspenze v pøedplnìném aplikátoru pro perorální podání;Oral suspension in pre-filled oral applicator;Suspensio peroralis in instrumento ad applicationem praeimpleto ad usum peroralem;;13075000
+POR SUS PRO;Perorální suspenze s prodlouženým uvolòováním;Prolonged-release oral suspension;Suspensio peroralis cum liberatione prolongata;;13134000
+POR SUS PSE;Šumivý prášek a suspenze pro perorální suspenzi;Effervescent powder and suspension for oral suspension;Pulvis effervescens et suspensio pro suspensione perorali;;13150000
+POR SUS SCC;Perorální suspenze v sáèku;Oral suspension in sachet;Suspensio peroralis in sacullo;;50038700
+POR SUS SUS;Suspenze pro perorální suspenzi;Suspension for oral suspension;Suspensio pro suspensione perorali;;13037000
+POR SUS TUB;Perorální suspenze v tubì;Oral suspension in tube;;;
+POR TBL DIS;Tableta dispergovatelná v ústech;Orodispersible tablet;Tabuletta pro orodispersione;;10223000
+POR TBP SOL;Tableta a prášek pro perorální roztok;Tablet and powder for oral solution;Tabuletta et pulvis pro solutione perorali;;50065000
+POR/ORM/DRM SOL;Perorální/orální/kožní roztok;Oral/oromucosal/cutaneous solution;Solutio peroralis/oromucosales/cutaneous;;
+POR/RCT CNC SOL;Koncentrát pro perorální/rektální roztok;Concentrate for oral/rectal solution;Concentratum pro solutione perorali/rectali;;50011000
+POR/RCT GRA SUS;Granule pro perorální/rektální suspenzi;Granules for oral/rectal suspension;Granula pro suspensione perorali/rectali;;50029150
+POR/RCT PLV SUS;Prášek pro perorální/rektální suspenzi;Powder for oral/rectal suspension;Pulvis pro suspensione perorali seu rectali;;50052000
+POR/RCT PLV SUS SCC;Prášek pro perorální/rektální suspenzi v sáèku;Powder for oral/rectal suspension in sachet;Pulvis pro suspensione perorali seu rectali in sacullo;;13060000
+POR/RCT SOL;Perorální/rektální roztok;Oral/rectal solution;Solutio peroralis/rectalis;;50037900
+POR/RCT SUS;Perorální/rektální suspenze;Oral/rectal suspension;Suspensio peroralis/rectalis;;50038000
+PRG GEL;Prášek a gel pro pøípravu gelu;Powder and gel for gel;Pulvis et gelatum pro gelato;;50041200
+PRN CNC SOL;Koncentrát pro roztok k peritoneální dialýze;Concentrate for solution for peritoneal dialysis;Concentratum pro solutione ad dialysim peritonealem;;50013250
+PRN SOL;Roztok pro peritoneální dialýzu;Solution for peritoneal dialysis;Solutio pro dialysi peritoneali;;11401000
+PRV PLQ SOL;Prášek a rozpouštìdlo pro roztok pro provokaèní test;Powder and solvent for solution for provocation test;Pulvis et liquefactorium pro solutione pro testo provocanti;;13185000
+PRV PSO;Prášek pro roztok pro provokaèní test;Powder for solution for provocation test;Pulvis pro solutione pro testo provocanti;;13184000
+PRV SOL;Roztok pro provokaèní test;Solution for provocation test;Solutio pro testo provocanti;;12131000
+RAD GEN;Radionuklidový generátor;Radionuclide generator;Generator pro elutione radionucleidi;;12106000
+RAD KIT;Kit pro radiofarmakum;Kit for radiopharmaceutical preparation;Compositio pro radiopharmaco;;12107000
+RAD PRE;Prekurzor radiofarmaka;Radiopharmaceutical precursor;Praecursor radiopharmaci;;12105000
+RAD PRE SOL;Prekurzor radiofarmaka, roztok;Radiopharmaceutical precursor, solution;Praecursor radiopharmaci in solutione;;50056500
+RCT CNC SOL;Koncentrát pro rektální roztok;Concentrate for rectal solution;Concentratum pro solutione rectali;;11008000
+RCT CPS;Rektální tobolka;Rectal capsule;Capsula rectalis;;11014000
+RCT CRM;Rektální krém;Rectal cream;Cremor rectalis;;11001000
+RCT EML;Rektální emulze;Rectal emulsion;Emulsio rectalis;;11007000
+RCT GEL;Rektální gel;Rectal gel;Gelatum rectale;;11002000
+RCT GRA SUS;Granule pro rektální suspenzi;Granules for rectal suspension;Granula pro suspensione rectali;;13015000
+RCT PLV SOL;Prášek pro rektální roztok;Powder for rectal solution;Pulvis pro solutione rectali;;11009000
+RCT PLV SUS;Prášek pro rektální suspenzi;Powder for rectal suspension;Pulvis pro suspensione rectali;;11010000
+RCT SOL;Rektální roztok;Rectal solution;Solutio rectalis;;11005000
+RCT SPM;Rektální pìna;Rectal foam;Spuma rectalis;;11004000
+RCT SUS;Rektální suspenze;Rectal suspension;Suspensio rectalis;;11006000
+RCT TBL SOL;Tableta pro rektální roztok;Tablet for rectal solution;Tabuletta pro solutione rectali;;11011000
+RCT TBL SUS;Tableta pro rektální suspenzi;Tablet for rectal suspension;Tabuletta pro suspensione rectali;;11012000
+RCT TLQ SUS;Tableta a rozpouštìdlo pro rektální suspenzi;Tablet and solvent for rectal suspension;Tabuletta et liquefactorium pro suspensione rectali;;50064000
+RCT TMP;Rektální tampon;Rectal tampon;Tamponum rectale;;11015000
+RCT UNG;Rektální  mast;Rectal ointment;Unguentum rectale;;11003000
+SAT;Šampon;Shampoo;Saponatum;;10508000
+SIR;Sirup;Syrup;Sirupus;;10117000
+SIR SCC;Sirup v sáèku;Syrup in sachet;Sirupus in sacullo;;13094000
+SLG FLM;Sublingvální film;Sublingual film;Lamina sublingualis;;10317500
+SLG LYO;Sublingvální lyofilizát;Sublingual lyophilisate;Lyophilisatum sublingualis;;13127000
+SLG PLV;Sublingvální prášek;Sublingual powder;Pulvis sublingualis;;13105000
+SLG SOL;Sublingvální roztok;Sublingual solution;Solutio sublingualis;;13196000
+SLG SPR EML;Sublingvální sprej, emulze;Sublingual spray, emulsion;Emulsio pro aerodispersione sublinguali;;10309100
+SLG SPR SOL;Sublingvální sprej, roztok;Sublingual spray, solution;Solutio pro aerodispersione sublinguali;;10309200
+SLG SPR SUS;Sublingvální sprej, suspenze;Sublingual spray, suspension;Suspensio pro aerodispersione sublinguali;;10309300
+SLG TBL NOB;Sublingvální tableta;Sublingual tablet;Tabuletta sublingualis;;10318000
+SOL ACC SNG;Antikoagulaèní a konzervaèní roztok pro krev;Anticoagulant and preservative solution for blood;Solutio anticoagulans et sanguinem conservans;;12102000
+SOL CNS ORG;Roztok na konzervování orgánù;Solution for organ preservation;Solutio pro conservatione organorum;;12112000
+SOL GKU;Roztok pro tkáòové lepidlo;Solution for sealant;Solutio pro glutino telae vivae;;50061500
+SOL ION;Roztok pro iontoforézu;Solution for iontophoresis;Solutio pro iontoforesi;;10518000
+SOL IRR;Roztok na výplach;Irrigation solution;Solutio pro irrigatione;;12113000
+SOL IRR SCH;Roztok na výplach žaludku;Stomach irrigation;Solutio pro irrigatione stomachi;;12114000
+SOL MOD SNF;Roztok pro úpravu krevní frakce;Solution for blood fraction modification;Solutio pro modificatione fractionis sanguinis;;12103000
+SOL NEB;Roztok k rozprašování;Nebuliser solution;Solutio ad nebulisationem;;11101000
+SOL PRO VLN;Roztok na ránu s prodlouženým uvolòováním;Prolonged-release wound solution;;;13128000
+SPC;Léèivý èaj;Herbal tea;Species;A;10122000
+SPC SCC;Léèivý èaj v nálevovém sáèku;Herbal tea in bag;Species in sacculo;;50029700
+SPC SOL;Instantní léèivý èaj;Instant herbal tea;Species solubilis;;10202000
+SPO MED;Léèivá hubka;Medicated sponge;Spongiola medicinalis;;12119000
+SPR CNC EML;Koncentrát pro sprej, emulze;Concentrate for spray emulsion;Concentratum pro aerodispersione in emulsione;;50013500
+SPR SLO;Suspenze a roztok pro sprej;Suspension and solution for spray;Suspensio et solutio pro aerodispersione;;50062500
+STL VLN;Tyèinka na ránu;Wound stick;Stylus ad vulnerem;;12104000
+STV;Náhrada živé tkánì;Living tissue equivalent;Substitutio telae vivae;;12118000
+SUG GEL;Suspenze a gel pro pøípravu gelu;Suspension and gel for gel;Suspensio et gelatum pro gelato;;13166000
+SUP;Èípek;Suppository;Suppositorium;A;11013000
+SUS GEL;Suspenze pro pøípravu gelu;Suspension for gel;Suspensio pro gelato;;13165000
+SUS NEB;Suspenze k rozprašování;Nebuliser suspension;Suspensio ad nebulisationem;;11102000
+TBL EFF;Šumivá tableta;Effervescent tablet;Tabuletta effervescens;;10222000
+TBL EFF+TBL FLM;Šumivá tableta + potahovaná tableta;Effervescent tablet + film-coated tablet;Tabuletta effervescens et tabuletta filmo obducta;;14007000
+TBL ENT;Enterosolventní tableta;Gastro-resistant tablet;Tabuletta enterosolvens;;10225000
+TBL ENT+RCT SUS;Enterosolventní tableta + rektální suspenze;Gastro-resistant tablet + rectal suspension;Tabuletta enterosolvens et suspensio rectalis;;14003000
+TBL FLM;Potahovaná tableta;Film-coated tablet;Tabuletta filmo obducta;;10221000
+TBL FLM SCC;Potahovaná tableta v sáèku;Film-coated tablet in sachet;;;
+TBL FLM+GRA ENT SCC;Potahovaná tableta a enterosolventní granule v sáèku;Film-coated tablet and gastro-resistant granules in sachet;Tabuletta filmo obducta et granula enterosolventia in sacullo;;50023700
+TBL FLM+TBL NOB;Potahovaná tableta + tableta;Film-coated tablet + tablet;Tabuletta filmo obducta et tabuletta;;14014000
+TBL FLM+VAG GLB;Potahovaná tableta + vaginální kulièka;Film-coated tablet  + pessary;Tabuletta filmo obducta et globulus vaginalis;;14011000
+TBL GGR;Kloktadlo, tableta pro roztok;Gargle, tablet for solution;Tabuletta pro gargarismate;;10304000
+TBL MND;Žvýkací tableta;Chewable tablet;Tabuletta manducabilis;;10228000
+TBL MND PRO;Žvýkací tableta s prodlouženým uvolòováním;Prolonged-release chewable tablet;Tabuletta manducabilis cum liberatione prolongata;;13175000
+TBL MND/SUS;Žvýkací/dispergovatelná tableta;Chewable/dispersible tablet;Tabuletta manducabilis/dispersibilis;;50001000
+TBL MRL;Tableta s øízeným uvolòováním;Modified-release tablet;Tabuletta cum liberatione modificata;;10227000
+TBL NOB;Tableta;Tablet;Tabuletta;;10219000
+TBL NOB+VAG TBL NOB;Tableta+vaginální tableta;Tablet+vaginal tablet;;;14008000
+TBL OBD;Obalená tableta;Coated tablet;Tabuletta obducta;;10220000
+TBL PRO;Tableta s prodlouženým uvolòováním;Prolonged-release tablet;Tabuletta cum liberatione prolongata;;10226000
+TBL SNS;Tableta se senzorem;Tablet with sensor;Tabuletta cum proprioreceptor;;13118000
+TBL SOL;Rozpustná tableta;Soluble tablet;Tabuletta pro solutione perorali;;10120000
+TBL SUS;Dispergovatelná tableta;Dispersible tablet;Tabuletta pro dispersione;;10121000
+TBL SUS DSD;Dispergovatelné tablety pro dávkovací zaøízení;Dispersible tablets for dose dispenser;Tabulettae pro dispersione pro instrumento ad applicationem in dosibus;;10121500
+TDR EMP;Transdermální náplast;Transdermal patch;Emplastrum transcutaneum;;10519000
+TDR GEL;Transdermální gel;Transdermal gel;Gelatum transcutaneum;;10546250
+TDR GEL SCC;Transdermální gel v sáèku;Transdermal gel in sachet;Gelatum transcutaneum in sacullo;;13137000
+TDR SOL;Transdermální roztok;Transdermal solution;Solutio transcutanea;;10546400
+TDR SPR SOL;Transdermální sprej, roztok;Transdermal spray, solution;Solutio pro aerodispersione transcutanea;;10546500
+TDR SYS;Transdermální systém;Transdermal system;Systema transcutaneum;;10547000
+TDR UNG;Transdermální mast;Transdermal ointment;Unguentum transcutaneum;;13102000
+TMP IPR;Impregnovaný tampon;Impregnated pad;Tamponum impregnatum;;12117000
+UNG;Mast;Ointment;Unguentum cutaneum;A;10504000
+UNG/INH UNG VAP;Mast/mast k inhalaci parou;Ointment/inhalation vapour, ointment;Unguentum cutaneum/Unguentum ad inhalationem vapore paratam;;
+UNG+VAG TBL NOB;Mast + vaginální tableta;Ointment + vaginal tablet;Unguentum et tabuletta vaginalis;;14015000
+URT EML;Uretrální emulze;Urethral emulsion;Emulsio urethralis;;13077000
+URT GEL;Uretrální gel;Urethral gel;Gelatum urethrale;;11504000
+URT STL;Uretrální tyèinka;Urethral stick;Stylus urethralis;;11505000
+URT UNG;Uretrální mast;Urethral ointment;Unguentum urethrale;;13123000
+VAG CPS DUR;Tvrdá vaginální tobolka;Vaginal capsule, hard;Capsula vaginalis dura;;10910000
+VAG CPS MOL;Mìkká vaginální tobolka;Vaginal capsule, soft;Capsula vaginalis mollis;;10911000
+VAG CPS MOL+VAG CRM;Mìkká vaginální tobolka + vaginální krém;Vaginal capsule, soft + vaginal cream;Capsula vaginalis mollis et cremor vaginalis;;14004000
+VAG CRM;Vaginální krém;Vaginal cream;Cremor vaginalis;;10901000
+VAG CRM+VAG TBL NOB;Vaginální krém + vaginální tableta;Vaginal cream + vaginal tablet;Cremor vaginalis et tabuletta vaginali;;14005000
+VAG EML;Vaginální emulze;Vaginal emulsion;Emulsio vaginalis;;10907000
+VAG GEL;Vaginální gel;Vaginal gel;Gelatum vaginale;;10902000
+VAG GLB;Vaginální kulièka;Pessary;Globulus vaginalis;;10909000
+VAG GLB PRO;Vaginální kulièka s prodlouženým uvolòováním;Prolonged-release pessary;Globulus vaginalis cum liberatione prolongata;;13148000
+VAG GRA SOL;Granule pro vaginální roztok;Granules for vaginal solution;Granula pro solutione vaginali;;50029500
+VAG INS;Vaginální inzert;Vaginal delivery system;Insertum vaginale;;10915000
+VAG PLV SOL;Prášek pro vaginální roztok;Powder for vaginal solution;Pulvis pro solutione vaginali;;13111000
+VAG SOL;Vaginální roztok;Vaginal solution;Solutio vaginalis;;10905000
+VAG SPM;Vaginální pìna;Vaginal foam;Spuma vaginalis;;10904000
+VAG SUP;Vaginální èípek;Vaginal suppository;Suppositorium vaginale;;
+VAG SUS;Vaginální suspenze;Vaginal suspension;Suspensio vaginalis;;10906000
+VAG TBL EFF;Šumivá vaginální tableta;Effervescent vaginal tablet;Tabuletta vaginalis effervescens;;10913000
+VAG TBL NOB;Vaginální tableta;Vaginal tablet;Tabuletta vaginalis;;10912000
+VAG TBL SOL;Tableta pro vaginální roztok;Tablet for vaginal solution;Tabuletta pro solutione vaginali;;10908000
+VAG TMP MED;Léèivý vaginální tampon;Medicated vaginal tampon;Tamponum vaginale medicinale;;10914000
+VAG UNG;Vaginální mast;Vaginal ointment;Unguentum vaginale;;10903000
+VSC IRR PSO;Prášek pro roztok k výplachu moèového mìchýøe;Powder for bladder irrigation;Pulvis pro solutione ad irrigationem vesicae urinariae;;11503000
+VSC IRR SOL;Roztok k výplachu moèového mìchýøe;Bladder irrigation;Solutio pro irrigatione vesicae urinariae;;11502000

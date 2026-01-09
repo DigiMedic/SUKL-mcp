@@ -1,0 +1,43 @@
+TYP_LP;NAZEV;NAZEV_EN
+AD/G;ATMP - Genová terapie;Advanced Therapy Medicinal product
+AD/GC;ATMP - Genová terapie (s buòkami/tkánìmi);Advanced Therapy Medicinal product
+AD/GCM;ATMP - Genová terapie (s buòkami/tkánìmi) obsahující GMO;Advanced Therapy Medicinal product
+AD/GM;ATMP - Genová terapie obsahující GMO;Advanced Therapy Medicinal product
+AD/S;ATMP - Somato-bunìèná terapie;Advanced Therapy Medicinal product
+AD/SM;ATMP - Somato-bunìèná terapie obsahující GMO;Advanced Therapy Medicinal product
+AD/T;ATMP - Tkáòové inženýrství;Advanced Therapy Medicinal product
+AD/TM;ATMP - Tkáòové inženýrství obsahující GMO;Advanced Therapy Medicinal product
+BI;Biologické léèivé pøípravky - ostatní;Biological Medicinal Product
+BT;Biotechnologické léèivé pøípravky;List A Biological Medicinal Product
+CH;Chemické léèivé pøípravky;Chemical Medicinal Product
+G;genová terapie;Advanced Therapy Medicinal Product
+GB;genová terapie (s buòkami/tkánìmi);
+GBM;genová terapie (s buòkami/tkánìmi) obsahující GMO;
+GM;genová terapie obsahující GMO;Advanced Therapy Medicinal Product
+HE;Rostlinné léèivé pøípravky;Herbal Medicinal Product
+HO;Homeopatické léèivé pøípravky;Homeopathic Medicinal Product
+IM;Imunologické léèivé pøípravky;Immunological Medicinal Product
+IM/BI;Imunologické léèivé pøípravky/Biologické léèivé pøípravky;Immunological Medicinal Product/Biological Medicinal Product
+IM/BT;Imunologické léèivé pøípravky/Biotechnologické léèivé pøípravky;Immunological Medicinal Product/List A Biological Medicinal Product
+IM/CH;Imunologické léèivé pøípravky/Chemické léèivé pøípravky;Immunological Medicinal Product/Chemical Medicinal Product
+IM/M;Imunologické léèivé pøípravky obsahující GMO;Immunological Medicinal Product
+IM/M/BT;Imunologické léèivé pøípravky obsahující GMO/Biotechnologické léèivé pøípravky;Immunological Medicinal Product/List A Biological Medicinal Product
+KA;krevní derivát - albumin;Medicinal Product derived from Human Blood or Human Plasma
+KB;krevní derivát - imunoglobulin (iv/im/sc);Medicinal Product derived from Human Blood or Human Plasma
+KF;krevní derivát - koagulaèní faktor;Medicinal Product derived from Human Blood or Human Plasma
+KI;krevní derivát - koagulaèní inhibitor;Medicinal Product derived from Human Blood or Human Plasma
+KL;krevní derivát - fibrinové lepidlo;Medicinal Product derived from Human Blood or Human Plasma
+KO;krevní derivát - ostatní;Medicinal Product derived from Human Blood or Human Plasma
+KR/A;Krevní derivát-albumin;Medicinal Product derived from Human Blood or Human Plasma
+KR/B;Krevní derivát-immunoglobulin (iv/im/sc);Medicinal Product derived from Human Blood or Human Plasma
+KR/F;Krevní derivát-koagulaèní faktor;Medicinal Product derived from Human Blood or Human Plasma
+KR/I;Krevní derivát-koagulaèní inhibitor;Medicinal Product derived from Human Blood or Human Plasma
+KR/L;Krevní derivát-fibrinové lepidlo;Medicinal Product derived from Human Blood or Human Plasma
+KR/O;Krevní derivát-ostatní;Medicinal Product derived from Human Blood or Human Plasma
+M;LP obsahující GMO;
+RA;Radiofarmaka;Radiopharmaceutical Medicinal product
+S;somato-bunìèná terapie;Advanced Therapy Medicinal Product
+SM;somato-bunìèná terapie obsahující GMO;Advanced Therapy Medicinal Product
+T;tkáòové inženýrství;Advanced Therapy Medicinal Product
+TM;tkáòové inženýrství obsahující GMO;Advanced Therapy Medicinal Product
+TR;Tradièní rostlinné léèivé pøípravky;Traditional Herbal Medicinal Product

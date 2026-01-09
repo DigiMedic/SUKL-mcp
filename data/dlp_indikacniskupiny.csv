@@ -1,0 +1,89 @@
+INDSK;NAZEV
+00;Suroviny
+01;Anaesthetica (lokální)
+04;Aminoacida
+05;Anaesthetica (celková)
+06;Psychostimulantia (nootropní léèiva, analeptika)
+07;Analgetica, antipyretica
+08;Anorexica
+09;Antacida (vèetnì antiulcerosních léèiv)
+10;Anthelmintica
+12;Antianaemica
+13;Antiarrythmica
+14;Bronchodilatantia, antiasthmatica
+15;Antibiotica (proti mikrob. a virovým infekcím)
+16;Anticoagulantia (fibrinolytica, antifibrinol.)
+17;Anticoncipientia
+18;Antidiabetica (vèetnì insulinu)
+19;Antidota,detoxicantia
+20;Antiemetica, antivertiginosa
+21;Antiepileptica, anticonvulsiva
+23;Antihaemorrhoidalia
+24;Antihistaminica, histamin
+25;Antiparasitica (antiprotozoica, antimalarica)
+26;Antimycotica (lokální i celková)
+27;Antiparkinsonica
+29;Antirheumatica, antiphlogistica, antiuratica
+30;Antidepressiva
+31;Hypolipidaemica
+32;Antiseptica, desinficientia (lokální)
+33;Antimigraenica, antiserotonica
+34;Antihormona
+36;Antitussica
+39;Soli a ionty pro p.o. i parent.aplikaci
+41;Cardiaca
+42;Chemotherapeutica (vèetnì tuberkulostatik)
+43;Choleretica,cholekinetica
+44;Cytostatica
+45;Derivantia
+46;Dermatologica
+47;Diaetetica
+48;Diagnostica
+49;Digestiva, adsorbentia, acida
+50;Diuretica
+51;Emetica
+52;Expectorantia, mucolytica
+53;Parasympatholytica, ganglioplegica
+54;Gynaecologica
+56;Hormona (léèiva s hormonální aktivitou)
+57;Hypnotica, sedativa
+58;Hypotensiva
+59;Immunopraeparata
+61;Laxantia
+63;Myorelaxantia
+64;Ophthalmologica
+65;Analgetica - anodyna
+66;Organopreparata
+67;Parasympathomimetica
+68;Antipsychotica (neuroleptica)
+69;Otorhinolaryngologica
+70;Anxiolytica
+71;Obvazový materiál,rukavice,rehabilit.+kompenzaèní pomùcky
+72;Shock therapeutica
+73;Spasmolytica
+74;Species
+75;Substitutio sanguinis (a krevní deriváty)
+76;Infundibilia
+77;Sympatholytica
+78;Sympathomimetica
+79;Therapia non specifica
+80;Hepatica
+81;Uterotonica
+82;Materiae stomatologicae
+83;Vasodilatantia
+84;Vasopressorica
+85;Venopharmaca, antivaricosa
+86;Vitamina, vitagena
+87;Varia
+88;Radiopharmaca
+89;Medicinální plyny
+90;Neuroleptanalgetica
+91;Multivitamíny a stopové prvky
+92;Zdravotnické pøístroje
+93;Homeopatica
+94;Phytopharmaca
+95;Stomatologica-praeparata medicinalia
+96;Veterinaria-pharmaceutica
+97;Veterinaria-immunopreparata
+98;Veterinaria-praemixta
+99;Veterinaria-varia

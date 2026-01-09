@@ -1,0 +1,176 @@
+CESTA;NAZEV;NAZEV_EN;NAZEV_LAT;KOD_EDQM
+AUR;Ušní podání;Auricular use;Usus auricularis;20001000
+AUR/OPH;Ušní/oèní podání;Auricular/ocular use;Usus auricularis/ophthalmicus;
+BUC;Bukální podání;Buccal use;Usus buccalis;20002500
+BUC/IMS/IVN/NAS;Bukální/intramuskulární/intravenózní/nosní podání;Buccal/intramuscular/intravenous/nasal use;Usus buccalis/intramuscularis/intravenosus/nasalis;
+CDP;Kardioplegické podání;Cardioplegic use;Usus cardioplegicus;20089000
+DNT;Dentální podání;Dental use;Usus dentalis;20004000
+DRM;Kožní podání;Cutaneous use;Usus cutaneus;20003000
+DRM/INH;Kožní/inhalaèní podání;Cutaneous/inhalation use;Usus cutaneus/inhalatorius;
+EAC;Mimotìlní podání;Extracorporeal use;Usus extracorporealis;20011500
+EAM;Extraamniotické podání;Extraamniotic use;Usus extraamnioticus;20011000
+EAP;Extrapleurální podání;Extrapleural use;Usus extrapleuralis;20087000
+ENC;Endocervikální podání;Endocervical use;Usus endocervicalis;20006000
+ENS;Endosinusové podání;Endosinusial use;Usus endosinusialis;20007000
+EPD;Epidurální podání;Epidural use;Usus epiduralis;20009000
+EPD/IAT/IFL;Epidurální/intraartikulární podání/infiltrace;Epidural/intraarticular use/infiltration;Usus epiduralis/intraarticularis/infiltratio;
+EPD/IAT/PNR/SDR;Epidurální/intraartikulární/perineurální/subkutánní podání;Epidural/intraarticular/perineural/subcutaneous use;Usus epiduralis/intraarticularis/perineuralis/subcutaneus;
+EPD/IMS/IVN/SDR;Epidurální/intramuskulární/intravenózní/subkutánní;Epidural/intramuscular/intravenous/subcutaneous use;Usus epiduralis/intramuscularis/intravenosus/subcutaneus;
+EPD/ITH/IFL;Epidurální/intratekální/infiltrace;Epidural/intrathecal/infiltration;Usus epiduralis/intrathecalis/infiltratio;
+EPD/ITH/IVN/SDR;Epidurální/intratekální/intravenózní/subkutánní podání;Epidural/intrathecal/intravenous/subcutaneous use;Usus epiduralis/intrathecalis/intravenosus/subcutaneus;
+EPD/ITH/PNR/IFL;Epidurální/intratekální/perineurální podání/infiltrace;Epidural/intrathecal/perineural use/infiltration;Usus epiduralis/intrathecalis/perineuralis/infiltratio;
+EPD/PNR;Epidurální/perineurální podání;Epidural/perineural use;Usus epiduralis/perineuralis;
+EPL;Epilezionální podání;Epilesional use;Usus epilaesionalis;20010000
+EPL/IMP;Epilezionální podání/implantace;Epilesional use/implantation;Usus epilaesionalis/implantatio;
+ETP;Endotracheopulmonální podání;Endotracheopulmonary use;Usus endotracheopulmonalis;20008000
+GNG;Podání na dásnì;Gingival use;Usus gingivalis;20014000
+GSR;Žaludeèní podání;Gastric use;Usus stomachicus;20013500
+GST;Gastroenterální podání;Gastroenteral use;Usus gastroenteralis;20013000
+HMD;Hemodialýza;Haemodialysis;Haemodialysis;20015000
+HMD/IVN;Hemodialýza/intravenózní podání;Hemodialysis/intravenous use;Haemodialysis/usus intravenosus;
+IAM;Intraamniotické podání;Intraamniotic use;Usus intraamnioticus;20022000
+IAM/IMS;Intraamniotické/intramuskulární podání;Intraamniotic/intramuscular use;Usus intraamnioticus/intramuscularis;
+IAR;Intraarteriální podání;Intraarterial use;Usus intraarterialis;20023000
+IAR/IAT/ICP/IVN;Intraarteriální/intraartikulární/intracholangiopankreatické//intravenózní podání;Intraarterial/intraarticular/intracholangiopancreatic/intravenous use;Usus intraarterialis/intraarticularis/intracholangiopancreaticus/intravenosus;
+IAR/ILF;Intraarteriální/intralymfatické podání;Intraarterial/intralymphatic use;Usus intraarterialis/intralymphaticus;
+IAR/ILF/IUT;Intraarteriální/intralymfatické/intrauterinní podání;Intraarterial/intralymphatic/intrauterine use;Usus intraarterialis/intralymphaticus/intrauterinus;
+IAR/IMS/ITH/IVN;Intraarteriální/intramuskulární/intratekální/intravenózní podání;Intraarterial/intramuscular/intrathecal/intravenous use;Usus intraarterialis/intramuscularis/intrathecalis/intravenosus;
+IAR/IMS/IVN;Intraarteriální/intramuskulární/intravenózní;Intraarterial/intramuscular/intravenous use;Usus intraarterialis/intramuscularis/intravenosus;
+IAR/IPL/IPT/IVN;Intraarteriální/intrapleurální/intraperitoneální/intravenózní podání;Intraarterial/intrapleural/intraperitoneal/intravenous use;Usus intraarterialis/intrapleuralis/intraperitonealis/intravenosus;
+IAR/IVN;Intraarteriální/intravenózní podání;Intraarterial/intravenous use;Usus intraarterialis/intravenosus;
+IAR/IVN/ITH;Intraarteriální/intravenózní/intratekální podání;Intraarterial/intravenous/intrathecal use;Usus intraarterialis/intravenosus/intrathecalis;
+IAR/SDR;Intraarteriální/subkutánní podání;Intraarterial/subcutaneous use;Usus intraarterialis/subcutaneus;
+IAT;Intraartikulární podání;Intraarticular use;Usus intraarticularis;20024000
+IAT/IBR/IMS/IVN;Intraartikulární/intraburzální/intramuskulární/intravenózní podání;Intraarticular/intrabursal/ntramuscular/intravenous use;Usus intraarticularis/intrabursalis/intramuscularis/intravenosus;
+IAT/IFL/IMS/IVN;Intraartikulární/infiltrace/intramuskulární/intravenózní podání;Intraarticular/infiltration/ntramuscular/intravenous use;Usus intraarticularis/infiltratio/intramuscularis/intravenosus;
+IAT/PAT;Intraartikulární/periartikulární podání;Intraarticular/periarticular use;Usus intraarticularis/periarticularis;
+IBR;Intraburzální podání;Intrabursal use;Usus intrabursalis;20025000
+ICB;Intracerebrální podání;Intracerebral use;Usus intracerebralis;20027010
+ICC;Intracervikální podání;Intracervical use;Usus intracervicalis;20028000
+ICC/IUT;Intracervikální/intrauterinní podání;Intracervical/intrauterine use;Usus intracervicalis/intrauterinus;
+ICC/IVN;Intracervikální/intravenózní podání;Intracervical/intravenous use;Usus intracervicalis/intranenosus;
+ICG;Intrakartilaginózní podání;Intracartilaginous use;Usus intracartilaginosus;20026500
+ICL;Intracerebroventrikulární podání;Intracerebroventricular use;Usus intracerebroventricularis;20080000
+ICM;Podání do pøední oèní komory;Intracameral use;Usus intracameralis;20025500
+ICN;Intrakoronární podání;Intracoronary use;Usus intracoronarius;20029000
+ICN/IVN;Intrakoronární/intravenózní podání;Intracoronary/intravenous use;Usus intracoronarius/intravenosus;
+ICP;Intracholangiopankreatické podání;Intracholangiopancreatic use;Usus intracholangiopancreaticus;20028300
+ICR;Intrakardiální podání;Intracardiac use;Usus intracardiacus;20026000
+ICT;Intracisternální podání;Intracisternal use;Usus intracisternalis;20028500
+ICT/IVN;Intracisternální/intravenózní  podání;Intracisternal/intravenous use;Usus intracisternalis/intravenosus;
+ICV;Intrakavernózní podání;Intracavernous use;Usus intracavernosus;20027000
+IDR;Intradermální podání;Intradermal use;Usus intradermalis;20030000
+IDR/IMS;Intradermální/intramuskulární podání;Intradermal/intramuscular use;Usus intradermalis/intramuscularis;
+IDR/IMS/IDT;Intradermální/intramuskulární/podání do detruzoru;Intradermal/intramuscular/intradetrusorial use;Usus intradermalis/intramuscularis/intradetrusorialis;
+IDR/IMS/SDR;Intradermální/intramuskulární/subkutánní podání;Intradermal/intramuscular/subcutaneous use;Usus intradermalis/intramuscularis/subcutaneus;
+IDR/IMS/SDR/IDT;Intradermální/intramuskulární/subkutánní/podání do detruzoru;Intradermal/intramuscular/subcutaneous/Intradetrusorial use;Usus intradermalis/intramuscularis/subcutaneus/intradetrusorialis;
+IDR/SDR/ITM;Intradermální/subkutánní/intratumorózní podání;Intradermal/subcutaneous/intratumoral use;Usus intradermalis/subcutaneus/intratumoralis;
+IDR/SDR/ITM/PTM;Intradermální/subkutánní/intratumorózní/peritumorózní podání;Intradermal/subcutaneous/intratumoral/peritumoral use;Usus intradermalis/subcutaneus/intratumoralis/peritumoralis;
+IDR/SDR/IVN/PTM;Intradermální/subkutánní/intravenózní/peritumorózní podání;Intradermal/subcutaneous/intravenous/peritumoral use;Usus intradermalis/subcutaneus/intravenosus/peritumoralis;
+IDS;Intradiskální podání;Intradiscal use;Usus intradiscalis;20031000
+IDT;Podání do detruzoru;Intradetrusorial use;Usus intradetrusorialis;
+IED;Intraepidermální podání;Intraepidermal use;Usus intraepidermalis;20031500
+IFL;Infiltrace;Infiltration;Infiltratio;20019500
+IFL/PNR;Infiltrace/perineurální podání;Infiltration/perineural use;Infiltratio/usus perineuralis;
+IGD;Intraglandulární podání;Intraglandular use;Usus intraglandularis;20031700
+IGD/IMS;Intraglandulární/intramuskulární podání;Intraglandular/intramuscular use;Usus intraglandularis/intramuscularis;
+ILF;Intralymfatické podání;Intralymphatic use;Usus intralymphaticus;20033000
+ILS;Intralezionální podání;Intralesional use;Usus intralaesionalis;20032000
+IMP;Implantace;Implantation;Implantatum;20015500
+IMS;Intramuskulární podání;Intramuscular use;Usus intramuscularis;20035000
+IMS/IVN;Intramuskulární/intravenózní podání;Intramuscular/intravenous use;Usus intramuscularis/intravenosus;
+IMS/IVN/IFL;Intramuskulární/intravenózní podání/infiltrace;Intramuscular/intravenous use/infiltration;Usus intramuscularis/intravenosus/infiltratio;
+IMS/IVN/INH;Intramuskulární/intravenózní/inhalaèní podání;Intramuscular/intravenous/inhalation use;Usus intramuscularis/intravenosus/inhalatorius;
+IMS/IVN/IOS;Intramuskulární/intravenózní/intraoseální podání;Intramuscular/intravenous/intraosseous use;Usus intramuscularis/intravenosus/intraosealis;
+IMS/IVN/IPT;Intramuskulární/intravenózní/intraperitoneální podání;Intramuscular/intravenous/intraperitoneal use;Usus intramuscularis/intravenosus/intraperitonealis;
+IMS/IVN/ITH;Intramuskulární/intravenózní/intratekální podání;Intramuscular/intravenous/intrathecal use;Usus intramuscularis/intravenosus/intrathecalis;
+IMS/IVN/IUT;Intramuskulární/intravenózní/intrauterinní podání;Intramuscular/intravenous/intrauterine use;Usus intramuscularis/intravenosus/intrauterinus;
+IMS/IVN/IUT/NAS;Intramuskulární/intravenózní/intrauterinní/nosní podání;Intramuscular/intravenous/intrauterine/nasal use;Usus intramuscularis/intravenosus/intrauterinus/nasalis;
+IMS/IVN/POR;Intramuskulární/intravenózní/perorální podání;Intramuscular/intravenous/oral use;Usus intramuscularis/intravenosus/peroralis;
+IMS/IVN/RCT;Intramuskulární/intravenózní/rektální podání;Intramuscular/intravenous/rectal use;Usus intramuscularis/intravenosus/rectalis;
+IMS/IVN/SCI;Intramuskulární/intravenózní/subkonjunktivální podání;Intramuscular/intravenous/subconjunctival use;Usus intramuscularis/intravenosus/subconiunctivalis;
+IMS/IVN/SDR/IFL;Intramuskulární/intravenózní/subkutánní podání/infiltrace;Intramuscular/intravenous/subcutaneous use/infiltration;Usus intramuscularis/intravenosus/subcutaneus/infiltratio;
+INC;Intrakorneální podání;Intracorneal use;Usus intracornealis;20084000
+INH;Inhalaèní podání;Inhalation use;Usus inhalatorius;20020000
+INH/IVN;Inhalaèní/intravenózní podání;Inhalatione/intravenous use;Usus inhalatorius/intravenosus;
+INH/IVN/ICL/ITH;Inhalaèní/intravenózní/intracerebroventrikulární/intratekální podání;Inhalatione/intravenous/intracerebroventricular/intrathecal use;Usus inhalatorius/intravenosus/intracerebroventricularis/intrathecalis;
+INH/IVN/POR;Inhalaèní/intravenózní/perorální podání;Inhalation/intravenous/oral use;Usus inhalatorius/intravenosus/peroralis;
+INT;Intestinální podání;Intestinal use;Usus intestinalis;20021000
+IOC;Nitrooèní podání;Intraocular use;Usus intraocularis;20036000
+ION;Iontoforéza;Iontophoresis;Iontoforesis;20047500
+IOS;Intraoseální podání;Intraosseous use;Usus intraosealis;20036500
+IPC;Podání do osrdeèníku;Intrapericardial use;Usus intrapericardionalis;20037000
+IPL;Intrapleurální podání;Intrapleural use;Usus intrapleuralis;20039000
+IPL/IPT/IVN/IVS;Intrapleurální/intraperitoneální/intravenózní/intravezikální podání;Intrapleura/intraperitoneal/intravesical use;Usus intrapleuralis/intraperitonealis/intravenosus/intravesicalis;
+IPS;Intraprostatické podání;Intraprostatic use;Usus intraprostaticus;20039500
+IPT;Intraperitoneální podání;Intraperitoneal use;Usus intraperitonealis;20038000
+IPU;Intraputaminální podání;Intraputaminal use;Usus intraputaminalis;20086000
+IST;Intrasternální podání;Intrasternal use;Usus intrasternalis;20041000
+ITH;Intratekální podání;Intrathecal use;Usus intrathecalis;20042000
+ITM;Intratumorózní podání;Intratumoral use;Usus intratumoralis;20043000
+ITP;Intraportální podání;Intraportal use;Usus intraportalis;20039200
+IUT;Intrauterinní podání;Intrauterine use;Usus intrauterinus;20044000
+IVI;Intravitreální podání;Intravitreal use;Usus intravitrealis;20047000
+IVN;Intravenózní podání;Intravenous use;Usus intravenosus;20045000
+IVN/EPD;Intravenózní/epidurální podání;Intravenous/epidural use;Usus intravenousus/epiduralis;
+IVN/ICL/ITH;Intravenózní/intracerebroventrikulární/intratekální podání;Intravenous/intracerebroventricular/intrathecal use;Usus intravenosus/intracerebroventricularis/intrathecalis;
+IVN/ITH;Intravenózní/intratekální podání;Intravenous/intrathecal use;Usus intravenosus/intrathecalis;
+IVN/IVS;Intravenózní/intravezikální podání;Intravenous/intravesical use;Usus intravenous/intravesicalis;
+IVN/IVS/IAR;Intravenózní/intravezikální/intraarteriální podání;Intravenous/intravesical/intraarterial use;Usus intravenous/intravesicalis/intraarterialis;
+IVN/OPH;Intravenózní/oèní podání;Intravenous/ocular use;Usus intravenosus/ophthalmicus;
+IVN/OPH/EAC;Intravenózní/oèní/mimotìlní podání;Intravenous/ocular/extracorporeal use;Usus intravenosus/ophthalmicus/extracorporealis;
+IVN/POR;Intravenózní/perorální podání;Intravenous/oral use;Usus intravenosus/peroralis;
+IVN/RCT;Intravenózní/rektální podání;Intravenous/rectal use;Usus intravenousus/rectalis;
+IVS;Intravezikální podání;Intravesical use;Usus intravesicalis;20046000
+IXP;Zadní juxtasklerální podání;Posterior juxtascleral use;Usus iuxtascleralis posterior;20059500
+LRP;Laryngofaryngeální podání;Laryngopharyngeal use;Usus laryngopharyngealis;20048000
+NAS;Nosní podání;Nasal use;Usus nasalis;20049000
+NAS/ORM;Nosní/orální podání;Nasal/oromucosal use;Usus nasalis/oromucosalis;
+OPH;Oèní podání;Ocular use;Usus ophthalmicus;20051000
+OPH/NAS;Oèní/nosní podání;Ocular/nasal use;Usus ophthalmicus/nasalis;
+ORM;Orální podání;Oromucosal use;Usus oromucosalis;20054000
+ORM/GNG;Orální podání/podání na dásnì;oromucosal use/usus gingivalis;usus oromucosalis/usus gingivalis;
+ORM/LRP;Orální/laryngofaryngeální;Oromucosal/laryngopharyngeal;Oromucosalis/laryngopharyngealis;
+ORM/POR;Orální/perorální podání;Oromucosal/oral use;Usus oromucosalis/peroralis;
+ORP;Orofaryngeální podání;Oropharyngeal use;Usus oropharyngealis;20055000
+PAT;Periartikulární podání;Periarticular use;Usus periarticularis;20057000
+PDN;Periodontální podání;Periodontal use;Usus periodontalis;20059000
+PLN;Perilezionální podání;Perilesional use;Usus perilaesionalis;20088000
+PNR;Perineurální podání;Perineural use;Usus perineuralis;20058000
+POR;Perorální podání;Oral use;Usus peroralis;20053000
+POR/DRM;Perorální/kožní podání;Oral use/cutaneous use;Usus peroralis/Usus cutaneus;
+POR/GSR;Perorální/žaludeèní podání;Oral/gastric use;Usus peroralis/stomachicus;
+POR/GST;Perorální/gastroenterální podání;Oral/gastroenteral use;Usus peroralis/gastroenteralis;
+POR/INH;Perorální/inhalaèní podání;Oral/inhalation use;Usus peroralis/inhalatorius;
+POR/INT;Perorální/Intestinální podání;Oral/intestinal use;Usus peroralis/Usus intestinalis;
+POR/ORM/DRM;Perorální/orální/kožní podání;Oral/oromucosal/cutaneous use;Usus peroralis/oromucosalis/cutaneus;
+POR/ORM/DRM/INH;Perorální/orální/kožní/inhalaèní podání;Oral/oromucosal/cutaneous/inhalation use;Usus peroralis/oromucosalis/cutaneus/inhalatorius;
+POR/ORM/INH;Perorální/orální/inhalaèní podání;Oral/oromucosal/inhalation use;Usus peroralis/oromucosalis/inhalatorius;
+POR/RCT;Perorální/rektální podání;Oral/rectal use;Usus peroralis/rectalis;
+POR/VAG;Perorální/vaginální podání;Oral use/vaginal use;Usus peroralis/vaginalis;
+PRL;Perioseální podání;Periosseous use;Usus periossealis;20059300
+PTM;Peritumorózní podání;Peritumoral use;Usus peritumoralis;20059400
+RCT;Rektální podání;Rectal use;Usus rectalis;20061000
+RTB;Retrobulbární podání;Retrobulbar use;Usus rectobulbaris;20061500
+SBR;Subretinální podání;Subretinal use;Usus subretinalis;20081000
+SCI;Subkonjunktivální podání;Subconjunctival use;Usus subconiunctivalis;20065000
+SCR;Kožní skarifikace;Skin scarification;Usus per scarificationem;20063000
+SDR;Subkutánní podání;Subcutaneous use;Usus subcutaneus;20066000
+SDR/IMS;Subkutánní/intramuskulární podání;Subcutaneous/intramuscular use;Usus subcutaneus/intramuscularis;
+SDR/IMS/IVN;Subkutánní/intramuskulární/intravenózní podání;Subcutaneous/intramuscular/intravenous use;Usus subcutaneus/intramuscularis/intravenosus;
+SDR/IVN;Subkutánní/intravenózní podání;Subcutaneous/intravenous use;Usus subcutaneus/intravenosus;
+SDR/IVN/EAC;Subkutánní/intravenózní/mimotìlní podání;Subcutaneous/intravenous/extracorporeal use;Usus subcutaneus/intravenosus/extracorporealis;
+SDR/IVN/HMD;Subkutánní/intravenózní podání/hemodialýza;Subcutaneous/intravenous use/haemodialysis;Usus subcutaneus/intravenosus/haemodialysis;
+SDR/IVN/IAR;Subkutánní/intravenózní/intraarteriální podání;Subcutaneous/intravenous/intraarterial use;Usus subcutaneus/intravenosus/intraarterialis;
+SDR/IVN/ITH;Subkutánní/intravenózní/intratekální podání;Subcutaneous/intravenous/intrathecal use;Usus subcutaneus/intravenosus/intrathecalis;
+SLG;Sublingvální podání;Sublingual use;Usus sublingualis;20067000
+SLG/BUC;Podání pod jazyk/bukální podání;Sublingual/buccal use;Usus sublingualis/buccalis;
+SMC;Submukosální podání;Submucosal use;Usus submucosalis;20067500
+TDR;Transdermální podání;Transdermal use;Usus transcutaneus;20070000
+TOP;Topické podání (Topicky);Topical;Usus topicalis;20085000
+TRC;Transplacentární podání (Transplacentárnì);Transplacental;Usus transplacentalis;20083000
+TRM;Transmamární podání (Transmamárnì);Transmammary;Usus transmammaris;20082000
+UNS;Nespecifikovaný zpùsob podání;Route of administration not applicable;Usus non specificatus;20062000
+URT;Uretrální podání;Urethral use;Usus urethralis;20071000
+VAG;Vaginální podání;Vaginal use;Usus vaginalis;20072000
+VAG/DRM;Vaginální/kožní podání;Vaginal/cutaneous use;Usus vaginalis/cutaneous;
