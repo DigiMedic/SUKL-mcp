@@ -63,7 +63,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
     logger.info("Starting SÚKL MCP Server v4.0 (REST API + CSV fallback)...")
 
     # Inicializace REST API klienta (primary)
-    api_client = await get_api_client()
+    api_client = await get_rest_client()
     api_health = await api_client.health_check()
     logger.info(
         f"REST API health: {api_health['status']}, latency: {api_health.get('latency_ms', 'N/A')}ms"
@@ -94,7 +94,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
     )
 
     logger.info("Shutting down SÚKL MCP Server...")
-    await close_api_client()
+    await close_rest_client()
     await close_sukl_client()
     close_document_parser()
 
@@ -242,11 +242,11 @@ async def get_client(ctx: Context | None) -> SUKLClient:
     return await get_sukl_client()
 
 
-async def get_api_client_from_ctx(ctx: Context | None) -> SUKLAPIClient:
+async def get_rest_client_from_ctx(ctx: Context | None) -> SUKLAPIClient:
     """Safe API client access via context or global getter."""
     if ctx and ctx.request_context and hasattr(ctx.request_context, "lifespan_context"):
         return ctx.request_context.lifespan_context.api_client
-    return await get_api_client()
+    return await get_rest_client()
 
 
 # === MCP Tools ===
@@ -417,7 +417,7 @@ async def _try_rest_get_detail(sukl_code: str) -> dict | None:
         dict s daty léčiva nebo None při chybě
     """
     try:
-        api_client = await get_api_client()
+        api_client = await get_rest_client()
 
         # Get medicine detail from REST API
         medicine = await api_client.get_medicine(sukl_code)
@@ -868,7 +868,7 @@ async def _check_availability_logic(
         await ctx.info(f"Checking availability for medicine: {sukl_code}")
 
     # TRY: REST API pro dostupnost
-    data_client = await get_api_client()
+    data_client = await get_rest_client()
     detail = await _try_rest_get_detail(sukl_code)
 
     if detail is None:
