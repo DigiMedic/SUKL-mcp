@@ -23,7 +23,7 @@ from fastmcp.server.middleware.rate_limiting import RateLimitingMiddleware
 from fastmcp.server.middleware.timing import TimingMiddleware
 
 # Absolutní importy pro FastMCP Cloud compatibility
-from sukl_mcp.api import SUKLAPIClient, close_api_client, get_api_client
+from sukl_mcp.api import SUKLAPIClient, close_rest_client, get_rest_client
 from sukl_mcp.client_csv import SUKLClient, close_sukl_client, get_sukl_client
 from sukl_mcp.document_parser import close_document_parser, get_document_parser
 from sukl_mcp.exceptions import SUKLAPIError, SUKLDocumentError, SUKLParseError
@@ -258,69 +258,29 @@ async def _try_rest_search(
     """
     Pokusí se vyhledat přes REST API.
 
-    Hybrid helper: Try REST API first, return None on failure for CSV fallback.
+    HYBRID STRATEGIE:
+    REST API POST /dlprc NEMÁ parametr pro vyhledávání podle názvu.
+    Používá filtry: atc, stavRegistrace, uhrada, jeDodavka, jeRegulovany.
+
+    Proto:
+    - Pro name-based search -> Vždy vrací None (vynutí CSV fallback)
+    - Pro strukturované dotazy (ATC, status) -> Bude implementováno
 
     Args:
-        query: Hledaný text
+        query: Hledaný text (ignorováno pro POST /dlprc)
         limit: Maximální počet výsledků
-        typ_seznamu: Typ seznamu (default: "dlpo" - dostupné léčivé přípravky)
+        typ_seznamu: Typ seznamu (ignorováno pro POST /dlprc)
 
     Returns:
-        tuple[list[dict], str]: (results, "rest_api") nebo None při chybě
+        None -> Vynutí použití CSV klienta (name search)
     """
-    try:
-        api_client = await get_api_client()
+    # REST API nepodporuje vyhledávání podle názvu
+    # Pouze strukturované dotazy s filtry (ATC, status, availability)
+    if query and query.strip():
+        logger.info(f"🔄 Name-based search '{query}' - REST API not supported, using CSV")
+        return None  # Force CSV fallback
 
-        # Search pro získání kódů
-        search_result = await api_client.search_medicines(
-            query=query, typ_seznamu=typ_seznamu, limit=limit
-        )
-
-        if not search_result.codes:
-            logger.info(f"REST API: žádné výsledky pro '{query}' - falling back to CSV")
-            return None  # Force CSV fallback when REST API returns no results
-
-        # Batch fetch details
-        medicines = await api_client.get_medicines_batch(
-            search_result.codes[:limit], max_concurrent=5
-        )
-
-        # Convert APILecivyPripravek -> dict pro kompatibilitu
-        results = []
-        for med in medicines:
-            # Calculate actual match quality based on query vs medicine name
-            match_score, match_type = _calculate_match_quality(query, med.nazev)
-
-            results.append(
-                {
-                    "kod_sukl": med.kodSUKL,
-                    "nazev": med.nazev,
-                    "doplnek": med.doplnek,
-                    "sila": med.sila,
-                    "forma": med.lekovaFormaKod,
-                    "baleni": med.baleni,
-                    "atc": med.ATCkod,
-                    "stav_registrace": med.stavRegistraceKod,
-                    "vydej": med.zpusobVydejeKod,
-                    "dostupnost": "ano" if med.jeDodavka else "ne",
-                    # Match metadata - calculated based on actual similarity
-                    "match_score": match_score,
-                    "match_type": match_type,
-                }
-            )
-
-        # Enrich with price data from CSV (REST API doesn't have price fields)
-        csv_client = await get_sukl_client()
-        enriched_results = await csv_client._enrich_with_price_data(results)
-
-        logger.info(
-            f"✅ REST API: {len(enriched_results)}/{len(search_result.codes)} results (enriched)"
-        )
-        return enriched_results, "rest_api"
-
-    except (SUKLAPIError, Exception) as e:
-        logger.warning(f"⚠️  REST API search failed: {e}")
-        return None
+    return None
 
 
 @mcp.tool(

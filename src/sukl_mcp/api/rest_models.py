@@ -4,7 +4,8 @@ Pydantic modely pro SÚKL REST API responses (prehledy.sukl.cz/v1).
 Tyto modely mapují přesně strukturu odpovědí z testovaných REST API endpointů.
 """
 
-from typing import Any
+from typing import Any, List
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -40,36 +41,36 @@ class LecivyPripravekDLP(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     # Identifikace
-    registracniCisloDisplay: str = Field(..., description="Registrační číslo pro zobrazení")
-    registracniCislo: str = Field(..., description="Registrační číslo")
+    registracniCisloDisplay: str | None = Field(default=None, description="Registrační číslo pro zobrazení")
+    registracniCislo: str | None = Field(default=None, description="Registrační číslo")
     kodSUKL: str = Field(..., description="Kód SÚKL")
     nazevLP: str = Field(..., description="Název léčivého přípravku")
-    doplnekNazvu: str | None = Field(None, description="Doplněk názvu")
+    doplnekNazvu: str | None = Field(default=None, description="Doplněk názvu")
 
     # Složení a forma
-    sila: str | None = Field(None, description="Síla přípravku")
-    lekovaForma: LecivaForma | None = Field(None, description="Léková forma")
-    cestaPodani: CestaPodani | None = Field(None, description="Cesta podání")
+    sila: str | None = Field(default=None, description="Síla přípravku")
+    lekovaForma: LecivaForma | None = Field(default=None, description="Léková forma")
+    cestaPodani: CestaPodani | None = Field(default=None, description="Cesta podání")
 
     # Registrace a výdej
-    stavRegistrace: str = Field(..., description="Stav registrace (R, N, Z, atd.)")
-    jeRegulovany: bool = Field(..., description="Je regulovaný")
-    jeDodavka: bool = Field(..., description="Je v aktivním výskytu na trhu")
-    uhrada: str | None = Field(None, description="Kód úhrady (A, B, D, atd.)")
-    dovoz: str = Field(..., description="Dovoz")
-    dostupnost: str | None = Field(None, description="Dostupnost (D - dostupný)")
-    atc: ATCInfo | None = Field(None, description="ATC klasifikace")
-    zpusobVydeje: str = Field(..., description="Způsob výdeje (R - na recept)")
+    stavRegistrace: str | None = Field(default=None, description="Stav registrace (R, N, Z, atd.)")
+    jeRegulovany: bool | None = Field(default=None, description="Je regulovaný")
+    jeDodavka: bool | None = Field(default=None, description="Je v aktivním výskytu na trhu")
+    uhrada: str | None = Field(default=None, description="Kód úhrady (A, B, D, atd.)")
+    dovoz: str | None = Field(default=None, description="Dovoz")
+    dostupnost: str | None = Field(default=None, description="Dostupnost (D - dostupný)")
+    atc: ATCInfo | None = Field(default=None, description="ATC klasifikace")
+    zpusobVydeje: str | None = Field(default=None, description="Způsob výdeje (R - na recept)")
 
 
 class DLPResponse(BaseModel):
     """Odpověď z POST /dlprc endpointu."""
 
-    data: list[LecivyPripravekDLP] = Field(
+    data: List[LecivyPripravekDLP] = Field(
         default_factory=list, description="Seznam léčivých přípravků"
     )
     celkem: int = Field(..., description="Celkový počet záznamů")
-    extraSearch: list[Any] = Field(default_factory=list, description="Další možnosti vyhledávání")
+    extraSearch: List[Any] = Field(default_factory=list, description="Další možnosti vyhledávání")
 
 
 # =============================================================================
@@ -80,15 +81,15 @@ class DLPResponse(BaseModel):
 class Adresa(BaseModel):
     """Adresa."""
 
-    obec: str = Field(..., description="Obec")
-    castObce: str | None = Field(None, description="Část obce")
-    ulice: str | None = Field(None, description="Ulice")
-    cisloPopisne: str | None = Field(None, description="Číslo popisné")
-    cisloOrientacni: str | Field(None, description="Číslo orientační")
-    psc: str = Field(..., description="PSČ")
-    kod_obce: str = Field(..., description="Kód obce")
-    kod_okresu: str = Field(..., description="Kód okresu")
-    nazev_okresu: str = Field(..., description="Název okresu")
+    obec: str | None = Field(default=None, description="Obec")
+    castObce: str | None = Field(default=None, description="Část obce")
+    ulice: str | None = Field(default=None, description="Ulice")
+    cisloPopisne: str | None = Field(default=None, description="Číslo popisné")
+    cisloOrientacni: str | None = Field(default=None, description="Číslo orientační")
+    psc: str | None = Field(default=None, description="PSČ")
+    kod_obce: str | None = Field(default=None, description="Kód obce")
+    kod_okresu: str | None = Field(default=None, description="Kód okresu")
+    nazev_okresu: str | None = Field(default=None, description="Název okresu")
 
 
 class VedouciLekarnik(BaseModel):
@@ -96,16 +97,16 @@ class VedouciLekarnik(BaseModel):
 
     jmeno: str = Field(..., description="Jméno")
     prijmeni: str = Field(..., description="Příjmení")
-    titulPred: str | None = Field(None, description="Titul před jménem")
-    titulZa: str | Field(None, description="Titul za jménem")
+    titulPred: str | None = Field(default=None, description="Titul před jménem")
+    titulZa: str | None = Field(default=None, description="Titul za jménem")
 
 
 class Kontakty(BaseModel):
     """Kontaktní údaje."""
 
-    telefon: list[str] = Field(default_factory=list, description="Telefonní čísla")
-    email: list[str] = Field(default_factory=list, description="E-mailové adresy")
-    web: list[str] = Field(default_factory=list, description="Webové stránky")
+    telefon: List[str] = Field(default_factory=list, description="Telefonní čísla")
+    email: List[str] = Field(default_factory=list, description="E-mailové adresy")
+    web: List[str] = Field(default_factory=list, description="Webové stránky")
 
 
 class Geo(BaseModel):
@@ -119,8 +120,8 @@ class OteviraciDoba(BaseModel):
     """Otevírací doba."""
 
     den: str = Field(..., description="Den v týdnu")
-    od: str | None = Field(None, description="Od")
-    do: str | None = Field(None, description="Do")
+    od: str | None = Field(default=None, description="Od")
+    do: str | None = Field(default=None, description="Do")
 
 
 class Lekarna(BaseModel):
@@ -129,27 +130,27 @@ class Lekarna(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     # Základní informace
-    nazev: str = Field(..., description="Název lékárny")
-    kodPracoviste: str = Field(..., description="Kód pracoviště")
-    kodLekarny: str = Field(..., description="Kód lékárny")
-    icz: str = Field(..., description="IČZ")
-    ico: str = Field(..., description="IČO")
-    typLekarny: str = Field(..., description="Typ lékárny")
+    nazev: str | None = Field(default=None, description="Název lékárny")
+    kodPracoviste: str | None = Field(default=None, description="Kód pracoviště")
+    kodLekarny: str | None = Field(default=None, description="Kód lékárny")
+    icz: str | None = Field(default=None, description="IČZ")
+    ico: str | None = Field(default=None, description="IČO")
+    typLekarny: str | None = Field(default=None, description="Typ lékárny")
 
     # Adresa a kontakty
-    adresa: Adresa | None = Field(None, description="Adresa")
-    vedouciLekarnik: VedouciLekarnik | None = Field(None, description="Vedoucí lékárník")
-    kontakty: Kontakty | None = Field(None, description="Kontaktní údaje")
+    adresa: Adresa | None = Field(default=None, description="Adresa")
+    vedouciLekarnik: VedouciLekarnik | None = Field(default=None, description="Vedoucí lékárník")
+    kontakty: Kontakty | None = Field(default=None, description="Kontaktní údaje")
 
     # GPS a otevírací doba
-    geo: Geo | None = Field(None, description="GPS souřadnice")
-    oteviraciDoba: list[OteviraciDoba] | None = Field(None, description="Otevírací doba")
+    geo: Geo | None = Field(default=None, description="GPS souřadnice")
+    oteviraciDoba: List[OteviraciDoba] | None = Field(default=None, description="Otevírací doba")
 
 
 class LekarnyResponse(BaseModel):
     """Odpověď z GET /lekarny endpointu."""
 
-    data: list[Lekarna] = Field(default_factory=list, description="Seznam lékáren")
+    data: List[Lekarna] = Field(default_factory=list, description="Seznam lékáren")
     celkem: int = Field(..., description="Celkový počet lékáren")
 
 
@@ -163,13 +164,21 @@ class CiselnikPolozka(BaseModel):
 
     kod: str = Field(..., description="Kód")
     nazev: str = Field(..., description="Název")
-    nazevEN: str | None = Field(None, description="Název v angličtině")
+    nazevEN: str | None = Field(default=None, description="Název v angličtině")
 
 
-class CiselnikResponse(list[CiselnikPolozka]):
+class CiselnikResponse:
     """Odpověď z číselníkových endpointů."""
 
-    pass  # List of CiselnikPolozka
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, list):
+            return v
+        return []
 
 
 # =============================================================================
@@ -180,9 +189,9 @@ class CiselnikResponse(list[CiselnikPolozka]):
 class DatumAktualizace(BaseModel):
     """Datum aktualizace dat v databázi."""
 
-    DLPO: str | None = Field(None, description="Datum aktualizace léčivých přípravků")
-    DLPW: str | None = Field(None, description="Datum aktualizace skladových zásob")
-    SCAU: str | None = Field(None, description="Datum aktualizace cen a úhrad")
+    DLPO: str | None = Field(default=None, description="Datum aktualizace léčivých přípravků")
+    DLPW: str | None = Field(default=None, description="Datum aktualizace skladových zásob")
+    SCAU: str | None = Field(default=None, description="Datum aktualizace cen a úhrad")
 
 
 # =============================================================================
@@ -195,7 +204,7 @@ class APIError(BaseModel):
 
     kodChyby: int = Field(..., description="Kód chyby")
     popisChyby: str = Field(..., description="Popis chyby")
-    detailChyby: list[dict[str, Any]] = Field(default_factory=list, description="Detail chyby")
+    detailChyby: List[dict[str, Any]] = Field(default_factory=list, description="Detail chyby")
 
 
 # =============================================================================
@@ -206,10 +215,10 @@ class APIError(BaseModel):
 class DLPSearchParams(BaseModel):
     """Parametry pro POST /dlprc vyhledávání."""
 
-    atc: str | None = Field(None, description="ATC kód (např. 'A10AE04')")
-    stavRegistrace: str | None = Field(None, description="Stav registrace (R, N, Z, atd.)")
-    uhrada: str | None = Field(None, description="Kód úhrady (A, B, D, atd.)")
-    jeDodavka: bool | None = Field(None, description="Pouze přípravky s aktivním výskytem na trhu")
-    jeRegulovany: bool | None = Field(None, description="Pouze regulované přípravky")
+    atc: str | None = Field(default=None, description="ATC kód (např. 'A10AE04')")
+    stavRegistrace: str | None = Field(default=None, description="Stav registrace (R, N, Z, atd.)")
+    uhrada: str | None = Field(default=None, description="Kód úhrady (A, B, D, atd.)")
+    jeDodavka: bool | None = Field(default=None, description="Pouze přípravky s aktivním výskytem na trhu")
+    jeRegulovany: bool | None = Field(default=None, description="Pouze regulované přípravky")
     stranka: int = Field(1, ge=1, description="Číslo stránky (default: 1)")
     pocet: int = Field(10, ge=1, le=1000, description="Počet záznamů na stránku (default: 10)")

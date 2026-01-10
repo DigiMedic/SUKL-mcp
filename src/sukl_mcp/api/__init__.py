@@ -17,8 +17,8 @@ Použití:
 from sukl_mcp.api.client import (
     SUKLAPIClient,
     SUKLAPIConfig,
-    close_api_client,
-    get_api_client,
+    close_rest_client,
+    get_rest_client,
 )
 from sukl_mcp.api.models import (
     APICena,
@@ -30,8 +30,8 @@ from sukl_mcp.api.models import (
 __all__ = [
     "SUKLAPIClient",
     "SUKLAPIConfig",
-    "get_api_client",
-    "close_api_client",
+    "get_rest_client",
+    "close_rest_client",
     "APILecivyPripravek",
     "APISearchResponse",
     "APICena",

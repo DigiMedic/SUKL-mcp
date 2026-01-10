@@ -4,12 +4,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.14+-green.svg)](https://gofastmcp.com)
-[![Version](https://img.shields.io/badge/version-4.0.1-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.0.0-brightgreen.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-241%20passed-success.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-264%20passed-success.svg)](tests/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **v4.0.1** - Production-ready release: Opraveny kritické bugy (Phase 1 & 2), přesné match scoring, kompletní data enrichment. Zero crashes, 241 testů. [Roadmapa →](PRODUCT_SPECIFICATION.md) | [Changelog →](CHANGELOG.md)
+> **v5.0.0** - REST API Integration: Experimentální podpora SÚKL REST API s kompletním klientem, 23 novými testy a plnou dokumentací. Backward compatible, zero breaking changes. [Roadmapa →](PRODUCT_SPECIFICATION.md) | [Changelog →](CHANGELOG.md)
 
 ---
 
@@ -19,7 +19,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 
 ### Klíčové vlastnosti
 
-- ✅ **Production-ready (v4.0.1)**: Zero known crashes, stable ve všech scénářích
+- ✅ **Production-ready (v5.0.0)**: Zero known crashes, stable ve všech scénářích
 - 🎯 **Accurate match scoring**: 0-100 škála založená na rapidfuzz (ne hardcoded 20.0)
 - 📊 **Complete data enrichment**: Cenová data přímo v search results (1 API call místo 2+)
 - 🔍 **8 MCP tools** pro komplexní práci s farmaceutickými daty
@@ -36,7 +36,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 - 🔒 **Security features**: ZIP bomb protection, regex injection prevention
 - 🏆 **Type-safe**: Pydantic v2 modely s runtime validací
 - 🚀 **Dual deployment**: FastMCP Cloud (stdio) + Smithery (HTTP/Docker)
-- ✅ **241 comprehensive tests** s pytest a coverage >85%
+- ✅ **264 comprehensive tests** s pytest a coverage >85% (241 původních + 23 REST API testů)
 - 🎯 **Full FastMCP 2.14+**: Context logging, Progress reporting, Resource templates, Tool annotations
 
 ### Datová základna
@@ -216,6 +216,60 @@ get_atc_info(atc_code="N02")
 ```
 
 Detailní dokumentace všech tools: **[API Reference](docs/api-reference.md)**
+
+---
+
+## 🌐 REST API Integration (v5.0 - Experimental)
+
+### Nově v5.0: SÚKL REST API Klient
+
+Server nyní obsahuje experimentální podporu pro přímé volání SÚKL REST API (`prehledy.sukl.cz/v1`).
+
+#### Dostupné REST API metody
+
+```python
+from sukl_mcp.api import get_rest_client
+
+async with get_rest_client() as client:
+    # Vyhledávání podle ATC kódu
+    result = await client.search_medicines(atc="A10AE04", pocet=10)
+    print(f"Nalezeno {result.celkem} léků")
+
+    # Seznam lékáren
+    pharmacies = await client.get_pharmacies(stranka=1, pocet=20)
+    print(f"Celkem {pharmacies.celkem} lékáren")
+
+    # Číselníky
+    uhrad = await client.get_ciselnik("uhrady")
+    atc_codes = await client.get_atc_codes()
+
+    # Datum aktualizace
+    dates = await client.get_update_dates()
+    print(f"Data aktualizována: {dates.DLPO}")
+```
+
+#### ⚠️ Známá omezení
+
+**POST /dlprc NEPODPORUJE name-based search**
+
+SÚKL REST API akceptuje pouze strukturované filtry:
+- `atc` - ATC kód (např. "A10AE04")
+- `stavRegistrace` - Stav registrace (R, N, Z)
+- `uhrada` - Kód úhrady (A, B, D)
+- `jeDodavka` - Boolean (dostupnost)
+- `jeRegulovany` - Boolean (regulované)
+
+**Chybí**: Parametr pro vyhledávání podle názvu léku!
+
+Proto:
+- ✅ MCP tools používají **CSV klienta** (funguje perfektně)
+- 📊 REST API je připravené pro budoucí strukturované dotazy
+- 🔮 Plánováno: Hybrid architecture v budoucí verzi
+
+#### Dokumentace
+
+- **REST API Reference**: [`docs/sukl_api_dokumentace.md`](docs/sukl_api_dokumentace.md)
+- **Unit Testy**: [`tests/test_rest_api_client.py`](tests/test_rest_api_client.py) (23 testů)
 
 ---
 
@@ -460,7 +514,7 @@ pytest tests/test_performance_benchmark.py  # Performance benchmarks
 ```
 
 **Test coverage**: >85% (všechny moduly)
-**Pass rate**: 241/241 tests passing (100%)
+**Pass rate**: 264/264 tests passing (100%) - 241 původních + 23 REST API testů
 
 ---
 

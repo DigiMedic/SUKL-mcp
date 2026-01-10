@@ -16,7 +16,9 @@ class SUKLValidationError(SUKLException):
 class SUKLAPIError(SUKLException):
     """Chyba při komunikaci s SÚKL REST API."""
 
-    pass
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class SUKLZipBombError(SUKLException):
