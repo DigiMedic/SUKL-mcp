@@ -720,6 +720,10 @@ async def get_reimbursement(
         return None
 
 
+@mcp.tool(
+    tags={"documents", "patient-info"},
+    annotations={"readOnlyHint": True},
+)
 async def get_pil_content(
     sukl_code: str,
     ctx: Annotated[Context, CurrentContext] = None,
@@ -950,43 +954,6 @@ async def _check_availability_logic(
 @mcp.tool(
     tags={"availability", "medicines"},
     annotations={"readOnlyHint": True, "idempotentHint": True},
-)
-async def check_availability(
-    sukl_code: str,
-    include_alternatives: bool = True,
-    limit: int = 5,
-    ctx: Annotated[Context, CurrentContext] = None,
-) -> AvailabilityInfo | None:
-    """
-    Zkontroluje dostupnost léčivého přípravku na českém trhu.
-
-    EPIC 4: Pokud je přípravek nedostupný, automaticky najde a doporučí alternativy
-    se stejnou účinnou látkou nebo ve stejné ATC skupině.
-
-    v4.0: REST API + CSV fallback
-    - PRIMARY: REST API (availability check)
-    - FALLBACK: CSV (local cache)
-    - ALWAYS: CSV pro find_generic_alternatives() (REST API nemá substance search)
-
-    Args:
-        sukl_code: SÚKL kód přípravku
-        include_alternatives: Zda zahrnout alternativy (default: True)
-        limit: Max počet alternativ (default: 5, max: 10)
-        ctx: Context pro logging (auto-injected by FastMCP, optional)
-
-    Returns:
-        AvailabilityInfo s informacemi o dostupnosti a alternativách
-    """
-    return await _check_availability_logic(
-        sukl_code=sukl_code,
-        include_alternatives=include_alternatives,
-        limit=limit,
-        ctx=ctx,
-    )
-
-
-@mcp.tool(
-    tags={"pharmacies"},
 )
 async def check_availability(
     sukl_code: str,

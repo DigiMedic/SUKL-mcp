@@ -5,6 +5,43 @@ All notable changes to SÚKL MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2026-01-11
+
+### Fixed - Critical Tool Registration Issues
+
+#### BUG #1: Duplicate `check_availability` Registration ✅
+- **Issue**: Tool was registered TWICE with @mcp.tool() decorator (lines 950 & 988)
+- **Fix**: Removed duplicate registration (lines 988-1022), kept only first with correct tags
+- **Impact**: Prevented tool discovery conflicts and metadata inconsistencies
+
+#### BUG #2: Missing `get_pil_content` MCP Tool ✅
+- **Issue**: Function existed but was NOT registered as MCP tool (missing @mcp.tool decorator)
+- **Fix**: Added @mcp.tool() decorator with tags={"documents", "patient-info"}
+- **Impact**: Users can now access patient information leaflets via MCP protocol
+
+#### BUG #3: Deployment Package Size ✅
+- **Issue**: 61MB of CSV data files committed to git causing Lambda deployment failures
+- **Fix**: Added data/ to .gitignore, removed 1.3M lines of CSV from repository
+- **Impact**: Deployment package reduced by ~60MB, server downloads data at runtime
+
+### Changed
+
+#### Tool Count Correction
+- **Corrected**: Documentation now accurately reflects **8 registered MCP tools**
+- Previously claimed 8 tools but only 7 were registered due to missing PIL tool
+- Now: 7 standard tools + 1 background task tool = 8 total
+
+#### Server Functionality
+- All tools now properly registered and accessible
+- No duplicate registrations
+- Complete tool coverage for pharmaceutical data access
+
+### Migration Notes
+
+No breaking changes - all existing tool signatures remain unchanged.
+
+---
+
 ## [5.0.0] - 2026-01-10
 
 ### Added - REST API Integration (Experimental)
@@ -249,12 +286,14 @@ Tato verze přidává **experimentální** REST API podporu bez změny stávají
 Current registered tools in `server.py`:
 1. `search_medicine` - Vyhledávání léčivých přípravků (hybrid REST+CSV)
 2. `get_medicine_details` - Detaily konkrétního přípravku (hybrid)
-3. `get_pil_content` - Příbalové informace (PIL) s extrakcí textu
+3. `get_pil_content` - Příbalové informace (PIL) s extrakcí textu ⚠️ FIXED in v5.0.1
 4. `get_spc_content` - Souhrn údajů o přípravku (SPC)
 5. `check_availability` - Dostupnost léků s alternativami (hybrid)
-6. `get_reimbursement` - Informace o úhradách (CSV only)
+6. `get_reimbursement` - Informace o úhradách (direct REST API)
 7. `find_pharmacies` - Vyhledávání lékáren
 8. `get_atc_info` - ATC klasifikace
+
+**Note**: v5.0.1 fixed duplicate `check_availability` and missing `get_pil_content` registrations
 
 #### Development Tools
 - **Makefile targets**:

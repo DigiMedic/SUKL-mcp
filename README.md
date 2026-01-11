@@ -4,12 +4,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.14+-green.svg)](https://gofastmcp.com)
-[![Version](https://img.shields.io/badge/version-5.0.0-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.0.1-brightgreen.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-264%20passed-success.svg)](tests/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **v5.0.0** - REST API Integration: Experimentální podpora SÚKL REST API s kompletním klientem, 23 novými testy a plnou dokumentací. Backward compatible, zero breaking changes. [Roadmapa →](PRODUCT_SPECIFICATION.md) | [Changelog →](CHANGELOG.md)
+> **v5.0.1** - Opraveny kritické chyby: duplicitní registrace nástroje, chybějící PIL tool, deployment problémy. [Changelog →](CHANGELOG.md)
 
 ---
 
@@ -19,7 +19,7 @@ SÚKL MCP Server je implementace [Model Context Protocol](https://modelcontextpr
 
 ### Klíčové vlastnosti
 
-- ✅ **Production-ready (v5.0.0)**: Zero known crashes, stable ve všech scénářích
+- ✅ **Production-ready (v5.0.1)**: Opraveny kritické chyby, všechny nástroje správně registrovány
 - 🎯 **Accurate match scoring**: 0-100 škála založená na rapidfuzz (ne hardcoded 20.0)
 - 📊 **Complete data enrichment**: Cenová data přímo v search results (1 API call místo 2+)
 - 🔍 **8 MCP tools** pro komplexní práci s farmaceutickými daty

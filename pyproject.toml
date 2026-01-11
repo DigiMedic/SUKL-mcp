@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sukl-mcp-server"
-version = "5.0.0"
-description = "Production-ready FastMCP server s experimentální REST API podporou pro přístup k české databázi léčivých přípravků SÚKL"
+version = "5.0.1"
+description = "Production-ready FastMCP server s REST API podporou pro přístup k české databázi léčivých přípravků SÚKL"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
