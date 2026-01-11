@@ -4,12 +4,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastMCP](https://img.shields.io/badge/FastMCP-2.14+-green.svg)](https://gofastmcp.com)
-[![Version](https://img.shields.io/badge/version-5.0.1-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-5.0.2-brightgreen.svg)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-264%20passed-success.svg)](tests/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-> **v5.0.1** - Opraveny kritické chyby: duplicitní registrace nástroje, chybějící PIL tool, deployment problémy. [Changelog →](CHANGELOG.md)
+> **v5.0.2** - FastMCP 2.14+ compliance: 100% annotations coverage, modernizovaný Context pattern. [Changelog →](CHANGELOG.md)
 
 ---
 

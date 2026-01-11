@@ -103,7 +103,7 @@ async def server_lifespan(server: FastMCP) -> AsyncGenerator[AppContext, None]:
 
 mcp = FastMCP(
     name="SÚKL MCP Server",
-    version="5.0.2",
+    version="4.0.0",
     website_url="https://github.com/DigiMedic/SUKL-mcp",
     lifespan=server_lifespan,
     instructions="""
@@ -293,7 +293,7 @@ async def search_medicine(
     only_reimbursed: bool = False,
     limit: int = 20,
     use_fuzzy: bool = True,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> SearchResponse:
     """
     Vyhledá léčivé přípravky v databázi SÚKL (v4.0: REST API + CSV fallback).
@@ -459,7 +459,7 @@ async def _try_rest_get_detail(sukl_code: str) -> dict | None:
 )
 async def get_medicine_details(
     sukl_code: str,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> MedicineDetail | None:
     """
     Získá detailní informace o léčivém přípravku podle SÚKL kódu.
@@ -557,7 +557,7 @@ async def get_medicine_details(
 )
 async def get_reimbursement(
     sukl_code: str,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> ReimbursementInfo | None:
     """
     Získá informace o úhradě léčivého přípravku zdravotní pojišťovnou.
@@ -722,11 +722,11 @@ async def get_reimbursement(
 
 @mcp.tool(
     tags={"documents", "patient-info"},
-    annotations={"readOnlyHint": True, "idempotentHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True},
 )
 async def get_pil_content(
     sukl_code: str,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> PILContent | None:
     """
     Získá obsah příbalového letáku (PIL) pro pacienty.
@@ -792,11 +792,11 @@ async def get_pil_content(
 
 @mcp.tool(
     tags={"documents", "professional-info"},
-    annotations={"readOnlyHint": True, "idempotentHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True},
 )
 async def get_spc_content(
     sukl_code: str,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> PILContent | None:
     """
     Získá obsah Souhrnu údajů o přípravku (SPC) pro odborníky.
@@ -953,13 +953,13 @@ async def _check_availability_logic(
 
 @mcp.tool(
     tags={"availability", "medicines"},
-    annotations={"readOnlyHint": True, "idempotentHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
 async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
     limit: int = 5,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> AvailabilityInfo | None:
     """
     Zkontroluje dostupnost léčivého přípravku na českém trhu.
@@ -993,7 +993,7 @@ async def check_availability(
     sukl_code: str,
     include_alternatives: bool = True,
     limit: int = 5,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> AvailabilityInfo | None:
     """
     Zkontroluje dostupnost léčivého přípravku na českém trhu.
@@ -1118,7 +1118,7 @@ async def check_availability(
 
 @mcp.tool(
     tags={"pharmacies", "location"},
-    annotations={"readOnlyHint": True, "openWorldHint": True, "idempotentHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": True},
 )
 async def find_pharmacies(
     city: str | None = None,
@@ -1126,7 +1126,7 @@ async def find_pharmacies(
     has_24h_service: bool = False,
     has_internet_sales: bool = False,
     limit: int = 20,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> list[PharmacyInfo]:
     """
     Vyhledá lékárny podle různých kritérií.
@@ -1206,11 +1206,11 @@ async def find_pharmacies(
 
 @mcp.tool(
     tags={"classification", "atc"},
-    annotations={"readOnlyHint": True, "idempotentHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
 async def get_atc_info(
     atc_code: str,
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
 ) -> dict:
     """
     Získá informace o ATC (anatomicko-terapeuticko-chemické) skupině.
@@ -1296,11 +1296,11 @@ async def get_atc_info(
 @mcp.tool(
     task=True,
     tags={"availability", "batch", "background"},
-    annotations={"readOnlyHint": True, "idempotentHint": True, "openWorldHint": True},
+    annotations={"readOnlyHint": True, "idempotentHint": True},
 )
 async def batch_check_availability(
     sukl_codes: list[str],
-    ctx: Context = CurrentContext(),
+    ctx: Annotated[Context, CurrentContext] = None,
     progress: Progress = Depends(Progress),
 ) -> dict:
     """
@@ -1401,7 +1401,7 @@ async def batch_check_availability(
 
 @mcp.resource("sukl://medicine/{sukl_code}")
 async def get_medicine_resource(
-    sukl_code: str, ctx: Context = CurrentContext()
+    sukl_code: str, ctx: Annotated[Context, CurrentContext] = None
 ) -> dict:
     """
     Detailní informace o léčivém přípravku.
@@ -1416,7 +1416,7 @@ async def get_medicine_resource(
 
 
 @mcp.resource("sukl://pharmacies/city/{city}")
-async def get_pharmacies_by_city(city: str, ctx: Context = CurrentContext()) -> dict:
+async def get_pharmacies_by_city(city: str, ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Seznam lékáren v konkrétním městě.
     """
@@ -1430,7 +1430,7 @@ async def get_pharmacies_by_city(city: str, ctx: Context = CurrentContext()) -> 
 
 
 @mcp.resource("sukl://health")
-async def get_health_resource(ctx: Context = CurrentContext()) -> dict:
+async def get_health_resource(ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Aktuální stav serveru a statistiky databáze.
 
@@ -1445,7 +1445,7 @@ async def get_health_resource(ctx: Context = CurrentContext()) -> dict:
 
 
 @mcp.resource("sukl://atc-groups/top-level")
-async def get_top_level_atc_groups(ctx: Context = CurrentContext()) -> dict:
+async def get_top_level_atc_groups(ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Seznam hlavních ATC skupin (1. úroveň klasifikace) s navigačními URI.
 
@@ -1474,7 +1474,7 @@ async def get_top_level_atc_groups(ctx: Context = CurrentContext()) -> dict:
 
 
 @mcp.resource("sukl://atc/level/{level}")
-async def get_atc_by_level(level: int, ctx: Context = CurrentContext()) -> dict:
+async def get_atc_by_level(level: int, ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Browse ATC codes by hierarchical level (1-5).
 
@@ -1511,7 +1511,7 @@ async def get_atc_by_level(level: int, ctx: Context = CurrentContext()) -> dict:
 
 
 @mcp.resource("sukl://atc/{code}")
-async def get_atc_code_resource(code: str, ctx: Context = CurrentContext()) -> dict:
+async def get_atc_code_resource(code: str, ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Get ATC code details with parent and children navigation.
 
@@ -1571,7 +1571,7 @@ async def get_atc_code_resource(code: str, ctx: Context = CurrentContext()) -> d
 
 
 @mcp.resource("sukl://atc/tree/{root_code}")
-async def get_atc_subtree(root_code: str, ctx: Context = CurrentContext()) -> dict:
+async def get_atc_subtree(root_code: str, ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Get complete subtree from ATC code (all descendants).
 
@@ -1599,7 +1599,7 @@ async def get_atc_subtree(root_code: str, ctx: Context = CurrentContext()) -> di
 
 
 @mcp.resource("sukl://statistics")
-async def get_database_statistics(ctx: Context = CurrentContext()) -> dict:
+async def get_database_statistics(ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Statistiky databáze léčiv.
 
@@ -1630,7 +1630,7 @@ async def get_database_statistics(ctx: Context = CurrentContext()) -> dict:
 
 
 @mcp.resource("sukl://pharmacies/regions")
-async def get_pharmacy_regions(ctx: Context = CurrentContext()) -> list[str]:
+async def get_pharmacy_regions(ctx: Annotated[Context, CurrentContext] = None) -> list[str]:
     """
     Seznam všech českých krajů (14 krajů) pro regionální vyhledávání lékáren.
 
@@ -1650,7 +1650,7 @@ async def get_pharmacy_regions(ctx: Context = CurrentContext()) -> list[str]:
 
 @mcp.resource("sukl://pharmacies/region/{region_name}")
 async def get_pharmacies_by_region(
-    region_name: str, ctx: Context = CurrentContext()
+    region_name: str, ctx: Annotated[Context, CurrentContext] = None
 ) -> dict:
     """
     Seznam lékáren v konkrétním kraji.
@@ -1684,7 +1684,7 @@ async def get_pharmacies_by_region(
 
 
 @mcp.resource("sukl://statistics/detailed")
-async def get_detailed_statistics(ctx: Context = CurrentContext()) -> dict:
+async def get_detailed_statistics(ctx: Annotated[Context, CurrentContext] = None) -> dict:
     """
     Komplexní statistiky databáze SÚKL.
 
