@@ -58,6 +58,7 @@ dmypy.json
 # SÚKL data cache
 /tmp/sukl_dlp_cache/
 /tmp/sukl_dlp_data/
+data/  # CSV files downloaded at runtime from SÚKL Open Data
 
 # macOS
 .DS_Store
