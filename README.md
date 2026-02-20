@@ -1,10 +1,11 @@
 # SUKL MCP Server
 
-**MCP server pro českou databázi léčivých přípravků SUKL** — landing page, MCP endpoint a interaktivní demo chat v jednom Next.js 16 projektu.
+**MCP server pro českou databázi léčivých přípravků SÚKL** — landing page, MCP endpoint a interaktivní demo chat v jednom Next.js 16 projektu.
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2025--03--26-green.svg)](https://modelcontextprotocol.io/)
+[![Tests](https://img.shields.io/badge/tests-28%20passed-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > Konsolidovaná aplikace: landing page + MCP Streamable HTTP endpoint + demo chat na jedné URL.
@@ -19,11 +20,12 @@ SUKL MCP Server implementuje [Model Context Protocol](https://modelcontextprotoc
 
 - **9 MCP tools** pro komplexní práci s farmaceutickými daty
 - **Fuzzy vyhledávání** pomocí Fuse.js s tolerancí překlepů
-- **Landing page** s informacemi o projektu a interaktivním demo
+- **Landing page** s 12 sekcemi a interaktivním demo
 - **Guided demo onboarding** — 3-krokový interaktivní tour (hledání → detail → ATC)
 - **MCP Streamable HTTP** endpoint (JSON-RPC 2.0) na `/mcp`
 - **Demo chat** bez LLM — regex/pattern matching pro ukázku tool calls
 - **Dark/Light mode** s plně responzivním designem
+- **Automatická aktualizace dat** — CI workflow (měsíční cron)
 
 ---
 
@@ -60,11 +62,14 @@ npm run dev
 # 4. Otevřít http://localhost:3000
 ```
 
-### Build
+### Build & Testy
 
 ```bash
-npm run build
-npm start
+npm run build      # Produkční build (vč. TypeScript check)
+npm start          # Spustit produkční server
+npm test           # Vitest (28 testů: unit + integration)
+npm run test:watch # Vitest watch mode
+npm run analyze    # Analýza velikosti bundlu
 ```
 
 ---
@@ -76,11 +81,11 @@ npm start
 | 1 | `search-medicine` | Fuzzy vyhledávání léčiv podle názvu, účinné látky nebo SUKL kódu |
 | 2 | `get-medicine-details` | Detail léčivého přípravku podle SUKL kódu |
 | 3 | `check-availability` | Kontrola dostupnosti na trhu |
-| 4 | `find-pharmacies` | Vyhledání lékáren podle města, PSC nebo 24h provozu |
+| 4 | `find-pharmacies` | Vyhledání lékáren podle města, PSČ nebo 24h provozu |
 | 5 | `get-atc-info` | ATC klasifikace léčiv |
-| 6 | `get-reimbursement` | Informace o úhradách a cenách |
-| 7 | `get-pil-content` | Příbalový leták (PIL) |
-| 8 | `get-spc-content` | Souhrn údajů o přípravku (SPC) |
+| 6 | `get-reimbursement` | Informace o úhradách, cenách a doplatcích |
+| 7 | `get-pil-content` | Příbalový leták (PIL) — vrací URL ke stažení z SÚKL API |
+| 8 | `get-spc-content` | Souhrn údajů o přípravku (SPC) — vrací URL ke stažení z SÚKL API |
 | 9 | `batch-check-availability` | Hromadná kontrola dostupnosti (max 50 léků) |
 
 ### Příklady použití
@@ -110,16 +115,16 @@ curl -X POST https://sukl-mcp.vercel.app/mcp \
 SUKL-mcp/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx              # Landing page + demo sekce
+│   │   ├── page.tsx              # Landing page (12 sekcí)
 │   │   ├── layout.tsx            # Root layout (fonty, metadata, theme)
-│   │   ├── globals.css           # Tailwind + SUKL CSS proměnné
+│   │   ├── globals.css           # Tailwind 4 + SUKL CSS proměnné
 │   │   └── api/
 │   │       ├── mcp/route.ts      # MCP Streamable HTTP (JSON-RPC 2.0)
 │   │       └── demo/route.ts     # Demo chat backend (rate limited)
 │   ├── components/
-│   │   ├── sections/             # 12 landing page sekcí (vč. demo)
-│   │   ├── demo/                 # Guided tour + chat widget (10 komponent)
-│   │   ├── ui/                   # 11 UI komponent
+│   │   ├── sections/             # 12 landing page sekcí
+│   │   ├── demo/                 # Guided tour + chat widget
+│   │   ├── ui/                   # Reusable UI komponenty
 │   │   └── theme-provider.tsx    # next-themes provider
 │   └── lib/
 │       ├── sukl-client.ts        # Data layer (Fuse.js, lazy-loaded JSON)
@@ -128,8 +133,16 @@ SUKL-mcp/
 │       ├── demo-handler.ts       # Intent parser (regex)
 │       └── utils.ts              # cn() helper
 ├── data/
-│   └── bundled-data.json         # 9.5 MB (68k+ léků, ATC kódy)
-├── vercel.json                   # Deployment config
+│   └── bundled-data.json         # 10.4 MB (68k léků, 2662 lékáren, 8480 úhrad, 6907 ATC)
+├── scripts/
+│   ├── build-pharmacies.ts       # Stažení a zpracování dat lékáren
+│   └── build-reimbursements.ts   # Stažení a zpracování dat úhrad (SCAU)
+├── tests/                        # Vitest testy (28)
+├── .github/workflows/
+│   ├── update-data.yml           # Měsíční aktualizace dat z SÚKL
+│   ├── claude.yml                # Claude CI workflow
+│   └── claude-code-review.yml    # Claude code review
+├── vercel.json                   # Deployment config + CORS
 └── smithery.yaml                 # MCP registry
 ```
 
@@ -140,16 +153,23 @@ SUKL-mcp/
 - **Tailwind CSS 4** — Custom theme s CSS proměnnými
 - **Fuse.js** — Fuzzy search přes 68k+ záznamů
 - **Framer Motion** — Animace na landing page
+- **Vitest** — Unit a integrační testy
 - **Vercel** — Deployment (region `fra1`)
 
 ### Data
 
-Aplikace používá bundled JSON soubor (`data/bundled-data.json`, 9.5 MB) obsahující:
-- **68 000+** léčivých přípravků z SUKL Open Data
-- **6 900+** ATC klasifikačních kódů
-- Lazy-loaded při prvním požadavku, cachováno v paměti
+Aplikace používá bundled JSON soubor (`data/bundled-data.json`, 10.4 MB) obsahující:
 
-Data pochází z oficiálního portálu SUKL: https://opendata.sukl.cz
+- **68 248** léčivých přípravků z SÚKL
+- **6 907** ATC klasifikačních kódů
+- **2 662** lékáren
+- **8 480** záznamů o úhradách a cenách
+
+Data jsou lazy-loaded při prvním požadavku a cachována v paměti. Automatická měsíční aktualizace přes GitHub Actions workflow (28. den v měsíci). Manuální aktualizace: `npx tsx scripts/build-pharmacies.ts` a `npx tsx scripts/build-reimbursements.ts`.
+
+### PIL/SPC dokumenty
+
+Nástroje `get-pil-content` a `get-spc-content` vracejí URL ke stažení PDF dokumentů z SÚKL API (`prehledy.sukl.cz`). Pro parsování obsahu PDF doporučujeme použít [docling-mcp](https://github.com/docling-project/docling) jako companion MCP server.
 
 ---
 
@@ -173,10 +193,9 @@ Projekt je nasazený na Vercel:
 
 ## Známá omezení
 
-- **Lékárny** — data lékáren zatím nejsou v bundled JSON, `find-pharmacies` vrací prázdný výsledek
-- **PIL/SPC** — obsah dokumentů zatím není implementován, vrací placeholder
-- **Úhrady** — cenová data zatím nejsou v bundled JSON, `get-reimbursement` vrací null
-- **Cold start** — první požadavek na Vercel může být pomalejší kvůli lazy-loading 9.5 MB JSON
+- **PIL/SPC vrací URL** — nástroje vrací odkaz na PDF ke stažení z SÚKL API, ne parsovaný obsah. Pro extrakci textu z PDF použijte docling-mcp.
+- **Cold start** — první požadavek na Vercel může být pomalejší kvůli lazy-loading 10.4 MB JSON
+- **In-memory rate limiting** — reset při serverless cold start (100 req/min MCP, 10 req/min demo)
 
 ---
 
@@ -186,12 +205,27 @@ Tento server poskytuje informace výhradně pro informační účely. Data mohou
 
 ---
 
-## License
+## Contributing
 
-MIT License — viz [LICENSE](LICENSE).
+```bash
+# Fork a klonovat repozitář
+git clone https://github.com/<your-username>/SUKL-mcp.git
+cd SUKL-mcp
+npm install
+npm test          # Ověřit, že testy procházejí
+npm run dev       # Spustit dev server
+```
 
-Data poskytnutá SUKL pod podmínkami Open Data: https://opendata.sukl.cz/?q=podminky-uziti
+Pull requesty jsou vítány. Pro větší změny nejdříve otevřete issue k diskuzi.
 
 ---
 
-**Vytvořeno s [Next.js](https://nextjs.org)** | **Data od [SUKL](https://opendata.sukl.cz)** | **Protokol [MCP](https://modelcontextprotocol.io)**
+## License
+
+MIT License — viz [LICENSE](LICENSE). Copyright 2025-2026 Petr Sovadina.
+
+Data poskytnutá SÚKL pod podmínkami Open Data: https://opendata.sukl.cz/?q=podminky-uziti
+
+---
+
+**Vytvořeno s [Next.js](https://nextjs.org)** | **Data od [SÚKL](https://www.sukl.cz)** | **Protokol [MCP](https://modelcontextprotocol.io)**

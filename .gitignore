@@ -11,22 +11,11 @@ out/
 # Vercel
 .vercel
 
-# Legacy Python project
-legacy/venv/
-legacy/data/
-legacy/__pycache__/
-*.pyc
-venv/
-
 # Claude local settings
 .claude/
 
 # macOS
 .DS_Store
-
-# iCloud
-*.icloud
-.icloud
 
 # IDE
 .vscode/
@@ -36,3 +25,10 @@ venv/
 
 # Logs
 *.log
+
+# Python leftovers (if any)
+__pycache__/
+*.pyc
+venv/
+.pytest_cache/
+.ruff_cache/
