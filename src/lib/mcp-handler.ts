@@ -12,6 +12,7 @@ import {
   findPharmacies,
   getATCInfo,
   getMedicinesByATC,
+  getCatalogueProvenance,
 } from "./sukl-client";
 
 // ============================================================================
@@ -49,7 +50,8 @@ const TOOLS = [
           description: "Vyhledávací dotaz — název léku, účinná látka nebo SÚKL kód (min. 2 znaky)",
         },
         limit: {
-          type: "number",
+          type: "integer",
+          minimum: 1, maximum: 100,
           description: "Maximální počet výsledků (výchozí: 20, rozsah: 1–100)",
           default: 20,
         },
@@ -60,7 +62,7 @@ const TOOLS = [
   {
     name: "get-medicine-details",
     description:
-      "Získání detailních informací o léčivém přípravku podle SÚKL kódu. Vrací registrační údaje, lékovou formu, účinné látky a držitele registrace.",
+      "Získání detailních informací o léčivém přípravku podle SÚKL kódu. Vrací dostupné katalogové údaje a datum snímku; neznámé hodnoty jsou null.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -75,7 +77,7 @@ const TOOLS = [
   {
     name: "check-availability",
     description:
-      "Kontrola dostupnosti léčivého přípravku na trhu. Vrací informace o aktuální dostupnosti, případných výpadcích a očekávaném datu obnovení.",
+      "Vrátí unknown: skutečná skladová dostupnost není v tomto serveru ověřována. Registrace přípravku neznamená jeho dostupnost.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -90,10 +92,12 @@ const TOOLS = [
   {
     name: "find-pharmacies",
     description:
-      "Vyhledání lékáren v České republice. Filtrování podle města, PSČ nebo nepřetržitého provozu.",
+      "Vyhledání lékáren v České republice. Filtrování podle města nebo PSČ, s omezením výsledků. Nepřetržitý provoz není ověřen.",
     inputSchema: {
       type: "object" as const,
       properties: {
+        limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+        offset: { type: "integer", minimum: 0, maximum: 10000, default: 0 },
         city: {
           type: "string",
           description: "Název města (např. 'Praha', 'Brno')",
@@ -126,7 +130,8 @@ const TOOLS = [
           default: false,
         },
         medicines_limit: {
-          type: "number",
+          type: "integer",
+          minimum: 1, maximum: 100,
           description: "Maximální počet léčiv v seznamu (výchozí: 20)",
           default: 20,
         },
@@ -137,7 +142,7 @@ const TOOLS = [
   {
     name: "get-reimbursement",
     description:
-      "Informace o úhradě a cenách léčivého přípravku. Vrací maximální cenu, výši úhrady, doplatek pacienta a podmínky úhrady.",
+      "Informace o úhradě a cenách léčivého přípravku. Vrací MFC, úhradu UHR1, vypočtený maximální doplatek a preskripční omezení ze SCAU s datem platnosti. Skutečná prodejní cena a nárok na úhradu se mohou lišit.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -152,7 +157,7 @@ const TOOLS = [
   {
     name: "get-pil-content",
     description:
-      "Příbalový leták (PIL) léčivého přípravku. Vrací metadata a URL ke stažení PDF dokumentu ze SÚKL. Pro parsování obsahu PDF doporučujeme docling-mcp server.",
+      "Příbalový leták (PIL) léčivého přípravku. Vrací metadata a URL ke stažení PDF dokumentu ze SÚKL. Obsah PDF není součástí odpovědi.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -167,7 +172,7 @@ const TOOLS = [
   {
     name: "get-spc-content",
     description:
-      "Souhrn údajů o přípravku (SPC/SmPC). Vrací metadata a URL ke stažení PDF dokumentu ze SÚKL. Pro parsování obsahu PDF doporučujeme docling-mcp server.",
+      "Souhrn údajů o přípravku (SPC/SmPC). Vrací metadata a URL ke stažení PDF dokumentu ze SÚKL. Obsah PDF není součástí odpovědi.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -182,7 +187,7 @@ const TOOLS = [
   {
     name: "batch-check-availability",
     description:
-      "Hromadná kontrola dostupnosti více léčivých přípravků najednou. Užitečné pro kontrolu celé medikace pacienta.",
+      "Vrátí unknown pro známé přípravky a not_found pro neznámé kódy. Skladovou dostupnost server neověřuje.",
     inputSchema: {
       type: "object" as const,
       properties: {
@@ -195,7 +200,7 @@ const TOOLS = [
       required: ["sukl_codes"],
     },
   },
-];
+].map(tool => ({ ...tool, annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, idempotentHint: true }, _meta: { securitySchemes: [{ type: "noauth" }] } }));
 
 // ============================================================================
 // Server Info
@@ -203,7 +208,7 @@ const TOOLS = [
 
 const SERVER_INFO = {
   name: "sukl-mcp",
-  version: "5.0.0",
+  version: "6.0.0",
   description:
     "MCP server pro českou databázi léčivých přípravků SÚKL (~68k léků)",
 };
@@ -234,7 +239,7 @@ function validateArray(value: unknown, name: string, maxItems: number): string[]
     throw new ValidationError(`Maximální počet položek v '${name}' je ${maxItems}.`);
   }
   return value.map((item, i) => {
-    if (typeof item !== "string" || item.trim().length === 0) {
+    if (typeof item !== "string" || !/^\d{1,7}$/.test(item)) {
       throw new ValidationError(`Položka ${i + 1} v '${name}' musí být neprázdný řetězec.`);
     }
     return item.trim();
@@ -242,24 +247,29 @@ function validateArray(value: unknown, name: string, maxItems: number): string[]
 }
 
 function validateNumber(value: unknown, fallback: number, min: number, max: number): number {
-  if (value === undefined || value === null) return fallback;
-  const n = typeof value === "number" ? value : Number(value);
-  if (isNaN(n)) return fallback;
-  return Math.max(min, Math.min(max, Math.round(n)));
+  if (value === undefined) return fallback;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < min || value > max) throw new ValidationError(`Číselný parametr musí být celé číslo ${min}–${max}.`);
+  return value;
 }
-
-type ToolResponse = { content: { type: string; text: string }[] };
+function validateCode(value: unknown): string {
+  const code = validateString(value, "sukl_code");
+  if (!/^\d{1,7}$/.test(code)) throw new ValidationError("Neplatný kód SÚKL.");
+  return code;
+}
+type ToolResponse = { content: { type: "text"; text: string }[]; isError?: boolean; structuredContent?: Record<string, unknown> };
 
 function textResponse(text: string): ToolResponse {
   return { content: [{ type: "text", text }] };
 }
 
-async function executeTool(
+export async function executeTool(
   name: string,
   args: Record<string, unknown>
 ): Promise<ToolResponse> {
   const startTime = performance.now();
   try {
+    const definition = TOOLS.find(tool => tool.name === name);
+    if (definition && Object.keys(args).some(key => !(key in (definition.inputSchema.properties ?? {})))) throw new ValidationError("Nepovolený parametr.");
     let result: unknown;
 
     switch (name) {
@@ -273,7 +283,7 @@ async function executeTool(
         break;
       }
       case "get-medicine-details": {
-        const code = validateString(args.sukl_code, "sukl_code");
+        const code = validateCode(args.sukl_code);
         result = await getMedicineByCode(code);
         if (!result) {
           return logAndReturn(name, args, startTime, "ok",
@@ -282,7 +292,7 @@ async function executeTool(
         break;
       }
       case "check-availability": {
-        const code = validateString(args.sukl_code, "sukl_code");
+        const code = validateCode(args.sukl_code);
         result = await checkAvailability(code);
         if (!result) {
           return logAndReturn(name, args, startTime, "ok",
@@ -291,17 +301,22 @@ async function executeTool(
         break;
       }
       case "find-pharmacies": {
-        result = await findPharmacies(
-          args.city as string | undefined,
-          args.postal_code as string | undefined,
-          args.is_24h as boolean | undefined
-        );
+        if (args.is_24h !== undefined) throw new ValidationError("Nepřetržitý provoz není ověřen; filtr is_24h není podporován.");
+        const city = args.city === undefined ? undefined : validateString(args.city, "city");
+        const postal = args.postal_code === undefined ? undefined : validateString(args.postal_code, "postal_code");
+        if ((city && city.length > 100) || (postal && !/^\d{1,5}$/.test(postal))) throw new ValidationError("Neplatný filtr lékáren.");
+        const pharmacies = await findPharmacies(city, postal);
+        const limit = validateNumber(args.limit, 20, 1, 100);
+        const offset = validateNumber(args.offset, 0, 0, 10000);
+        result = { pharmacies: pharmacies.slice(offset, offset + limit), total_count: pharmacies.length, offset, limit };
         break;
       }
       case "get-atc-info": {
-        const atcCode = validateString(args.atc_code, "atc_code");
-        const includeMedicines = (args.include_medicines as boolean) || false;
-        const medicinesLimit = (args.medicines_limit as number) || 20;
+        const atcCode = validateString(args.atc_code, "atc_code").toUpperCase();
+        if (!/^(?:[A-Z]|[A-Z]\d{2}|[A-Z]\d{2}[A-Z]|[A-Z]\d{2}[A-Z]{2}|[A-Z]\d{2}[A-Z]{2}\d{2})$/.test(atcCode)) throw new ValidationError("Neplatný kód ATC.");
+        if (args.include_medicines !== undefined && typeof args.include_medicines !== "boolean") throw new ValidationError("include_medicines musí být boolean.");
+        const includeMedicines = args.include_medicines === true;
+        const medicinesLimit = validateNumber(args.medicines_limit, 20, 1, 100);
 
         const atcInfo = await getATCInfo(atcCode);
         if (!atcInfo) {
@@ -322,7 +337,7 @@ async function executeTool(
         break;
       }
       case "get-reimbursement": {
-        const code = validateString(args.sukl_code, "sukl_code");
+        const code = validateCode(args.sukl_code);
         result = await getReimbursement(code);
         if (!result) {
           return logAndReturn(name, args, startTime, "ok",
@@ -331,8 +346,10 @@ async function executeTool(
         break;
       }
       case "get-pil-content": {
-        const code = validateString(args.sukl_code, "sukl_code");
-        result = await getDocumentContent(code, "PIL");
+        const code = validateCode(args.sukl_code);
+        const document = await getDocumentContent(code, "PIL");
+        if (document && !document.document_url) return { ...textResponse(document.content), isError: true };
+        result = document;
         if (!result) {
           return logAndReturn(name, args, startTime, "ok",
             textResponse(`Příbalový leták pro SÚKL kód '${code}' nebyl nalezen.`));
@@ -340,8 +357,10 @@ async function executeTool(
         break;
       }
       case "get-spc-content": {
-        const code = validateString(args.sukl_code, "sukl_code");
-        result = await getDocumentContent(code, "SPC");
+        const code = validateCode(args.sukl_code);
+        const document = await getDocumentContent(code, "SPC");
+        if (document && !document.document_url) return { ...textResponse(document.content), isError: true };
+        result = document;
         if (!result) {
           return logAndReturn(name, args, startTime, "ok",
             textResponse(`SPC pro SÚKL kód '${code}' nebylo nalezeno.`));
@@ -353,7 +372,7 @@ async function executeTool(
         const results = await Promise.all(
           codes.map((code) => checkAvailability(code))
         );
-        const validResults = results.filter(Boolean);
+        const validResults = results.map((r, i) => r ?? { sukl_code: codes[i], status: "not_found" });
         let availableCount = 0;
         let unavailableCount = 0;
         for (const r of validResults) {
@@ -365,33 +384,29 @@ async function executeTool(
           total_checked: codes.length,
           available_count: availableCount,
           unavailable_count: unavailableCount,
-          checked_at: new Date().toISOString(),
+          unknown_count: validResults.filter(r => r.status === "unknown").length,
+          not_found_count: validResults.filter(r => r.status === "not_found").length,
         };
         break;
       }
       default:
         return logAndReturn(name, args, startTime, "ok",
-          textResponse(`Neznámý nástroj: '${name}'`));
+          { ...textResponse(`Neznámý nástroj: '${name}'`), isError: true });
     }
 
     return logAndReturn(name, args, startTime, "ok",
-      textResponse(JSON.stringify(result, null, 2)));
+      { ...textResponse(JSON.stringify({ ...(result && typeof result === "object" && !Array.isArray(result) ? result : { data: result }), provenance: getCatalogueProvenance() })), structuredContent: { ...(result && typeof result === "object" && !Array.isArray(result) ? result : { data: result }), provenance: getCatalogueProvenance() } });
   } catch (error) {
     const duration_ms = Math.round(performance.now() - startTime);
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.log(JSON.stringify({
       event: "mcp_tool_call",
       tool: name,
-      params: args,
       duration_ms,
       status: "error",
       error: errorMessage,
     }));
-    return textResponse(
-      error instanceof ValidationError
-        ? errorMessage
-        : "Chyba při zpracování požadavku. Zkuste to znovu.",
-    );
+    return { ...textResponse(error instanceof ValidationError ? errorMessage : "Chyba při zpracování požadavku. Zkuste to znovu."), isError: true };
   }
 }
 
@@ -406,7 +421,6 @@ function logAndReturn(
   console.log(JSON.stringify({
     event: "mcp_tool_call",
     tool,
-    params,
     duration_ms,
     status,
   }));
@@ -420,6 +434,9 @@ function logAndReturn(
 export async function handleJsonRpc(
   request: JsonRpcRequest
 ): Promise<JsonRpcResponse | null> {
+  if (!request || typeof request !== "object" || Array.isArray(request) || request.jsonrpc !== "2.0" || typeof request.method !== "string" || (request.id !== undefined && typeof request.id !== "string" && typeof request.id !== "number") || (request.params !== undefined && (!request.params || typeof request.params !== "object" || Array.isArray(request.params)))) {
+    return { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request" } };
+  }
   const { method, params, id } = request;
 
   // Notifications (no id) — return null to signal 202 response

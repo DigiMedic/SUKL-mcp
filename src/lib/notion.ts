@@ -7,6 +7,8 @@ import { Client } from "@notionhq/client";
 
 const notion = new Client({
   auth: process.env.NOTION_API_KEY,
+  timeoutMs: 10000,
+  retry: { maxRetries: 1, maxRetryDelayMs: 1000 },
 });
 
 const DB_LEADS = process.env.NOTION_DB_LEADS ?? "";
@@ -63,36 +65,18 @@ export async function createEnterpriseContact(data: {
 }
 
 export async function checkNewsletterDuplicate(email: string): Promise<boolean> {
-  try {
-    // Notion client v5 dataSources.query uses a different endpoint than /databases/{id}/query.
-    // Use direct REST call for database query compatibility.
-    const res = await fetch(`https://api.notion.com/v1/databases/${DB_NEWSLETTER}/query`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.NOTION_API_KEY}`,
-        "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        filter: { property: "Email", email: { equals: email } },
-        page_size: 1,
-      }),
-    });
-    if (!res.ok) throw new Error(`Notion query failed: ${res.status}`);
-    const data = await res.json();
-    return data.results.length > 0;
-  } catch (error) {
-    console.error("Newsletter duplicate check error:", error);
-    return false;
-  }
+  const database = await notion.databases.retrieve({ database_id: DB_NEWSLETTER });
+  if (!("data_sources" in database) || database.data_sources.length !== 1) throw new Error("Newsletter requires exactly one configured Notion data source.");
+  const result = await notion.dataSources.query({ data_source_id: database.data_sources[0].id, filter: { property: "Email", email: { equals: email.toLowerCase() } }, page_size: 1 });
+  return result.results.length > 0;
 }
 
 export async function createNewsletterSubscriber(email: string, gdprConsentAt: string) {
   return notion.pages.create({
     parent: { database_id: DB_NEWSLETTER },
     properties: {
-      Name: { title: [{ text: { content: email } }] },
-      Email: { email },
+      Name: { title: [{ text: { content: email.toLowerCase() } }] },
+      Email: { email: email.toLowerCase() },
       "GDPR Souhlas": { date: { start: gdprConsentAt } },
       Datum: { date: { start: new Date().toISOString().split("T")[0] } },
     },

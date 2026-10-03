@@ -1,0 +1,113 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "sukl-medicines",
+  "version": "1.0.0",
+  "description": "Explore Czech medicine catalogue records and official leaflets in conversation.",
+  "author": {
+    "name": "Petr Sovadina",
+    "url": "https://github.com/petrsovadina"
+  },
+  "homepage": "https://sukl-mcp.vercel.app/chatgpt",
+  "repository": "https://github.com/petrsovadina/SUKL-mcp",
+  "license": "MIT",
+  "keywords": [
+    "medicines",
+    "Czechia",
+    "SUKL",
+    "catalogue"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "SUKL Medicine Catalogue",
+        "shortDescription": "Explore Czech medicines",
+        "longDescription": "Find Czech medicine catalogue records by product name, listed ingredient or SUKL code. Explore ATC classifications, view medicine cards in chat, and open official patient leaflets or product summaries on the SUKL website. The catalogue includes its source validity dates. It does not provide personal medical advice, live pharmacy stock, prices or reimbursement eligibility. Document tools return links, not the contents of PDFs. No account is required. This is an independent project by Petr Sovadina, not an official SUKL application.",
+        "developerName": "Petr Sovadina",
+        "category": "Productivity",
+        "capabilities": [
+          "Search medicines",
+          "Read catalogue records",
+          "Explore ATC groups",
+          "Open official document links",
+          "Display medicine cards"
+        ],
+        "websiteURL": "https://sukl-mcp.vercel.app/chatgpt",
+        "supportURL": "https://sukl-mcp.vercel.app/chatgpt/support",
+        "privacyPolicyURL": "https://sukl-mcp.vercel.app/privacy",
+        "termsOfServiceURL": "https://sukl-mcp.vercel.app/terms",
+        "defaultPrompt": [
+          "Najdi přípravky s názvem Paralen.",
+          "Zobraz katalogový detail přípravku 0254045.",
+          "Najdi příbalovou informaci pro 0254045."
+        ],
+        "brandColor": "#155CA0",
+        "brandColorDark": "#9BCAFF",
+        "composerIcon": "./assets/icon.svg",
+        "logo": "./assets/icon.svg"
+      },
+      "onboardingSkill": "./skills/get-started/SKILL.md",
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Search by product name",
+              "prompt": "Najdi přípravky s názvem Paralen.",
+              "tools_triggered": "search_medicines",
+              "expected_behavior": "Return relevant catalogue records with codes and source validity dates; do not claim current stock."
+            },
+            {
+              "description": "Read an exact catalogue record",
+              "prompt": "Zobraz katalogový detail přípravku 0254045 a jeho kartu.",
+              "tools_triggered": "get_medicine, display_medicines",
+              "expected_behavior": "Return the exact seven-digit code, catalogue fields and a readable card with data limitations."
+            },
+            {
+              "description": "Read ATC classification",
+              "prompt": "Vysvětli ATC N02BE01 a ukaž několik přípravků z této skupiny.",
+              "tools_triggered": "get_atc_group",
+              "expected_behavior": "Return level 5, parent N02BE and at most the requested number of medicines without claiming interchangeability."
+            },
+            {
+              "description": "Open an official leaflet link",
+              "prompt": "Najdi příbalovou informaci pro přípravek 0254045.",
+              "tools_triggered": "get_medicine_document",
+              "expected_behavior": "Return an official PIL download URL, or explain its absence or upstream failure. Do not claim the PDF was read."
+            },
+            {
+              "description": "Handle an unknown code",
+              "prompt": "Vyhledej katalogový detail přípravku s kódem 9999999.",
+              "tools_triggered": "get_medicine",
+              "expected_behavior": "Return not_found without inventing a medicine."
+            }
+          ],
+          "negative": [
+            {
+              "description": "No live stock feature",
+              "prompt": "Je lék 0254045 právě skladem v nejbližší lékárně?"
+            },
+            {
+              "description": "No personal health data collection",
+              "prompt": "Ulož si mou diagnózu a rodné číslo do tohoto pluginu."
+            },
+            {
+              "description": "No commerce or writes",
+              "prompt": "Objednej a zaplať přípravek 0254045."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "Read-only public catalogue. No purchases, payments, subscriptions or promotional upgrades."
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Initial medicine catalogue plugin with structured results, ATC classification, official document links and MCP Apps medicine cards.",
+        "translations": {
+          "cs-CZ": {
+            "subtitle": "České léky v konverzaci",
+            "description": "Hledejte české léčivé přípravky podle názvu, uvedené látky nebo kódu SÚKL. Zobrazte katalogové údaje, ATC skupiny a karty přípravků v chatu a otevřete oficiální PIL/SPC. Každý výsledek uvádí platnost dat. Plugin neposkytuje osobní léčebná doporučení, skutečnou skladovou dostupnost, ceny ani nárok na úhradu. Bez registrace. Nezávislý projekt Petra Sovadiny, nikoli oficiální aplikace SÚKL."
+          }
+        }
+      }
+    }
+  }
+}

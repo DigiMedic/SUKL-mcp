@@ -1,26 +1,13 @@
+import { acquireNewsletterLock } from "@/lib/newsletter-lock";
+import { readObject, isEmail, validConsent, createRateLimiter } from "@/lib/http-input";
 import { NextRequest, NextResponse } from "next/server";
 import { createNewsletterSubscriber, checkNewsletterDuplicate } from "@/lib/notion";
 import { sendNewsletterConfirmation } from "@/lib/resend";
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
+const checkRateLimit = createRateLimiter(5);
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production" && (process.env.LEGACY_FORMS_ENABLED !== "true" || process.env.PUBLICATION_POLICY_CONFIRMED !== "true")) return NextResponse.json({ error: "Webové formuláře nyní nejsou aktivní. Použijte stránku podpory." }, { status: 503 });
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -35,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = await readObject(request);
   } catch {
     return NextResponse.json(
       { error: "Neplatný formát požadavku." },
@@ -49,9 +36,7 @@ export async function POST(request: NextRequest) {
   };
 
   if (
-    typeof email !== "string" ||
-    !email.includes("@") ||
-    email.length > 200
+    !isEmail(email)
   ) {
     return NextResponse.json(
       { error: "Zadejte platný email." },
@@ -59,17 +44,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (typeof gdprConsentAt !== "string" || !gdprConsentAt) {
+  if (!validConsent(gdprConsentAt)) {
     return NextResponse.json(
       { error: "Souhlas se zpracováním údajů je povinný." },
       { status: 400 }
     );
   }
 
-  const trimmedEmail = email.trim();
+  const trimmedEmail = email.trim().toLowerCase();
+  let release: () => Promise<void>;
+  try { release = await acquireNewsletterLock(trimmedEmail); } catch { return NextResponse.json({ error: "Odběr nyní nelze bezpečně zpracovat. Zkuste to později." }, { status: 503 }); }
+  try {
 
-  // Duplicate check — if it fails, proceed anyway (don't lose subscriber)
-  const isDuplicate = await checkNewsletterDuplicate(trimmedEmail);
+  let isDuplicate: boolean;
+  try { isDuplicate = await checkNewsletterDuplicate(trimmedEmail); } catch { return NextResponse.json({ error: "Odběr nyní nelze ověřit. Zkuste to později." }, { status: 503 }); }
   if (isDuplicate) {
     return NextResponse.json({
       success: true,
@@ -78,21 +66,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await createNewsletterSubscriber(trimmedEmail, gdprConsentAt);
+    await createNewsletterSubscriber(trimmedEmail, new Date().toISOString());
 
     // Send confirmation email (non-blocking)
     try {
       await sendNewsletterConfirmation(trimmedEmail);
     } catch (emailError) {
-      console.error("Resend email error:", emailError);
+      console.error("Resend email delivery failed.");
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Newsletter API error:", error);
+    console.error("Form submission failed.");
     return NextResponse.json(
       { error: "Nepodařilo se přihlásit k odběru. Zkuste to znovu." },
       { status: 500 }
     );
   }
+  } finally { await release().catch(() => { console.error("Newsletter lease cleanup failed; lease expires automatically."); }); }
 }

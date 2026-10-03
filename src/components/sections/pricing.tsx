@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Sparkles, Building2, Bell, Rocket } from "lucide-react";
+import { ContactModal } from "@/components/forms/contact-modal";
 import { RegisterModal } from "@/components/forms/register-modal";
 import { trackEvent } from "@/lib/analytics";
 
@@ -24,11 +25,11 @@ const tiers: PricingTier[] = [
     name: "Open Source",
     price: "Zdarma",
     period: "navždy",
-    description: "Plný přístup k celé databázi SÚKL — bez omezení",
+    description: "Veřejný katalog z dat SÚKL s limitem požadavků",
     features: [
       "9 MCP nástrojů",
-      "68 000+ léčiv v reálném čase",
-      "Měsíční aktualizace dat",
+      "Katalogový snímek s uvedenou platností",
+      "Ověřované aktualizace dat",
       "Komunitní podpora",
       "MIT licence — open source",
     ],
@@ -75,6 +76,7 @@ const tiers: PricingTier[] = [
 
 export function Pricing() {
   const [earlyAccessOpen, setEarlyAccessOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   function handleAction(action: PricingTier["action"]) {
     trackEvent("pricing_cta", { tier: action });
@@ -82,8 +84,10 @@ export function Pricing() {
       case "free":
         document.getElementById("quickstart")?.scrollIntoView({ behavior: "smooth" });
         break;
-      case "early-access":
       case "notify":
+        setContactOpen(true);
+        break;
+      case "early-access":
         setEarlyAccessOpen(true);
         break;
     }
@@ -104,7 +108,7 @@ export function Pricing() {
             Začněte zdarma, rostěte s námi
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Projekt je v rané fázi — open source verze je plně funkční.
+            Projekt je v rané fázi — open source verze poskytuje katalogové údaje.
             Placené plány připravujeme pro ty, kdo chtějí víc.
           </p>
         </motion.div>
@@ -198,12 +202,13 @@ export function Pricing() {
           viewport={{ once: true }}
           className="text-center text-sm text-muted-foreground mt-8"
         >
-          Open source verze je plně funkční a zůstane zdarma navždy.
+          Open source katalog zůstává zdarma.
           Zanechte kontakt a budete první, kdo se dozví o nových plánech.
         </motion.p>
       </div>
 
       {/* Early Access Modal — reuses RegisterModal */}
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
       <RegisterModal isOpen={earlyAccessOpen} onClose={() => setEarlyAccessOpen(false)} />
     </section>
   );

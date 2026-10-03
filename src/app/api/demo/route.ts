@@ -1,3 +1,4 @@
+import { readObject, isEmail, validConsent, createRateLimiter } from "@/lib/http-input";
 import { NextRequest, NextResponse } from "next/server";
 import { parseQuery } from "@/lib/demo-handler";
 import {
@@ -12,30 +13,7 @@ import {
 // Rate Limiting (in-memory, resets on cold start)
 // ============================================================================
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
-}
-
-// ============================================================================
-// POST Handler
-// ============================================================================
+const checkRateLimit = createRateLimiter(10);
 
 export async function POST(request: NextRequest) {
   // Rate limiting
@@ -54,7 +32,7 @@ export async function POST(request: NextRequest) {
   // Parse body
   let body: { query?: unknown };
   try {
-    body = await request.json();
+    body = await readObject(request);
   } catch {
     return NextResponse.json(
       { error: "Neplatný formát požadavku." },
@@ -108,7 +86,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           type: "pharmacy",
           city: parsed.params.city || null,
-          pharmacies,
+          pharmacies: pharmacies.slice(0, 20),
           total: pharmacies.length,
           time_ms: Math.round(performance.now() - startTime),
         });

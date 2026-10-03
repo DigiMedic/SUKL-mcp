@@ -1,34 +1,13 @@
+import { readObject, isEmail, validConsent, createRateLimiter } from "@/lib/http-input";
 import { NextRequest, NextResponse } from "next/server";
 import { createLead } from "@/lib/notion";
 import { sendRegistrationConfirmation } from "@/lib/resend";
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60_000;
-
-const VALID_USE_CASES = [
-  "Chatbot",
-  "Lékárna",
-  "Klinický systém",
-  "Výzkum",
-  "Jiné",
-];
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
+const VALID_USE_CASES = ["Chatbot", "Lékárna", "Klinický systém", "Výzkum", "Jiné"];
+const checkRateLimit = createRateLimiter(5);
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production" && (process.env.LEGACY_FORMS_ENABLED !== "true" || process.env.PUBLICATION_POLICY_CONFIRMED !== "true")) return NextResponse.json({ error: "Webové formuláře nyní nejsou aktivní. Použijte stránku podpory." }, { status: 503 });
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -43,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = await readObject(request);
   } catch {
     return NextResponse.json(
       { error: "Neplatný formát požadavku." },
@@ -72,9 +51,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (
-    typeof email !== "string" ||
-    !email.includes("@") ||
-    email.length > 200
+    !isEmail(email)
   ) {
     return NextResponse.json(
       { error: "Zadejte platný email." },
@@ -93,7 +70,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (typeof gdprConsentAt !== "string" || !gdprConsentAt) {
+  if (!validConsent(gdprConsentAt)) {
     return NextResponse.json(
       { error: "Souhlas se zpracováním údajů je povinný." },
       { status: 400 }
@@ -114,19 +91,19 @@ export async function POST(request: NextRequest) {
       company: company.trim(),
       useCase: selectedUseCase,
       useCaseDetail: trimmedUseCaseDetail || undefined,
-      gdprConsentAt,
+      gdprConsentAt: new Date().toISOString(),
     });
 
     // Send confirmation email (non-blocking)
     try {
       await sendRegistrationConfirmation(email.trim(), name.trim());
     } catch (emailError) {
-      console.error("Resend email error:", emailError);
+      console.error("Resend email delivery failed.");
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Register API error:", error);
+    console.error("Form submission failed.");
     return NextResponse.json(
       { error: "Nepodařilo se odeslat registraci. Zkuste to znovu." },
       { status: 500 }

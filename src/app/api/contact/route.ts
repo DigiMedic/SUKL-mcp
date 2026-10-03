@@ -1,28 +1,13 @@
+import { readObject, isEmail, validConsent, createRateLimiter } from "@/lib/http-input";
 import { NextRequest, NextResponse } from "next/server";
 import { createEnterpriseContact } from "@/lib/notion";
 import { sendEnterpriseNotification } from "@/lib/resend";
 
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 60_000;
-
 const VALID_SIZES = ["1–10", "11–50", "51–200", "200+"];
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
+const checkRateLimit = createRateLimiter(5);
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production" && (process.env.LEGACY_FORMS_ENABLED !== "true" || process.env.PUBLICATION_POLICY_CONFIRMED !== "true")) return NextResponse.json({ error: "Webové formuláře nyní nejsou aktivní. Použijte stránku podpory." }, { status: 503 });
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -37,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = await readObject(request);
   } catch {
     return NextResponse.json(
       { error: "Neplatný formát požadavku." },
@@ -67,9 +52,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (
-    typeof email !== "string" ||
-    !email.includes("@") ||
-    email.length > 200
+    !isEmail(email)
   ) {
     return NextResponse.json(
       { error: "Zadejte platný email." },
@@ -99,12 +82,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (typeof gdprConsentAt !== "string" || !gdprConsentAt) {
+  if (!validConsent(gdprConsentAt)) {
     return NextResponse.json(
       { error: "Souhlas se zpracováním údajů je povinný." },
       { status: 400 }
     );
   }
+
+  if (phone !== undefined && (typeof phone !== "string" || phone.length > 40)) return NextResponse.json({ error: "Neplatné telefonní číslo." }, { status: 400 });
 
   const selectedSize = VALID_SIZES.includes(companySize as string)
     ? (companySize as string)
@@ -118,7 +103,7 @@ export async function POST(request: NextRequest) {
       phone: typeof phone === "string" ? phone.trim() : undefined,
       companySize: selectedSize,
       message: message.trim(),
-      gdprConsentAt,
+      gdprConsentAt: new Date().toISOString(),
     });
 
     // Send notification email (non-blocking)
@@ -131,12 +116,12 @@ export async function POST(request: NextRequest) {
         message: message.trim(),
       });
     } catch (emailError) {
-      console.error("Resend email error:", emailError);
+      console.error("Resend email delivery failed.");
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Contact API error:", error);
+    console.error("Form submission failed.");
     return NextResponse.json(
       { error: "Nepodařilo se odeslat poptávku. Zkuste to znovu." },
       { status: 500 }

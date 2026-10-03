@@ -1,6 +1,6 @@
 {
   "name": "sukl-mcp",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,9 +8,17 @@
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "build:widget": "node scripts/build-summary.mjs && node scripts/build-widget.mjs",
+    "predev": "npm run build:widget",
+    "prebuild": "npm run build:widget",
+    "data:update": "tsx scripts/update-data.ts",
+    "plugin:package": "node scripts/package-plugin.mjs",
+    "plugin:check": "node scripts/check-plugin.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "@modelcontextprotocol/sdk": "1.32.0",
     "@notionhq/client": "^5.10.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@vercel/analytics": "^1.6.1",
@@ -18,7 +26,7 @@
     "framer-motion": "^12.34.0",
     "fuse.js": "^7.1.0",
     "lucide-react": "^0.563.0",
-    "next": "16.1.6",
+    "next": "16.3.8",
     "next-themes": "^0.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -26,12 +34,17 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.1.6",
+    "@next/bundle-analyzer": "16.3.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "esbuild": "0.28.2",
+    "fflate": "0.8.3",
     "tailwindcss": "^4",
+    "tsx": "4.23.15",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }

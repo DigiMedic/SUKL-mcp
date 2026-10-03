@@ -11,6 +11,15 @@ function getResend(): Resend {
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@sukl-mcp.vercel.app";
 
+export function escapeEmailHtml(value: string): string {
+  return value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]!));
+}
+async function checkedSend(payload: Parameters<Resend["emails"]["send"]>[0]) {
+  if (!process.env.RESEND_API_KEY) return { skipped: true };
+  const result = await getResend().emails.send(payload);
+  if (result.error) throw new Error("Email provider rejected delivery.");
+  return result;
+}
 function emailWrapper(title: string, bodyHtml: string): string {
   return `
     <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e;">
@@ -31,12 +40,12 @@ function emailWrapper(title: string, bodyHtml: string): string {
 }
 
 export async function sendRegistrationConfirmation(to: string, name: string) {
-  return getResend().emails.send({
+  return checkedSend({
     from: FROM_EMAIL,
     to,
     subject: "SÚKL MCP — Jste na seznamu pro early access",
     html: emailWrapper("Jste na seznamu!", `
-      <p>Děkujeme za zájem, <strong>${name}</strong>!</p>
+      <p>Děkujeme za zájem, <strong>${escapeEmailHtml(name)}</strong>!</p>
       <p>Zapsali jsme vás k early access. Jako první se dozvíte o nových funkcích a plánech SÚKL MCP.</p>
       <p><strong>Co připravujeme:</strong></p>
       <ul style="padding-left: 20px; color: #374151;">
@@ -59,25 +68,25 @@ export async function sendEnterpriseNotification(data: {
 }) {
   const ownerEmail = process.env.RESEND_OWNER_EMAIL || FROM_EMAIL;
 
-  return getResend().emails.send({
+  return checkedSend({
     from: FROM_EMAIL,
     to: ownerEmail,
-    subject: `Nová Enterprise poptávka: ${data.company}`,
+    subject: `Nová Enterprise poptávka: ${escapeEmailHtml(data.company)}`,
     html: emailWrapper("Nová Enterprise poptávka", `
       <table style="border-collapse: collapse; width: 100%; margin-bottom: 16px;">
-        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Jméno:</td><td style="padding: 8px 0;">${data.name}</td></tr>
-        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Email:</td><td style="padding: 8px 0;">${data.email}</td></tr>
-        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Firma:</td><td style="padding: 8px 0;">${data.company}</td></tr>
-        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Velikost:</td><td style="padding: 8px 0;">${data.companySize}</td></tr>
+        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Jméno:</td><td style="padding: 8px 0;">${escapeEmailHtml(data.name)}</td></tr>
+        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Email:</td><td style="padding: 8px 0;">${escapeEmailHtml(data.email)}</td></tr>
+        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Firma:</td><td style="padding: 8px 0;">${escapeEmailHtml(data.company)}</td></tr>
+        <tr><td style="padding: 8px 16px 8px 0; font-weight: 600; color: #374151; white-space: nowrap;">Velikost:</td><td style="padding: 8px 0;">${escapeEmailHtml(data.companySize)}</td></tr>
       </table>
       <h3 style="margin: 0 0 8px 0; color: #1a1a2e; font-size: 15px;">Zpráva:</h3>
-      <p style="background: #f8f8fa; padding: 12px 16px; border-radius: 8px; color: #374151;">${data.message}</p>
+      <p style="background: #f8f8fa; padding: 12px 16px; border-radius: 8px; color: #374151;">${escapeEmailHtml(data.message)}</p>
     `),
   });
 }
 
 export async function sendNewsletterConfirmation(to: string) {
-  return getResend().emails.send({
+  return checkedSend({
     from: FROM_EMAIL,
     to,
     subject: "SÚKL MCP — Přihlášení k odběru novinek",

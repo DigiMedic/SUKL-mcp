@@ -1,3 +1,4 @@
+vi.mock("@/lib/newsletter-lock", () => ({ acquireNewsletterLock: vi.fn().mockResolvedValue(async () => {}) }));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Notion client
@@ -48,8 +49,9 @@ describe("POST /api/newsletter", () => {
     expect(data.success).toBe(true);
     expect(createNewsletterSubscriber).toHaveBeenCalledWith(
       "jan@firma.cz",
-      "2026-03-17T14:00:00.000Z"
+      expect.any(String)
     );
+    expect(Date.parse(vi.mocked(createNewsletterSubscriber).mock.calls[0][1])).toBeGreaterThan(Date.now() - 1000);
   });
 
   it("returns 400 for missing email", async () => {

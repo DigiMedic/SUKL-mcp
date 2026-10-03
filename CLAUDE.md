@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+Current local release candidate: application v6.0.0, public ChatGPT plugin v1.0.0. Read `docs/openai-publication.md` for current endpoint contracts, build commands and release gates. The legacy context below describes v5 where it differs.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

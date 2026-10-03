@@ -9,7 +9,7 @@ export interface ParsedQuery {
 }
 
 // ATC code pattern: letter followed by digits, optionally more letter+digit groups
-const ATC_PATTERN = /^[A-Z]\d{2}(?:[A-Z]{2}\d{2})?$/i;
+const ATC_PATTERN = /^(?:[A-Z]|[A-Z]\d{2}|[A-Z]\d{2}[A-Z]|[A-Z]\d{2}[A-Z]{2}|[A-Z]\d{2}[A-Z]{2}\d{2})$/i;
 
 // 7-digit SÚKL code (with or without leading zeros)
 const SUKL_CODE_PATTERN = /^\d{4,7}$/;
@@ -28,7 +28,7 @@ const PHARMACY_KEYWORDS = [
 
 // City extraction from pharmacy queries
 const PHARMACY_CITY_PATTERN =
-  /(?:lékárn\w*|lekarn\w*|pharmacy)\s+(?:v|ve|na|blízko|poblíž|u|kolem)?\s*(.+)/i;
+  /(?:lékárn[\p{L}]*|lekarn[\p{L}]*|pharmacy)\s+(?:v|ve|na|blízko|poblíž|u|kolem)?\s*(.+)/iu;
 
 export function parseQuery(input: string): ParsedQuery {
   const trimmed = input.trim();

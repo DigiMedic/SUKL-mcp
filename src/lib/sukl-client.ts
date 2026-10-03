@@ -51,11 +51,13 @@ interface BundledMedicine {
   h: string;  // holder
   r: string;  // registration
   d: string;  // dispensing
+  rn?: string; rv?: string | null; ro?: string | null; ig?: string | null; mr?: string | null; pi?: boolean;
 }
 
 interface BundledATC {
   c: string;  // code
   n: string;  // name
+  en?: string | null;
   l: number;  // level
   p: string;  // parent
 }
@@ -79,6 +81,7 @@ interface BundledReimbursement {
   m: number | null;  // max_price
   a: number | null;  // reimbursement_amount
   s: number | null;  // patient_surcharge
+  o?: string | null;
 }
 
 interface BundledData {
@@ -89,6 +92,7 @@ interface BundledData {
   _: {
     t: string;
     c: { m: number; a: number; p?: number; r?: number };
+    sources?: { medicines?: { url: string; valid_from: string; valid_until: string }; reimbursements?: { url: string; valid_from: string } };
   };
 }
 
@@ -152,14 +156,14 @@ function transformBundledMedicine(m: BundledMedicine): MedicineDetail {
     substance: m.u || null,
     holder: m.h || null,
     registration_status: m.r || null,
-    registration_number: null,
-    registration_valid_until: null,
+    registration_number: m.rn || null,
+    registration_valid_until: m.rv || null,
     dispensing: m.d || null,
     legal_status: null,
-    route_of_administration: null,
-    indication_group: null,
-    mrp_number: null,
-    parallel_import: false,
+    route_of_administration: m.ro || null,
+    indication_group: m.ig || null,
+    mrp_number: m.mr || null,
+    parallel_import: m.pi ?? null,
   };
 }
 
@@ -176,37 +180,40 @@ function transformBundledPharmacy(p: BundledPharmacy): Pharmacy {
     latitude: null,
     longitude: null,
     distance_km: null,
-    is_24h: p.h,
+    is_24h: null,
+    has_emergency_service: p.h,
     has_erecept: p.r,
   };
 }
 
 function transformBundledReimbursement(r: BundledReimbursement): ReimbursementInfo {
   return {
-    sukl_code: r.c,
+    sukl_code: normalizeCode(r.c),
     reimbursement_group: r.g,
     max_price: r.m,
     reimbursement_amount: r.a,
     patient_surcharge: r.s,
-    reimbursement_conditions: null,
-    valid_from: null,
+    reimbursement_conditions: r.o || null,
+    valid_from: getBundledData()._.sources?.reimbursements?.valid_from ?? null,
     valid_until: null,
   };
 }
 
-function transformBundledATC(a: BundledATC): ATCInfo {
+function transformBundledATC(a: BundledATC, knownCodes: Set<string>): ATCInfo {
+  const lengths = [1, 3, 4, 5, 7];
+  const level = lengths.indexOf(a.c.length) + 1;
   return {
     code: a.c,
     name_cs: a.n,
-    name_en: null,
-    level: a.l,
-    parent_code: a.p || null,
+    name_en: a.en || null,
+    level,
+    parent_code: level > 1 && knownCodes.has(a.c.slice(0, lengths[level - 2])) ? a.c.slice(0, lengths[level - 2]) : null,
     description: null,
   };
 }
 
 export async function initializeData(): Promise<void> {
-  if (store.lastLoaded && Date.now() - store.lastLoaded.getTime() < 3600000) {
+  if (store.lastLoaded) {
     return;
   }
 
@@ -226,8 +233,9 @@ export async function initializeData(): Promise<void> {
 
   // Transform ATC codes
   store.atcCodes.clear();
+  const knownCodes = new Set(data.a.map(a => a.c));
   for (const a of data.a) {
-    const info = transformBundledATC(a);
+    const info = transformBundledATC(a, knownCodes);
     store.atcCodes.set(info.code, info);
   }
 
@@ -285,12 +293,32 @@ export async function searchMedicines(
     return { medicines: [], total_count: 0, search_time_ms: 0 };
   }
 
-  const results = store.fuseIndex.search(query, { limit });
+  const exact = /^\d{1,7}$/.test(query.trim())
+    ? store.medicinesByCode.get(normalizeCode(query.trim()))
+    : undefined;
+  const results = exact
+    ? [{ item: exact }]
+    : store.fuseIndex.search(query);
 
   return {
-    medicines: results.map((r) => toBasic(r.item)),
+    medicines: results.slice(0, limit).map((r) => toBasic(r.item)),
     total_count: results.length,
     search_time_ms: Math.round(performance.now() - startTime),
+  };
+}
+
+/** Bundle creation time is not a verified source publication date. */
+export function getCatalogueProvenance() {
+  const source = getBundledData()._.sources?.medicines;
+  const today = new Date().toISOString().slice(0, 10);
+  const freshness = !source ? "unverified" : today < source.valid_from ? "not_yet_valid" : today > source.valid_until ? "expired" : "current";
+  return {
+    freshness,
+    bundle_created_at: getBundledData()._.t,
+    source_as_of: getBundledData()._.sources?.medicines?.valid_from ?? null,
+    source_valid_until: getBundledData()._.sources?.medicines?.valid_until ?? null,
+    source_url: getBundledData()._.sources?.medicines?.url ?? "https://opendata.sukl.gov.cz/",
+    warning: `${freshness === "expired" ? "Platnost snímku skončila; nelze jej považovat za aktuální. " : freshness === "not_yet_valid" ? "Snímek ještě není účinný. " : ""}Katalog z veřejných dat SÚKL. Neověřuje skladovou dostupnost, aktuální prodejní ceny ani nárok na úhradu. Složení, zejména kombinovaných přípravků, ověřte v oficiálním PIL/SPC.`,
   };
 }
 
@@ -334,14 +362,14 @@ export async function checkAvailability(
   if (!medicine) return null;
 
   return {
-    sukl_code: suklCode,
+    sukl_code: medicine.sukl_code,
     name: medicine.name,
-    status: medicine.registration_status === "R" ? "available" : "unknown",
-    last_checked: new Date().toISOString(),
+    status: "unknown",
+    last_checked: null,
     distribution_status: null,
     expected_availability: null,
     notes:
-      "Data based on registration status. Real-time availability not yet implemented.",
+      "Skutečnou skladovou dostupnost tento server neověřuje. Registrace není dostupnost.",
   };
 }
 
@@ -362,7 +390,8 @@ export async function getDocumentContent(
 
   try {
     const res = await fetch(
-      `${SUKL_API_BASE}/dokumenty-metadata/${suklCode}`
+      `${SUKL_API_BASE}/dokumenty-metadata/${suklCode.padStart(7, "0")}`,
+      { signal: AbortSignal.timeout(8000), cache: "no-store" }
     );
 
     if (!res.ok) {
@@ -378,7 +407,9 @@ export async function getDocumentContent(
       };
     }
 
-    const docs: SuklDocumentMeta[] = await res.json();
+    const raw: unknown = await res.json();
+    if (!Array.isArray(raw) || raw.some(d => !d || typeof d.typ !== "string" || !Number.isInteger(d.id) || d.id <= 0)) throw new Error("Neplatná metadata SÚKL.");
+    const docs = raw as SuklDocumentMeta[];
     const doc = docs.find(
       (d) => d.typ.toUpperCase() === documentType
     );
@@ -402,7 +433,7 @@ export async function getDocumentContent(
       sukl_code: suklCode,
       document_type: documentType,
       title: `${documentType} - ${medicine.name}`,
-      content: `Dokument ${documentType} pro přípravek ${medicine.name} je dostupný ke stažení. Pro zpracování obsahu PDF doporučujeme použít docling-mcp server.`,
+      content: `Dokument ${documentType} pro přípravek ${medicine.name} je dostupný ke stažení. Obsah PDF není součástí odpovědi; pro informace otevřete oficiální dokument.`,
       sections: [],
       last_updated: null,
       language: "cs",
@@ -441,10 +472,7 @@ export async function findPharmacies(
     results = results.filter((p) => p.postal_code.startsWith(postalCode));
   }
 
-  if (is24h !== undefined) {
-    results = results.filter((p) => p.is_24h === is24h);
-  }
+  if (is24h !== undefined) throw new Error("Údaj o nepřetržitém provozu není ověřen. Použijte kontaktní údaje lékárny.");
 
   return results;
 }
-

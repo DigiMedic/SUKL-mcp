@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, VT323 } from "next/font/google";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://sukl-mcp.vercel.app"),
   title: "SÚKL MCP | České léky pro AI agenty",
   description:
-    "Přístup k SÚKL databázi 68,248 léčiv přímo z Claude, Cursor nebo tvého AI agenta. Open source MCP server pro českou databázi léků.",
+    "Přístup ke katalogu léčiv SÚKL přímo z ChatGPT, Claude nebo tvého AI agenta. Open source MCP server pro českou databázi léků.",
   keywords: [
     "SÚKL",
     "MCP",
@@ -41,7 +40,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Petr Sovadina" }],
   creator: "Petr Sovadina",
-  publisher: "DigiMedic",
+  publisher: "Petr Sovadina",
   robots: {
     index: true,
     follow: true,
@@ -93,12 +92,7 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
-        <Analytics />
-        <Script
-          defer
-          src="https://umami-production-ab67.up.railway.app/script.js"
-          data-website-id="3b66d09f-6521-487b-831d-b1cdc5d3d3e5"
-        />
+        {process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === "true" ? <Analytics /> : null}
       </body>
     </html>
   );

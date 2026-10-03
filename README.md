@@ -1,3 +1,5 @@
+> **Lokální kandidát v6.0.0 — veřejný plugin pro ChatGPT.** Nové publikační rozhraní je `/chatgpt/mcp`; původní `/mcp` má opravený SDK transport. Návod, změny kontraktu a zbývající publikační kroky jsou v [docs/openai-publication.md](docs/openai-publication.md). Veřejný plugin ještě není nasazen ani publikován. Níže uvedené starší materiály popisují původní v5; při rozporu platí nový návod.
+
 # SUKL MCP Server
 
 **MCP server pro českou databázi léčivých přípravků SÚKL** — landing page, MCP endpoint a interaktivní demo chat v jednom Next.js 16 projektu.

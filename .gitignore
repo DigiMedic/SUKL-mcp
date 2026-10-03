@@ -32,3 +32,10 @@ __pycache__/
 venv/
 .pytest_cache/
 .ruff_cache/
+
+# Generated publication artifacts
+widgets/dist/
+plugin-dist/
+*.tsbuildinfo
+work-live-*.json
+work-live-*.txt

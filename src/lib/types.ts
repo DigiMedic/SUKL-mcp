@@ -18,7 +18,7 @@ export interface MedicineDetail extends MedicineBasic {
   route_of_administration: string | null;
   indication_group: string | null;
   mrp_number: string | null;
-  parallel_import: boolean;
+  parallel_import: boolean | null;
 }
 
 export interface ReimbursementInfo {
@@ -36,7 +36,7 @@ export interface AvailabilityInfo {
   sukl_code: string;
   name: string;
   status: "available" | "limited" | "unavailable" | "unknown";
-  last_checked: string;
+  last_checked: string | null;
   distribution_status: string | null;
   expected_availability: string | null;
   notes: string | null;
@@ -54,7 +54,8 @@ export interface Pharmacy {
   latitude: number | null;
   longitude: number | null;
   distance_km: number | null;
-  is_24h: boolean;
+  is_24h: boolean | null;
+  has_emergency_service?: boolean;
   has_erecept: boolean;
 }
 
