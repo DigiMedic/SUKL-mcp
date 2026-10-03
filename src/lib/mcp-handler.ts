@@ -208,7 +208,7 @@ const TOOLS = [
 
 const SERVER_INFO = {
   name: "sukl-mcp",
-  version: "6.0.0",
+  version: "6.0.1",
   description:
     "MCP server pro českou databázi léčivých přípravků SÚKL (~68k léků)",
 };

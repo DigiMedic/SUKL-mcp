@@ -3,9 +3,9 @@ import { join, relative } from "node:path";
 import { zipSync, strToU8 } from "fflate";
 const root = "plugins/sukl-medicines";
 const base = new URL(process.env.PLUGIN_BASE_URL ?? "https://sukl-mcp.vercel.app");
-if (base.protocol !== "https:" || base.username || base.password || base.pathname !== "/") throw new Error("PLUGIN_BASE_URL musí být kořen HTTPS domény bez přihlašovacích údajů.");
+if (base.protocol !== "https:" || base.username || base.password || base.pathname !== "/" || base.search || base.hash) throw new Error("PLUGIN_BASE_URL musí být kořen HTTPS domény bez přihlašovacích údajů.");
 const files = {};
-function walk(path) { for (const entry of readdirSync(path, { withFileTypes:true })) { const absolute = join(path,entry.name); if(entry.isDirectory()) walk(absolute); else files[relative(root,absolute)] = new Uint8Array(readFileSync(absolute)); } }
+function walk(path) { for (const entry of readdirSync(path, { withFileTypes:true })) { const absolute = join(path,entry.name); if(entry.isSymbolicLink()) throw new Error("Plugin cannot include symbolic links."); if(entry.isDirectory()) walk(absolute); else files[relative(root,absolute)] = new Uint8Array(readFileSync(absolute)); } }
 walk(root);
 const manifest = JSON.parse(readFileSync(join(root,"plugin.json"),"utf8"));
 const listing = manifest.extensions["com.openai"].interface;
@@ -18,7 +18,7 @@ mcp.mcpServers["sukl-catalogue"].url = new URL("/chatgpt/mcp",base).href;
 files["mcp.json"] = strToU8(JSON.stringify(mcp,null,2));
 files["LICENSE"] = new Uint8Array(readFileSync("LICENSE"));
 mkdirSync("plugin-dist",{recursive:true});
-writeFileSync("plugin-dist/sukl-medicines-1.0.0.zip",zipSync(files));
+writeFileSync(`plugin-dist/sukl-medicines-${manifest.version}.zip`,zipSync(files));
 writeFileSync("plugin-dist/plugin.json",files["plugin.json"]);
 writeFileSync("plugin-dist/mcp.json",files["mcp.json"]);
-console.log("Vytvořen plugin-dist/sukl-medicines-1.0.0.zip. Před veřejným odesláním spusťte plugin:check -- --live.");
+console.log(`Vytvořen plugin-dist/sukl-medicines-${manifest.version}.zip. Před veřejným odesláním spusťte plugin:check -- --live.`);

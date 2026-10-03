@@ -6,24 +6,25 @@ import { CallToolRequestSchema, ListToolsRequestSchema, ListResourcesRequestSche
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CatalogueInputError, catalogueOperation } from "./chatgpt-catalogue";
+import { CATALOGUE_OUTPUT_SCHEMAS } from "./catalogue-schema";
 
-export const CATALOGUE_UI_URI = "ui://sukl-catalogue/medicines-v1.html";
+export const CATALOGUE_UI_URI = "ui://sukl-catalogue/medicines-v2.html";
 const code = { type: "string", pattern: "^[0-9]{1,7}$", description: "Veřejný kód přípravku SÚKL, nikoli osobní identifikátor." };
 const count = { type: "integer", minimum: 1, maximum: 20, default: 10 };
 const annotations = { readOnlyHint: true, destructiveHint: false, openWorldHint: true, idempotentHint: true };
 const securitySchemes = [{ type: "noauth" }];
-const outputSchema = { type: "object" as const, properties: { status: { type: "string" }, provenance: { type: "object" } }, required: ["status", "provenance"] };
 
 function tool(name: string, title: string, description: string, properties: Record<string, object>, required: string[], ui = false): Tool & { securitySchemes: { type: string }[] } {
+  const outputSchema = CATALOGUE_OUTPUT_SCHEMAS[name as keyof typeof CATALOGUE_OUTPUT_SCHEMAS];
   return { name, title, description, inputSchema: { type: "object", properties, required, additionalProperties: false }, outputSchema, annotations, securitySchemes,
-    _meta: { securitySchemes, ...(ui ? { ui: { resourceUri: CATALOGUE_UI_URI }, "openai/outputTemplate": CATALOGUE_UI_URI } : {}) } };
+    _meta: { securitySchemes, ...(ui ? { ui: { resourceUri: CATALOGUE_UI_URI, visibility: ["model", "app"] }, "openai/outputTemplate": CATALOGUE_UI_URI } : name === "get_medicine_document" ? { ui: { visibility: ["model", "app"] }, "openai/widgetAccessible": true } : { ui: { visibility: ["model"] } }) } };
 }
 
 export const CHATGPT_TOOLS: Tool[] = [
   tool("search_medicines", "Vyhledat léčivé přípravky", "Vyhledá přípravky v českém datovém snímku SÚKL podle názvu, uvedené látky nebo kódu. query obsahuje pouze název/látku/kód, bez zdravotních údajů člověka. Vrací nejvýše 20 výsledků a datum snímku; nelze z nich odvodit aktuální cenu, dostupnost nebo úplné složení kombinace.", { query: { type: "string", minLength: 1, maxLength: 100, description: "Pouze název léčiva, látky nebo kód SÚKL." }, limit: count }, ["query"]),
   tool("get_medicine", "Detail léčivého přípravku", "Vrátí katalogové údaje pro konkrétní kód SÚKL, datum snímku a stav not_found při nenalezení. Registrace není skladová dostupnost. Uvedená látka může být neúplná; složení ověřte v oficiálním dokumentu. Neposkytuje individuální léčebná doporučení.", { sukl_code: code }, ["sukl_code"]),
-  tool("get_atc_group", "Klasifikace ATC", "Vrátí ATC skupinu, její úroveň, nadřazený kód a omezený seznam přípravků z datového snímku. Společná klasifikace neznamená zaměnitelnost léčiv. Neznámý kód vrací not_found.", { atc_code: { type: "string", minLength: 1, maxLength: 7 }, limit: count }, ["atc_code"]),
-  tool("get_medicine_document", "Odkaz na PIL nebo SPC", "Pro kód SÚKL vyhledá na veřejném API SÚKL odkaz na příbalovou informaci (PIL) nebo souhrn údajů (SPC). Vrací odkaz, nikoli přečtený obsah PDF. Neznámý přípravek a chybějící dokument mají odlišné stavy; nedostupné API vrací chybu. Na SÚKL se odesílá pouze kód přípravku.", { sukl_code: code, document_type: { type: "string", enum: ["PIL", "SPC"] } }, ["sukl_code", "document_type"]),
+  tool("get_atc_group", "Klasifikace ATC", "Použijte pro požadavek na klasifikaci ATC. Vrátí ATC skupinu, její úroveň, nadřazený kód a omezený seznam přípravků z datového snímku. Společná klasifikace neznamená zaměnitelnost léčiv. Neznámý kód vrací not_found.", { atc_code: { type: "string", pattern: "^(?:[A-Za-z]|[A-Za-z]\\d{2}|[A-Za-z]\\d{2}[A-Za-z]|[A-Za-z]\\d{2}[A-Za-z]{2}|[A-Za-z]\\d{2}[A-Za-z]{2}\\d{2})$", description: "Kód ATC libovolné úrovně, například N02BE01." }, limit: count }, ["atc_code"]),
+  tool("get_medicine_document", "Odkaz na PIL nebo SPC", "Použijte pro požadavek na oficiální PIL/SPC. Pro kód SÚKL vyhledá na veřejném API SÚKL odkaz na příbalovou informaci (PIL) nebo souhrn údajů (SPC). Vrací odkaz, nikoli přečtený obsah PDF. Neznámý přípravek a chybějící dokument mají odlišné stavy; nedostupné API vrací chybu. Na SÚKL se odesílá pouze kód přípravku.", { sukl_code: code, document_type: { type: "string", enum: ["PIL", "SPC"], description: "PIL = příbalová informace, SPC = souhrn údajů o přípravku." } }, ["sukl_code", "document_type"]),
   tool("display_medicines", "Zobrazit karty léčiv", "Zobrazí přehledné karty 1 až 10 konkrétních přípravků v chatu. Použijte pouze kódy relevantní k požadavku uživatele. Vrací také úplná textová data, datum snímku a seznam nenalezených kódů; funguje i bez podpory grafické aplikace. Nezobrazuje ceny, zásoby ani reklamu.", { sukl_codes: { type: "array", items: code, minItems: 1, maxItems: 10 } }, ["sukl_codes"], true),
 ];
 
@@ -34,7 +35,7 @@ function validateArguments(definition: Tool, args: Record<string, unknown>) {
 }
 
 export function createCatalogueServer() {
-  const server = new Server({ name: "sukl-catalogue", version: "1.0.0" }, {
+  const server = new Server({ name: "sukl-catalogue", version: "1.0.1" }, {
     capabilities: { tools: {}, resources: {} },
     instructions: "Informační katalog českých léčiv pro konverzaci. Pracujte pouze s názvem léčiva, látkou, ATC nebo kódem SÚKL, nikoli s údaji o pacientovi. Uvádějte datum snímku a jeho omezení. Registrace neznamená dostupnost. Výsledky nejsou osobním léčebným doporučením. Dokumentový nástroj vrací pouze odkaz; netvrďte, že byl obsah PDF přečten. SÚKL MCP je nezávislý projekt, nikoli oficiální aplikace SÚKL.",
   });
@@ -42,12 +43,17 @@ export function createCatalogueServer() {
   server.setRequestHandler(CallToolRequestSchema, async request => {
     const definition = CHATGPT_TOOLS.find(t => t.name === request.params.name);
     if (!definition) throw new McpError(ErrorCode.InvalidParams, "Neznámý nástroj.");
+    const started = performance.now();
     try {
       const args = request.params.arguments ?? {};
       validateArguments(definition, args);
       const structuredContent = await catalogueOperation(definition.name, args);
+      console.info(JSON.stringify({ event: "mcp.tool", tool: definition.name, outcome: structuredContent.status, duration_ms: Math.round(performance.now() - started) }));
       return { content: [{ type: "text", text: JSON.stringify(structuredContent) }], structuredContent };
     } catch (error) {
+      const inputError = error instanceof CatalogueInputError;
+      const event = { event: "mcp.tool", tool: definition.name, outcome: inputError ? "invalid_input" : "upstream_unavailable", duration_ms: Math.round(performance.now() - started) };
+      (inputError ? console.info : console.error)(JSON.stringify(event));
       const message = error instanceof CatalogueInputError ? error.message : "Data nebo dokument SÚKL nyní nelze získat. Zkuste požadavek později.";
       return { content: [{ type: "text", text: message }], isError: true };
     }
@@ -78,8 +84,8 @@ export async function handleCatalogueHttp(request: Request, factory = createCata
     return new Response("Samostatný SSE stream a serverové relace nejsou podporovány.", { status: 405, headers });
   }
   const ip = process.env.VERCEL ? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown" : "local";
-  try { if (!await allowMcpRequest(ip)) return new Response("Překročen limit požadavků.", { status: 429, headers: { "Retry-After": "60" } }); }
-  catch { return new Response("Služba nyní nemůže bezpečně přijímat požadavky.", { status: 503 }); }
+  try { if (!await allowMcpRequest(ip)) { headers.set("Retry-After", "60"); return new Response("Překročen limit požadavků.", { status: 429, headers }); } }
+  catch { return new Response("Služba nyní nemůže bezpečně přijímat požadavky.", { status: 503, headers }); }
   let parsedBody: Record<string, unknown>;
   try { parsedBody = await readObject(request); }
   catch (error) {

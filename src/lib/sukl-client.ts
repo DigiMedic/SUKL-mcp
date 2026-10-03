@@ -318,6 +318,8 @@ export function getCatalogueProvenance() {
     source_as_of: getBundledData()._.sources?.medicines?.valid_from ?? null,
     source_valid_until: getBundledData()._.sources?.medicines?.valid_until ?? null,
     source_url: getBundledData()._.sources?.medicines?.url ?? "https://opendata.sukl.gov.cz/",
+    source_name: "SÚKL",
+    terms_url: "https://opendata.sukl.gov.cz/?q=podminky-uziti-otevrenych-dat",
     warning: `${freshness === "expired" ? "Platnost snímku skončila; nelze jej považovat za aktuální. " : freshness === "not_yet_valid" ? "Snímek ještě není účinný. " : ""}Katalog z veřejných dat SÚKL. Neověřuje skladovou dostupnost, aktuální prodejní ceny ani nárok na úhradu. Složení, zejména kombinovaných přípravků, ověřte v oficiálním PIL/SPC.`,
   };
 }

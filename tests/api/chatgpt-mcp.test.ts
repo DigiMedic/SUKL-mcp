@@ -20,7 +20,7 @@ describe("Published MCP transport and catalogue", () => {
     try {
       const { tools } = await c.listTools(); expect(tools).toHaveLength(5);
       for (const t of tools) expect(t.annotations).toMatchObject({readOnlyHint:true,destructiveHint:false,openWorldHint:true});
-      expect(CHATGPT_TOOLS.filter(t => t._meta?.ui)).toHaveLength(1);
+      expect(CHATGPT_TOOLS.filter(t => (t._meta?.ui as {resourceUri?:string})?.resourceUri)).toHaveLength(1);
       const resource = await c.readResource({uri:CATALOGUE_UI_URI});
       const item = resource.contents[0]; expect(item.mimeType).toBe("text/html;profile=mcp-app");
       expect(item._meta).toMatchObject({ui:{csp:{connectDomains:[],resourceDomains:[]}}});

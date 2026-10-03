@@ -1,6 +1,6 @@
 {
   "name": "sukl-mcp",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,7 +17,7 @@
     "plugin:check": "node scripts/check-plugin.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "@modelcontextprotocol/ext-apps": "1.7.5",
     "@modelcontextprotocol/sdk": "1.32.0",
     "@notionhq/client": "^5.10.0",
     "@radix-ui/react-accordion": "^1.2.12",

@@ -1,14 +1,38 @@
 # SÚKL MCP jako veřejný plugin ChatGPT
 
-Lokální kandidát aplikace v6.0.0, pluginového balíčku v1.0.0. Výchozí remote main: `ee988dfb4fede38a5642a86287348d4e039cc015`. Změny nejsou na GitHubu ani na veřejném serveru. Cílem je používání katalogu během běžných konverzací v ChatGPT; integrace do EHR není součástí tohoto vydání.
+Aplikace v6.0.1, pluginový balíček v1.0.1. V6.0.0 byla sloučena přes PR #5 a nasazena na Vercel; v6.0.1 opravuje nálezy další validace proti dokumentaci OpenAI z 3. 10. 2026. Nasazená služba a veřejná publikace jsou samostatné stavy: plugin dosud nemá doložené schválení ani publikaci v OpenAI. Cílem je používání katalogu během běžných konverzací v ChatGPT; integrace do EHR není součástí tohoto vydání.
 
 ## Veřejná funkce
 
 Plugin je zdarma, bez účtu a bez OAuth. Pět nástrojů: `search_medicines`, `get_medicine`, `get_atc_group`, `get_medicine_document`, `display_medicines`. Nástroje jsou pouze pro čtení, mají explicitní anotace a bezpečnostní schéma `noauth`. Vrací strukturovaná i textová data; grafiku připojuje pouze poslední nástroj. Karty mají inline JS/CSS, podporují téma hostitele a žádné externí zdroje, analytiku ani iframe. PIL/SPC se otevírá na výslovné kliknutí uživatele přes hostitelský `openLink`. UI nečte historii chatu.
 
-Veřejný endpoint: `https://sukl-mcp.vercel.app/chatgpt/mcp` **po nasazení**, nyní je připravován lokálně. Obsahuje pouze informační katalog a odkazy na dokumenty. Neobsahuje nákupy, osobní doporučení léčby, zásoby ani ceny/úhrady. Opravené SCAU údaje zůstávají dostupné původním klientům přes `/mcp`, s datem platnosti a vysvětlením výpočtu.
+Veřejný endpoint: `https://sukl-mcp.vercel.app/chatgpt/mcp` je veřejně dostupný na Vercelu. Obsahuje pouze informační katalog a odkazy na dokumenty. Neobsahuje nákupy, osobní doporučení léčby, zásoby ani ceny/úhrady. Opravené SCAU údaje zůstávají dostupné původním klientům přes `/mcp`, s datem platnosti a vysvětlením výpočtu.
 
-`display_medicines` připojuje `ui://sukl-catalogue/medicines-v1.html`. Změna kompatibility widgetu vyžaduje novou URI. Dev náhled `/api/chatgpt/preview` a `/api/chatgpt/preview-data` vrací v produkci 404. Tlačítka v dev náhledu jsou záměrně vypnutá: náhled ověřuje rozvržení, ne skutečné připojení do ChatGPT.
+`display_medicines` připojuje `ui://sukl-catalogue/medicines-v2.html`. Změna kompatibility widgetu vyžaduje novou URI. Dev náhled `/api/chatgpt/preview` a `/api/chatgpt/preview-data` vrací v produkci 404. Tlačítka v dev náhledu jsou záměrně vypnutá: náhled ověřuje rozvržení, ne skutečné připojení do ChatGPT.
+
+## Validace možností OpenAI
+
+| Možnost | Rozhodnutí a důvod |
+|---|---|
+| Agent Plugins 1.0 ZIP | Použito, jeden veřejný MCP server, onboarding, listing a review scénáře. |
+| Oficiální MCP a explicitní schémata | Použito pro všech pět toolů včetně validace odpovědí a negativních výsledků. |
+| MCP Apps inline UI | Použito pro srovnatelné karty, téma, narrow layout, host openLink, textový fallback a chyby zdroje. |
+| Oddělené získání dat a vykreslení | Použito; běžné katalogové dotazy nevynucují UI. |
+| Viditelnost nástrojů | Čtení dokumentu a renderer jsou model+app; ostatní jsou model-only. |
+| CSP a self-contained zdroje | Žádný CDN, externí resource ani přímý fetch widgetu; komunikace přes hostitele. |
+| OAuth / auth profile | Nepotřebné: služba zpracovává veřejný katalog a nemá účty. |
+| Sidebar, thread view, composer, file viewer | Volitelné. Pro současný katalog nemají potvrzenou potřebu; první vydání používá inline UI. |
+| Import souborů, osobní zdravotní data, commerce, automatické zápisy | Mimo současný produktový rozsah. |
+| Company knowledge search/fetch | Není požadavkem pro veřejný katalogový plugin. |
+| Experimentální inference, agents/skills import, event push | Nepoužito; bez přínosu pro současných pět operací a se zbytečnými provozními nároky. |
+| Domain challenge | Připraven přesný plaintext route `/.well-known/openai-apps-challenge`; bez skutečného tokenu vrací 404. |
+| Review a veřejná publikace | Stále externí kroky portálu, identity, demo videa a testu v ChatGPT. |
+
+Interaktivní test odhalil nekompatibilitu ext-apps 2.0.3 s používaným MCP SDK v1: `callServerTool` selhalo na `v3Schema.safeParse`. Ext-apps 2 přesouvá implementaci na MCP SDK v2. Aktuální stabilní kombinace pro tento server je ext-apps 1.7.5 + MCP SDK 1.32.0. Obě verze jsou připnuté; test skutečného App/AppBridge spojení kontroluje tool call, openLink a obnovitelnou chybu. Přechod na v2 musí být samostatná ověřená migrace, ne automatická aktualizace UI balíčku.
+
+Lokální prohlížečový test MCP Apps bridge prokázal vykreslení, dokumentové kliknutí, dark theme, 320px rozvržení bez horizontálního přetečení a reakci na simulovaný výpadek. Tento hostitel není ChatGPT. Přímé, nepřímé a negativní prompty a mobilní/desktopové chování uvnitř skutečného ChatGPT zůstávají k ověření.
+
+`plugin:check` kontroluje Agent Plugins schémata i limity listingů, URL, SVG, barvy, onboarding a review metadata; `--live` provede všechny dostupné kontroly i když video nebo podmínky chybí. Vždy uloží strojový report. Hostitelské hodnocení, ověřená identita a doména nejsou tímto skriptem prokázány.
 
 ## Data
 
@@ -22,13 +46,15 @@ ATC ve zdroji obsahuje jednu mezeru: `V06XX` nemá záznam `V06X`. `parent_code`
 
 Provenance odděluje čas sestavení od platnosti zdroje. Po uplynutí platnosti označí snímek jako expired a připojí upozornění. Workflow vytvoří nebo aktualizuje jednu PR `automated/sukl-data`; data se bez schválení PR sama nedostanou do nasazené služby. Provozovatel musí aktualizace včas sloučit a nasadit.
 
+SÚKL dovoluje další šíření otevřených dat podle zveřejněných podmínek. Výsledky MCP, widget a produktové stránky uvádějí SÚKL a odkaz na [podmínky užití otevřených dat](https://opendata.sukl.gov.cz/?q=podminky-uziti-otevrenych-dat). MIT pokrývá vlastní software; nevztahuje se na data ani PDF třetích stran. Plugin vrací transformované a validované katalogové záznamy s vlastní UI a vysvětlením platnosti, ne univerzální proxy k cizímu účtu. Pravidla OpenAI o neoficiálních konektorech a oprávnění ke zdrojům musí posoudit reviewer; dostupnost otevřených dat sama o sobě negarantuje schválení.
+
 ## Opravy nálezů auditu
 
 | Nález | Stav lokálního kódu |
 |---|---|
 | 1. Chybné úhrady | MFC sloupec 86, UHR1 sloupec 19; OME1 je preskripční omezení. Doplatek je maximum MFC − UHR1, nikoli garantovaná cena v lékárně. Parser má nezávislý regresní příklad. |
 | 2. Registrace vydávaná za dostupnost | Dostupnost známých přípravků je unknown, bez falešného času ověření. Veřejný plugin tuto funkci nepropaguje. |
-| 3. Zastaralý katalog | Nový atomický import obnovuje léčiva, ATC, složení, lékárny i úhrady. Aktuální říjnový import je uložen. Živý workflow a jeho oprávnění zůstávají k ověření. |
+| 3. Zastaralý katalog | Nový atomický import obnovuje léčiva, ATC, složení, lékárny i úhrady. Aktuální říjnový import je uložen. GitHub Actions aktuálně nezačnou kvůli účtovému billing locku; do nápravy je nutný ruční import/PR/merge. |
 | 4. ATC hierarchie | Úrovně a rodiče odpovídají délkám 1/3/4/5/7, chybějící rodič ze zdroje je null. |
 | 5. Ztracené kódy v dávce | Původní batch vrací i not_found a samostatné počty unknown/not_found. |
 | 6. MCP transport | Oba HTTP endpointy používají oficiální SDK, stateless JSON odpovědi; GET/DELETE 405, notifications 202, validační/provozní chyby rozlišeny, Origin allowlist. |
@@ -39,7 +65,7 @@ Provenance odděluje čas sestavení od platnosti zdroje. Po uplynutí platnosti
 | 11. Počet hledání | Celkový počet není omezen velikostí stránky; přesný SÚKL kód má přednost. |
 | 12. Neúplné detaily | Doplněné složení z dostupných aktivních složek a další katalogové údaje; neznámé jsou null. Katalog není individuální léčebné doporučení. |
 | 13. Dokumenty | Timeout 8 s, kontrola tvaru a ID, normalizované kódy; veřejný nástroj rozlišuje nenalezený přípravek, dokument a chybu zdroje. Vrací odkaz, ne přečtený PDF obsah. |
-| 14. CI a testy | Nový test/build/package/audit gate a idempotentní data PR. Lokální testy používají skutečný MCP SDK klient a kontrolují nejrizikovější negativní případy. Aktivní ochrana main a funkčnost GitHub Actions nejsou tímto doloženy. |
+| 14. CI a testy | Nový test/build/package/audit gate a idempotentní data PR. Lokální testy používají skutečný MCP SDK klient a kontrolují nejrizikovější negativní případy. Účtový billing lock blokuje spuštění Actions. Ochrana main musí být ověřena a nastavena po obnovení funkčních checks. |
 | 15. UI a analytika | Omezené seznamy, lepší parser ATC/českých měst, opravená Enterprise CTA, odstraněné tvrzení o léčivech v reálném čase. Umami odstraněno, Vercel analytics vypnuta ve výchozím nastavení. |
 
 Newsletter používá aktuální Notion data-source API a při výpadku kontroly nepokračuje zápisem. Pro volitelné zapnutí vyžaduje sdílený Redis lease (atomické SET NX, uvolnění pouze vlastníkem), takže kontrola/vytvoření záznamu neběží současně ve více instancích. Je nutné ověřit konkrétní Notion databázi, poskytovatele Redis, podmínky a doručování; lokální test používá syntetické odpovědi, ne skutečné kontakty. Produkční webové formuláře jsou ve výchozím nastavení deaktivované.
@@ -57,7 +83,7 @@ npm run plugin:check
 npm audit --omit=dev
 ```
 
-Balíček je v `plugin-dist/sukl-medicines-1.0.0.zip`; uvnitř jsou root `plugin.json`, `mcp.json`, onboarding skill, nezávislá ikona a licence. Není v něm serverový kód ani credentials. Server se nasazuje zvlášť. `.app.json` a hooks nejsou součástí ZIP, protože je současný veřejný submission nepřijímá.
+Balíček je v `plugin-dist/sukl-medicines-1.0.1.zip`; uvnitř jsou root `plugin.json`, `mcp.json`, onboarding skill, nezávislá ikona a licence. Není v něm serverový kód ani credentials. Server se nasazuje zvlášť. `.app.json` a hooks nejsou součástí ZIP, protože je současný veřejný submission nepřijímá.
 
 Před změnou domény sestavte ZIP s `PLUGIN_BASE_URL=https://vas-overeny-host`. Widget origin nastavte v `MCP_WIDGET_DOMAIN`, veřejný serverový origin v `MCP_PUBLIC_ORIGIN`. Origin zásadně neměňte po publikaci bez kontroly procesu OpenAI: změna původu MCP může vyžadovat nový plugin.
 
@@ -65,13 +91,13 @@ Před změnou domény sestavte ZIP s `PLUGIN_BASE_URL=https://vas-overeny-host`.
 
 ## Co vyžaduje skutečný účet nebo hosting
 
-1. Zkontrolovat diff kandidáta v6.0.0 a vydání nasadit na veřejný HTTPS host. Zachovávat bundle a widget ve Vercel file tracing. Ověřit dostupnost včetně cold startu.
+1. Při každém vydání ověřit lokální testy/build, preview Vercelu, přesný merge SHA a živý MCP readback produkčního aliasu. Zachovávat bundle a widget ve Vercel file tracing. Ověřit dostupnost včetně cold startu.
 2. Nastavit sdílený Redis limit, soukromý HMAC salt, `PUBLIC_LAUNCH_MODE=true`. Před spuštěním ověřit dostupnost Redis, TTL a chování při výpadku. Aplikace pak vrací 503 místo obcházení ochrany. Zabezpečit server i proti distribuovanému zneužití na vrstvě hostingu, podle očekávaného zatížení.
 3. Doplnit skutečného poskytovatele Redis a potvrzené doby uchování hostingu/formulářů. Zkontrolovat podmínky použití zdrojových dat a zpracovatelské vztahy. Až pak potvrdit `PUBLICATION_POLICY_CONFIRMED=true`. Nechat formuláře a analytiku vypnuté, pokud nejsou potřebné.
 4. Pustit lokálně klientský readback `npm run plugin:check -- --live`. Vyžaduje veřejné stránky, skutečné video, připravenost služby, pět nástrojů, aktuální katalog a UI resource. Úspěšný readback ještě není schválení OpenAI.
 5. V ChatGPT developer mode připojit veřejný endpoint a bez autentizace zkusit pět pozitivních a tři negativní scénáře. Ověřit widget, kliknutí na PIL/SPC, textový fallback, chybu zdroje a použití bez zadání osobních údajů. Po změně toolů aktualizovat import. Zaznamenat skutečný průchod pro reviewer video.
 6. V OpenAI organizaci zvolit ověřenou individuální identitu Petra Sovadiny, nebo odpovídající ověřenou firmu, má-li být skutečným vydavatelem. Pro MCP review potřebujete podporovaný projekt s global data residency a právo Apps Management Write. Tato oprávnění nejsou lokálními testy ověřena.
-7. V https://platform.openai.com/plugins nahrát ZIP, připojit MCP, dokončit doménovou verifikaci podle portálu, Scan Tools, odstranit findings a odeslat k review. Schválení je samostatné od Publish. Po schválení zveřejnit a ověřit přesné jméno nebo URL katalogu. Publikace nezaručuje umístění na hlavní stránce katalogu.
+7. V https://platform.openai.com/plugins nahrát ZIP, připojit MCP, dokončit doménovou verifikaci podle portálu: jeho skutečný token nastavit jako `OPENAI_APPS_CHALLENGE`, nasadit a ověřit přesný plaintext na `/.well-known/openai-apps-challenge`; následně Scan Tools, odstranit findings a odeslat k review. Schválení je samostatné od Publish. Po schválení zveřejnit a ověřit přesné jméno nebo URL katalogu. Publikace nezaručuje umístění na hlavní stránce katalogu.
 8. Nastavit požadované CI checks na main, opravit účtové/runner blokace GitHub Actions a ověřit první skutečnou data PR. Lokální build nemůže potvrdit, že starý problém spouštění Actions zmizel.
 
 ## Změny pro původní klienty v6
@@ -82,6 +108,10 @@ JSON-RPC HTTP dávky nejsou podporovány. `find-pharmacies` vrací objekt `{phar
 
 - https://developers.openai.com/plugins/build/plugins
 - https://developers.openai.com/plugins/build/chatgpt-ui
+- https://developers.openai.com/plugins/build/extensions
+- https://developers.openai.com/plugins/guides/optimize-metadata
+- https://github.com/modelcontextprotocol/ext-apps/releases
+- https://opendata.sukl.gov.cz/?q=podminky-uziti-otevrenych-dat
 - https://developers.openai.com/plugins/deploy/submission
 - https://developers.openai.com/plugins/deploy/app-review
 - https://developers.openai.com/plugins/plugin-guidelines

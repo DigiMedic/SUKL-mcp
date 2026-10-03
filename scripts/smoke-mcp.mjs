@@ -29,7 +29,7 @@ for (const [path,legacy] of [["/chatgpt/mcp",false],["/mcp",true]]) {
       results[name] = result.structuredContent;
     }
     if (!legacy) {
-      const resource = await client.readResource({uri:"ui://sukl-catalogue/medicines-v1.html"});
+      const resource = await client.readResource({uri:"ui://sukl-catalogue/medicines-v2.html"});
       evidence.widget = { mimeType:resource.contents[0].mimeType, csp:resource.contents[0]._meta?.ui?.csp, byteLength:new TextEncoder().encode(resource.contents[0].text).length };
     }
     evidence.checks.push({path,tool_count:tools.length,results});
