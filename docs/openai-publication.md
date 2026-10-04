@@ -1,6 +1,6 @@
 # SÚKL MCP jako veřejný plugin ChatGPT
 
-Aplikace v6.0.1, pluginový balíček v1.0.1. V6.0.0 byla sloučena přes PR #5 a nasazena na Vercel; v6.0.1 opravuje nálezy další validace proti dokumentaci OpenAI z 3. 10. 2026. Nasazená služba a veřejná publikace jsou samostatné stavy: plugin dosud nemá doložené schválení ani publikaci v OpenAI. Cílem je používání katalogu během běžných konverzací v ChatGPT; integrace do EHR není součástí tohoto vydání.
+Aplikace v6.0.2, pluginový balíček v1.0.1. V6.0.0 a v6.0.1 byly sloučeny přes PR #5 a #6 a nasazeny na Vercel. V6.0.2 používá automatické proměnné Upstash a sjednocuje podmínky připravenosti právních stránek, statusu a formulářů. Nasazená služba a veřejná publikace jsou samostatné stavy: plugin dosud nemá doložené schválení ani publikaci v OpenAI. Cílem je používání katalogu během běžných konverzací v ChatGPT; integrace do EHR není součástí tohoto vydání.
 
 ## Veřejná funkce
 
@@ -92,8 +92,8 @@ Před změnou domény sestavte ZIP s `PLUGIN_BASE_URL=https://vas-overeny-host`.
 ## Co vyžaduje skutečný účet nebo hosting
 
 1. Při každém vydání ověřit lokální testy/build, preview Vercelu, přesný merge SHA a živý MCP readback produkčního aliasu. Zachovávat bundle a widget ve Vercel file tracing. Ověřit dostupnost včetně cold startu.
-2. Nastavit sdílený Redis limit, soukromý HMAC salt, `PUBLIC_LAUNCH_MODE=true`. Před spuštěním ověřit dostupnost Redis, TTL a chování při výpadku. Aplikace pak vrací 503 místo obcházení ochrany. Zabezpečit server i proti distribuovanému zneužití na vrstvě hostingu, podle očekávaného zatížení.
-3. Doplnit skutečného poskytovatele Redis a potvrzené doby uchování hostingu/formulářů. Zkontrolovat podmínky použití zdrojových dat a zpracovatelské vztahy. Až pak potvrdit `PUBLICATION_POLICY_CONFIRMED=true`. Nechat formuláře a analytiku vypnuté, pokud nejsou potřebné.
+2. Ve Vercel Storage připojit Upstash Redis k tomuto projektu. Aplikace čte automatické `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`; kompletní vlastní dvojice `RATE_LIMIT_REDIS_REST_URL` / `RATE_LIMIT_REDIS_REST_TOKEN` má přednost. Nikdy se nekombinují URL a token různých dvojic. Nastavit `RATE_LIMIT_HASH_SECRET` jako kryptograficky náhodný salt s nejméně 32 znaky a `PUBLIC_LAUNCH_MODE=true`. Před spuštěním ověřit dostupnost Redis, TTL a chování při výpadku. Aplikace pak vrací 503 místo obcházení ochrany. Zabezpečit server i proti distribuovanému zneužití na vrstvě hostingu, podle očekávaného zatížení.
+3. Doplnit skutečného poskytovatele Redis a potvrzené nastavení uchování hostingu. Viditelnost runtime logů podle tarifu není dokladem celkové retence údajů poskytovatele. Retenci formulářů je třeba nastavit pouze pokud jsou zapnuté; při vypnutých formulářích politika výslovně uvádí, že plugin nepředává kontakty do Notion ani neposílá emaily přes Resend. Zkontrolovat podmínky použití zdrojových dat a zpracovatelské vztahy. Až pak potvrdit `PUBLICATION_POLICY_CONFIRMED=true`. Nechat formuláře a analytiku vypnuté, pokud nejsou potřebné.
 4. Pustit lokálně klientský readback `npm run plugin:check -- --live`. Vyžaduje veřejné stránky, skutečné video, připravenost služby, pět nástrojů, aktuální katalog a UI resource. Úspěšný readback ještě není schválení OpenAI.
 5. V ChatGPT developer mode připojit veřejný endpoint a bez autentizace zkusit pět pozitivních a tři negativní scénáře. Ověřit widget, kliknutí na PIL/SPC, textový fallback, chybu zdroje a použití bez zadání osobních údajů. Po změně toolů aktualizovat import. Zaznamenat skutečný průchod pro reviewer video.
 6. V OpenAI organizaci zvolit ověřenou individuální identitu Petra Sovadiny, nebo odpovídající ověřenou firmu, má-li být skutečným vydavatelem. Pro MCP review potřebujete podporovaný projekt s global data residency a právo Apps Management Write. Tato oprávnění nejsou lokálními testy ověřena.
@@ -121,3 +121,11 @@ JSON-RPC HTTP dávky nejsou podporovány. `find-pharmacies` vrací objekt `{phar
 - https://vercel.com/docs/headers/request-headers
 
 Ověřeno podle dokumentace a zdrojů k 3. 10. 2026. Portál, approval, doménová verifikace, skutečná výkonnost a end-to-end ChatGPT zůstávají před publikací k ověření.
+
+## Ověření účtů 4. 10. 2026
+
+V organizaci Petr Sovadina ukazuje OpenAI individuální verifikaci jako `Approved`, ale oba vstupy Upload plugin stále otevřou `Complete identity verification`. Není doložen nový SÚKL draft ani úspěšný upload. Nezaměňovat existující plugin dokturek.ai za tento projekt. Rozpor vyžaduje vyřešení v portálu nebo podporou OpenAI; nová verifikace firmy není potřebou současného individuálního vydavatele.
+
+V týmu Vercel `sovadina` je Upstash integrace již nainstalovaná, ale není propojená s projektem `sukl-mcp`. Vercel MCP vrací na čtení dostupných produktů této instalace 401; nejde o důkaz absence databáze. Přístup přes dashboard vyžaduje přihlášení a druhý faktor vlastníka. Nové placené úložiště ani podmínky nelze potvrdit bez konkrétního souhlasu.
+
+Primární podklady pro integraci a rozlišení runtime logů: https://upstash.com/docs/redis/howto/vercelintegration a https://vercel.com/docs/logs/runtime.

@@ -1,6 +1,6 @@
 # SÚKL MCP — katalog léčiv pro ChatGPT
 
-Nezávislý projekt Petra Sovadiny pro vyhledávání českých léčivých přípravků během konverzací. Aplikace v6.0.1, balíček pluginu v1.0.1. Veřejná služba běží na Vercelu; publikace v katalogu OpenAI ještě není dokončena. Podrobný stav, omezení a publikační postup jsou v [docs/openai-publication.md](docs/openai-publication.md).
+Nezávislý projekt Petra Sovadiny pro vyhledávání českých léčivých přípravků během konverzací. Aplikace v6.0.2, balíček pluginu v1.0.1. Veřejná služba běží na Vercelu; publikace v katalogu OpenAI ještě není dokončena. Podrobný stav, omezení a publikační postup jsou v [docs/openai-publication.md](docs/openai-publication.md).
 
 - Produktová stránka: https://sukl-mcp.vercel.app/chatgpt
 - Veřejný ChatGPT MCP: https://sukl-mcp.vercel.app/chatgpt/mcp

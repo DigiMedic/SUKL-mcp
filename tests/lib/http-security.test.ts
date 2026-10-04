@@ -32,7 +32,7 @@ describe("Input, email and shared service boundaries", () => {
     await expect(allowMcpRequest("203.0.113.1")).rejects.toThrow();
   });
   it("uses one atomic expiring counter, pseudonymises IP and rejects a backend outage", async () => {
-    vi.stubEnv("RATE_LIMIT_REDIS_REST_URL","https://redis.example.test"); vi.stubEnv("RATE_LIMIT_REDIS_REST_TOKEN","synthetic-token"); vi.stubEnv("RATE_LIMIT_HASH_SECRET","synthetic-salt");
+    vi.stubEnv("RATE_LIMIT_REDIS_REST_URL","https://redis.example.test"); vi.stubEnv("RATE_LIMIT_REDIS_REST_TOKEN","synthetic-token"); vi.stubEnv("RATE_LIMIT_HASH_SECRET","synthetic-salt-at-least-32-characters");
     const f = vi.fn().mockResolvedValueOnce(Response.json({result:100})).mockResolvedValueOnce(Response.json({result:101})).mockResolvedValueOnce(new Response(null,{status:503})); vi.stubGlobal("fetch",f);
     expect(await allowMcpRequest("203.0.113.1")).toBe(true); expect(await allowMcpRequest("203.0.113.1")).toBe(false);
     expect(f.mock.calls[0][1].body).not.toContain("203.0.113.1"); expect(f.mock.calls[0][1].body).toContain("EXPIRE");

@@ -1,6 +1,6 @@
 # Repository guidance
 
-Current application v6.0.1; public plugin package v1.0.1. Read README.md and docs/openai-publication.md first. Historical v5 API/architecture documents are not authoritative for current contracts.
+Current application v6.0.2; public plugin package v1.0.1. Read README.md and docs/openai-publication.md first. Historical v5 API/architecture documents are not authoritative for current contracts.
 
 ## Contracts and implementation
 

@@ -1,3 +1,4 @@
+import { publicationPoliciesReady } from "@/lib/publication-config";
 import { readObject, isEmail, validConsent, createRateLimiter } from "@/lib/http-input";
 import { NextRequest, NextResponse } from "next/server";
 import { createEnterpriseContact } from "@/lib/notion";
@@ -7,7 +8,7 @@ const VALID_SIZES = ["1–10", "11–50", "51–200", "200+"];
 const checkRateLimit = createRateLimiter(5);
 
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === "production" && (process.env.LEGACY_FORMS_ENABLED !== "true" || process.env.PUBLICATION_POLICY_CONFIRMED !== "true")) return NextResponse.json({ error: "Webové formuláře nyní nejsou aktivní. Použijte stránku podpory." }, { status: 503 });
+  if (process.env.NODE_ENV === "production" && (process.env.LEGACY_FORMS_ENABLED !== "true" || !publicationPoliciesReady())) return NextResponse.json({ error: "Webové formuláře nyní nejsou aktivní. Použijte stránku podpory." }, { status: 503 });
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||

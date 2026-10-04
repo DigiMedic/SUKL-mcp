@@ -4,7 +4,8 @@ import addFormats from "ajv-formats";
 import { GET } from "@/app/.well-known/openai-apps-challenge/route";
 import { CHATGPT_TOOLS } from "@/lib/chatgpt-mcp";
 import { catalogueOperation } from "@/lib/chatgpt-catalogue";
-import { privacyPage, pluginPage } from "@/lib/publication-pages";
+import { privacyPage, pluginPage, termsPage } from "@/lib/publication-pages";
+import { GET as status } from "@/app/chatgpt/status/route";
 
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 describe("Public plugin contracts", () => {
@@ -46,5 +47,27 @@ describe("Public plugin contracts", () => {
     vi.stubEnv("PUBLICATION_POLICY_CONFIRMED","false");
     expect(privacyPage().status).toBe(503);
     expect(await pluginPage().text()).toContain("https://opendata.sukl.gov.cz/?q=podminky-uziti-otevrenych-dat");
+  });
+  it("keeps both legal pages and the status gate consistent for incomplete policies", async () => {
+    vi.stubEnv("PUBLICATION_POLICY_CONFIRMED","true");
+    vi.stubEnv("PRIVACY_HOST_LOG_RETENTION"," "); vi.stubEnv("PRIVACY_REDIS_PROVIDER","Upstash");
+    expect(privacyPage().status).toBe(503); expect(termsPage().status).toBe(503);
+    expect((await (await status()).json()).readiness.policy_confirmed).toBe(false);
+  });
+  it("describes disabled forms accurately without inventing form retention", async () => {
+    vi.stubEnv("NODE_ENV","production"); vi.stubEnv("LEGACY_FORMS_ENABLED","false");
+    vi.stubEnv("PUBLICATION_POLICY_CONFIRMED","true");
+    vi.stubEnv("PRIVACY_HOST_LOG_RETENTION","Synthetic test configuration"); vi.stubEnv("PRIVACY_REDIS_PROVIDER","Synthetic test provider");
+    vi.stubEnv("PRIVACY_FORM_RETENTION","");
+    const privacy = privacyPage(); expect(privacy.status).toBe(200); expect(termsPage().status).toBe(200);
+    const text = await privacy.text(); expect(text).toContain("formuláře na původním webu jsou vypnuté");
+    expect(text).not.toContain("Pokud je použijete"); expect(text).toContain("sama o sobě neprokazuje");
+    expect((await (await status()).json()).readiness.policy_confirmed).toBe(true);
+    vi.stubEnv("LEGACY_FORMS_ENABLED","true");
+    expect(privacyPage().status).toBe(503); expect(termsPage().status).toBe(503);
+    expect((await (await status()).json()).readiness.policy_confirmed).toBe(false);
+    vi.stubEnv("PRIVACY_FORM_RETENTION","Synthetic test retention");
+    expect(privacyPage().status).toBe(200);
+    expect(await privacyPage().text()).toContain("Pokud je použijete");
   });
 });
