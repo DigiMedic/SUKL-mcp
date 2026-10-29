@@ -55,7 +55,9 @@ describe("MCP Full Flow Integration", () => {
     });
     const content = (result!.result as { content: { text: string }[] }).content;
     const data = JSON.parse(content[0].text);
-    expect(data.reimbursement_group).toBe("ATB");
+    expect(data.reimbursement_group).toBeNull();
+    expect(data.reimbursement_conditions).toBe("ATB");
+    expect(data.valid_from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(data.max_price).toBeGreaterThan(0);
   });
 
@@ -71,7 +73,8 @@ describe("MCP Full Flow Integration", () => {
     });
     const content = (result!.result as { content: { text: string }[] }).content;
     const data = JSON.parse(content[0].text);
-    expect(data.length).toBeGreaterThan(0);
-    expect(data[0].city).toBe("Praha");
+    expect(data.pharmacies.length).toBeGreaterThan(0);
+    expect(data.pharmacies.length).toBeLessThanOrEqual(20);
+    expect(data.pharmacies[0].city).toBe("Praha");
   });
 });

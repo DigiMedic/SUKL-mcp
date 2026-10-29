@@ -1,4 +1,5 @@
 "use client";
+import catalogueSummary from "../../../data/catalogue-summary.json";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -44,7 +45,7 @@ export function CTA() {
           viewport={{ once: true }}
           className="flex flex-wrap justify-center gap-4 mb-10 text-sm text-muted-foreground"
         >
-          <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-teal" /> 68,248 léků</span>
+          <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-teal" /> {catalogueSummary.medicine_count.toLocaleString("cs-CZ")} léčiv</span>
           <span>•</span>
           <span className="inline-flex items-center gap-1"><Check className="w-4 h-4 text-teal" /> Aktualizováno denně</span>
           <span>•</span>

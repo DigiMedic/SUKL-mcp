@@ -1,0 +1,22 @@
+name: Validate application and plugin
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:widget
+      - run: npm test
+      - run: npm run build
+      - run: npm run plugin:package
+      - run: npm run plugin:check
+      - run: npm audit --omit=dev --audit-level=moderate

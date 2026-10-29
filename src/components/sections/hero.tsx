@@ -1,4 +1,5 @@
 "use client";
+import catalogueSummary from "../../../data/catalogue-summary.json";
 
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Building2, RefreshCw, Zap } from "lucide-react";
@@ -56,7 +57,7 @@ export function Hero() {
           className="flex flex-wrap justify-center gap-4 md:gap-8 mb-6"
         >
           <StatBadge>
-            <NumberTicker value={68248} className="text-pink font-bold" />
+            <NumberTicker value={catalogueSummary.medicine_count} className="text-pink font-bold" />
             <span className="text-muted-foreground">léků v databázi</span>
           </StatBadge>
           <StatBadge>

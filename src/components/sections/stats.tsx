@@ -1,4 +1,5 @@
 "use client";
+import catalogueSummary from "../../../data/catalogue-summary.json";
 
 import { motion } from "framer-motion";
 import { NumberTicker } from "@/components/ui/number-ticker";
@@ -7,13 +8,13 @@ import { Wrench } from "lucide-react";
 
 const stats = [
   {
-    value: 68248,
+    value: catalogueSummary.medicine_count,
     label: "léků v databázi",
     color: "pink",
     icon: <PillIcon className="w-10 h-10" />,
   },
   {
-    value: 2674,
+    value: catalogueSummary.pharmacy_count,
     label: "lékáren v ČR",
     color: "pixel-blue",
     icon: <HospitalIcon className="w-10 h-10" />,

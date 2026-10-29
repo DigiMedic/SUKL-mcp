@@ -6,6 +6,13 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
+  agentRules: false,
+  turbopack: { root: process.cwd() },
+  outputFileTracingIncludes: {
+    "/api/mcp": ["./data/bundled-data.json"],
+    "/api/chatgpt/mcp": ["./data/bundled-data.json", "./widgets/dist/medicines.html"],
+  },
+  async rewrites() { return [{ source: "/mcp", destination: "/api/mcp" }, { source: "/chatgpt/mcp", destination: "/api/chatgpt/mcp" }]; },
   async headers() {
     return [
       {
@@ -16,7 +23,7 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'",
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'${process.env.NODE_ENV === "development" ? " ws: wss:" : ""}; frame-ancestors 'none'`,
           },
         ],
       },
